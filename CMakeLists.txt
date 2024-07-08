@@ -21,24 +21,26 @@
 #!                                                                          !#
 #! ************************************************************************ !#
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.26)
-PROJECT(PortableEngine)
+cmake_minimum_required(VERSION 3.26)
+project(PortableEngine)
 
-SET(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 23)
+set(PROGRAM_NAME engine)
 
-INCLUDE_DIRECTORIES(${PROJECT_NAME} SYSTEM Source/ThirdParty/vulkan/Include)
+include_directories(${PROJECT_NAME} SYSTEM ThirdParty/vulkan/Include)
+include_directories(${PROJECT_NAME} SYSTEM ThirdParty/glfw/include)
+include_directories(${PROJECT_NAME} /)
 
-INCLUDE_DIRECTORIES(${PROJECT_NAME} Source)
-INCLUDE_DIRECTORIES(${PROJECT_NAME} Source/Engine)
-
-LINK_DIRECTORIES(
-    Source/ThirdParty/vulkan
+link_directories(
+        ThirdParty/vulkan
+        ThirdParty/glfw/lib-mingw-w64
 )
 
-ADD_EXECUTABLE(${PROJECT_NAME}
-    Source/Engine/PortableMain.cpp
+add_executable(${PROGRAM_NAME}
+        main.cpp
 )
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}
+target_link_libraries(${PROGRAM_NAME}
+    glfw3
     vulkan-1
 )

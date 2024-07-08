@@ -1,5 +1,5 @@
 /* ************************************************************************ */
-/* RenderHardwareDevice.h                                                   */
+/* main.cpp                                                                 */
 /* ************************************************************************ */
 /*                        This file is part of:                             */
 /*                           PORTABLE ENGINE                                */
@@ -20,23 +20,8 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ************************************************************************ */
-#ifndef RENDER_HARDWARE_DEVICE_H
-#define RENDER_HARDWARE_DEVICE_H
 
-/* Render hardware driver device abstract interface.
- *   This class is abstract interface for vulkan/dx/gl etc... */
-class RenderHardwareDevice {
-public:
-    static RenderHardwareDevice *InitHardwareDevice(unsigned int width, unsigned int height, RenderHardwareDevice **ppHardwareDevice)
-    {
-        // ....
-        return nullptr;
-    }
-
-    static void DestroyHardwareDevice(RenderHardwareDevice *pHardwareDevice)
-    {
-        // ....
-    }
-};
-
-#endif /* RENDER_HARDWARE_DEVICE_H */
+int main(int argc, char **argv)
+{
+    return 0;
+}
