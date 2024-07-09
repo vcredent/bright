@@ -1,9 +1,9 @@
-/* ======================================================================== */
-/* main.cpp                                                                 */
-/* ======================================================================== */
+/* ************************************************************************ */
+/* Error.h                                                                  */
+/* ************************************************************************ */
 /*                        This file is part of:                             */
 /*                           PORTABLE ENGINE                                */
-/* ======================================================================== */
+/* ************************************************************************ */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
 /*                                                                          */
@@ -19,21 +19,28 @@
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
-/* ======================================================================== */
-#include <iostream>
-#include "drivers/hardware.h"
+/* ************************************************************************ */
+#ifndef _ERROR_H_
+#define _ERROR_H_
 
-int main(int argc, char **argv)
-{
-    HardwareDevice *hardware;
-    hardware_device_hint(HARDWARE_CLIENT_API, HARDWARE_VULKAN_API);
-    hardware_device_create(800, 600, "PortableEngine", &hardware);
+#include <stdio.h>
+#include <stdexcept>
+#include <assert.h>
 
-    while (!hardware->window_should_close()) {
-        hardware->poll_events();
-    }
+#define EXIT_FAIL(...) do {            \
+    fprintf(stderr, __VA_ARGS__);      \
+    exit(1);                           \
+} while(0)
 
-    hardware_device_destroy(hardware);
+#define EXIT_FAIL_V(retval, ...) do {  \
+    if (!(retval)) {                   \
+        EXIT_FAIL(__VA_ARGS__);        \
+    }                                  \
+} while(0)
 
-    return 0;
-}
+enum Error {
+    OK = 0,
+    FAIL,
+};
+
+#endif /* _ERROR_H_ */

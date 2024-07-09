@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* main.cpp                                                                 */
+/* vulkan_context.h                                                         */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           PORTABLE ENGINE                                */
@@ -20,20 +20,29 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include <iostream>
-#include "drivers/hardware.h"
+#include <vulkan/vulkan.h>
+#include "hardware.h"
 
-int main(int argc, char **argv)
-{
-    HardwareDevice *hardware;
-    hardware_device_hint(HARDWARE_CLIENT_API, HARDWARE_VULKAN_API);
-    hardware_device_create(800, 600, "PortableEngine", &hardware);
+class VulkanContext : public HardwareDevice {
+public:
+    explicit VulkanContext();
+    ~VulkanContext() override;
 
-    while (!hardware->window_should_close()) {
-        hardware->poll_events();
-    }
+public:
+    VkInstance get_instance() { return inst; }
 
-    hardware_device_destroy(hardware);
+protected:
+    void _window_create(int width, int height, VkSurfaceKHR p_surface);
 
-    return 0;
-}
+private:
+    void _create_physical_device(VkSurfaceKHR p_surface);
+    void _initialize();
+
+private:
+    VkInstance inst;
+    VkSurfaceKHR surface;
+    VkPhysicalDevice gpu;
+    VkDevice device;
+    uint32_t graphics_queue_family;
+    uint32_t present_queue_family;
+};

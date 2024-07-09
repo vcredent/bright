@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* main.cpp                                                                 */
+/* vulkan_context_win32.h                                                   */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           PORTABLE ENGINE                                */
@@ -20,20 +20,24 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include <iostream>
-#include "drivers/hardware.h"
+#ifndef _VULKAN_CONTEXT_WIN32_H_
+#define _VULKAN_CONTEXT_WIN32_H_
 
-int main(int argc, char **argv)
-{
-    HardwareDevice *hardware;
-    hardware_device_hint(HARDWARE_CLIENT_API, HARDWARE_VULKAN_API);
-    hardware_device_create(800, 600, "PortableEngine", &hardware);
+#include "drivers/vulkan_context.h"
+#include <GLFW/glfw3.h>
 
-    while (!hardware->window_should_close()) {
-        hardware->poll_events();
-    }
+class VulkanContextWin32 : public VulkanContext {
+public:
+    explicit VulkanContextWin32();
+    ~VulkanContextWin32() override;
 
-    hardware_device_destroy(hardware);
+public:
+    void window_create(int width, int height, const char *title, struct hardware_device_hint *p_hint);
+    bool window_should_close() override final;
+    void poll_events() override final;
 
-    return 0;
-}
+private:
+    GLFWwindow *window;
+};
+
+#endif /* _VULKAN_CONTEXT_WIN32_H_ */

@@ -1,9 +1,9 @@
-/* ======================================================================== */
-/* main.cpp                                                                 */
-/* ======================================================================== */
+/* ************************************************************************ */
+/* typealias.h                                                              */
+/* ************************************************************************ */
 /*                        This file is part of:                             */
 /*                           PORTABLE ENGINE                                */
-/* ======================================================================== */
+/* ************************************************************************ */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
 /*                                                                          */
@@ -19,21 +19,10 @@
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
-/* ======================================================================== */
-#include <iostream>
-#include "drivers/hardware.h"
+/* ************************************************************************ */
+#ifndef _TYPEALIAS_H_
+#define _TYPEALIAS_H_
 
-int main(int argc, char **argv)
-{
-    HardwareDevice *hardware;
-    hardware_device_hint(HARDWARE_CLIENT_API, HARDWARE_VULKAN_API);
-    hardware_device_create(800, 600, "PortableEngine", &hardware);
+#define U_ASSERT_ONLY __attribute__((unused))
 
-    while (!hardware->window_should_close()) {
-        hardware->poll_events();
-    }
-
-    hardware_device_destroy(hardware);
-
-    return 0;
-}
+#endif /* _TYPEALIAS_H_ */

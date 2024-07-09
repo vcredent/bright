@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* main.cpp                                                                 */
+/* vulkan_context_win32.cpp                                                 */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           PORTABLE ENGINE                                */
@@ -20,20 +20,42 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include <iostream>
-#include "drivers/hardware.h"
+#include "vulkan_context_win32.h"
 
-int main(int argc, char **argv)
+VulkanContextWin32::VulkanContextWin32()
 {
-    HardwareDevice *hardware;
-    hardware_device_hint(HARDWARE_CLIENT_API, HARDWARE_VULKAN_API);
-    hardware_device_create(800, 600, "PortableEngine", &hardware);
+    // ...
+}
 
-    while (!hardware->window_should_close()) {
-        hardware->poll_events();
-    }
+VulkanContextWin32::~VulkanContextWin32()
+{
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}
 
-    hardware_device_destroy(hardware);
+void VulkanContextWin32::window_create(int width, int height, const char *title, struct hardware_device_hint *p_hint)
+{
+    glfwInit();
+    glfwInitHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwInitHint(GLFW_VISIBLE,  p_hint->window_visible);
 
-    return 0;
+    window = glfwCreateWindow(width, height, title, NULL, NULL);
+    EXIT_FAIL_V(window != NULL, "-engine error: create glfw window failed! cause: window is null.");
+
+    /* create surface. */
+    VkSurfaceKHR surface;
+    glfwCreateWindowSurface(get_instance(), window, NULL, &surface);
+    EXIT_FAIL_V(surface != NULL, "-engine error: glfw create window surface error, cause: VkSurfaceKHR is null.");
+
+    _window_create(width, height, surface);
+}
+
+bool VulkanContextWin32::window_should_close()
+{
+    return glfwWindowShouldClose(window);
+}
+
+void VulkanContextWin32::poll_events()
+{
+    glfwPollEvents();
 }

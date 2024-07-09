@@ -1,9 +1,9 @@
-#! ************************************************************************ !#
+#! ======================================================================== !#
 #! PortableMain.cpp                                                         !#
-#! ************************************************************************ !#
+#! ======================================================================== !#
 #!                        This file is part of:                             !#
 #!                           PORTABLE ENGINE                                !#
-#! ************************************************************************ !#
+#! ======================================================================== !#
 #!                                                                          !#
 #! Copyright (C) 2022 Vcredent All rights reserved.                         !#
 #!                                                                          !#
@@ -19,7 +19,7 @@
 #! See the License for the specific language governing permissions and      !#
 #! limitations under the License.                                           !#
 #!                                                                          !#
-#! ************************************************************************ !#
+#! ======================================================================== !#
 
 cmake_minimum_required(VERSION 3.26)
 project(PortableEngine)
@@ -27,17 +27,21 @@ project(PortableEngine)
 set(CMAKE_CXX_STANDARD 23)
 set(PROGRAM_NAME engine)
 
-include_directories(${PROJECT_NAME} SYSTEM ThirdParty/vulkan/Include)
-include_directories(${PROJECT_NAME} SYSTEM ThirdParty/glfw/include)
+include_directories(${PROJECT_NAME} SYSTEM thirdparty/vulkan/Include)
+include_directories(${PROJECT_NAME} SYSTEM thirdparty/glfw/include)
+include_directories(${PROJECT_NAME} SYSTEM include)
 include_directories(${PROJECT_NAME} /)
 
 link_directories(
-        ThirdParty/vulkan
-        ThirdParty/glfw/lib-mingw-w64
+        thirdparty/vulkan
+        thirdparty/glfw/lib-mingw-w64
 )
 
 add_executable(${PROGRAM_NAME}
         main.cpp
+        drivers/hardware.cpp
+        drivers/vulkan_context.cpp
+        window/vulkan_context_win32.cpp
 )
 
 target_link_libraries(${PROGRAM_NAME}

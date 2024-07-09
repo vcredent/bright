@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* main.cpp                                                                 */
+/* hardware.cpp                                                             */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           PORTABLE ENGINE                                */
@@ -20,20 +20,39 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include <iostream>
-#include "drivers/hardware.h"
+#include "hardware.h"
+#include "window/vulkan_context_win32.h"
 
-int main(int argc, char **argv)
+struct hardware_device_hint _hint;
+
+HardwareDevice::~HardwareDevice()
 {
-    HardwareDevice *hardware;
-    hardware_device_hint(HARDWARE_CLIENT_API, HARDWARE_VULKAN_API);
-    hardware_device_create(800, 600, "PortableEngine", &hardware);
+    // ...
+}
 
-    while (!hardware->window_should_close()) {
-        hardware->poll_events();
+void hardware_device_hint(int hint, int value)
+{
+    switch (hint) {
+        case HARDWARE_CLIENT_API:
+            _hint.client_api = value;
+            break;
+        case HARDWARE_WINDOW_VISIBLE:
+            _hint.window_visible = value;
+            break;
+        default:
+            EXIT_FAIL("-engine error: unknown hint: %d", hint);
     }
+}
 
-    hardware_device_destroy(hardware);
+Error hardware_device_create(int width, int height, const char *title, HardwareDevice **p_hardware)
+{
+    VulkanContextWin32 *vulkan_context_win32 = new VulkanContextWin32();
+    vulkan_context_win32->window_create(width, height, title, &_hint);
+    *p_hardware = vulkan_context_win32;
+    return OK;
+}
 
-    return 0;
+void hardware_device_destroy(HardwareDevice *hardware)
+{
+    delete hardware;
 }

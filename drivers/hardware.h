@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* main.cpp                                                                 */
+/* hardware.h                                                               */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           PORTABLE ENGINE                                */
@@ -20,20 +20,44 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include <iostream>
-#include "drivers/hardware.h"
+#ifndef HARDWARE_DEVICE_H
+#define HARDWARE_DEVICE_H
 
-int main(int argc, char **argv)
-{
-    HardwareDevice *hardware;
-    hardware_device_hint(HARDWARE_CLIENT_API, HARDWARE_VULKAN_API);
-    hardware_device_create(800, 600, "PortableEngine", &hardware);
+#include <engine/error.h>
+#include <engine/typealias.h>
 
-    while (!hardware->window_should_close()) {
-        hardware->poll_events();
-    }
+#define HARDWARE_TRUE           1
+#define HARDWARE_FALSE          0
+#define HARDWARE_CLIENT_API     0x000000002
+#define HARDWARE_STABLE_API     0x000000004 /* HINT:  HARDWARE_CLIENT_API          */
+#define HARDWARE_OPENGL_API     0x000000006 /* HINT:  HARDWARE_CLIENT_API          */
+#define HARDWARE_VULKAN_API     0x000000008 /* HINT:  HARDWARE_CLIENT_API          */
+#define HARDWARE_DIRECT3D_API   0x000000010 /* HINT:  HARDWARE_CLIENT_API          */
+#define HARDWARE_WINDOW_VISIBLE 0x000000012 /* VALUE: HARDWARE_TRUE/HARDWARE_FALSE */
 
-    hardware_device_destroy(hardware);
+struct hardware_device_hint {
+    int client_api = HARDWARE_VULKAN_API;
+    int window_visible = HARDWARE_TRUE;
+};
 
-    return 0;
-}
+class HardwareDevice {
+public:
+    /* ============================== */
+    /*        graphics options        */
+    /* ============================== */
+
+    /* ============================ */
+    /*        window options        */
+    /* ============================ */
+    virtual bool window_should_close() = 0;
+    virtual void poll_events() = 0;
+
+    virtual ~HardwareDevice() = 0;
+};
+
+/* create and destroy HardwareDevice object. */
+void hardware_device_hint(int hint, int value);
+Error hardware_device_create(int width, int height, const char *title, HardwareDevice **ppHardwareDevice);
+void hardware_device_destroy(HardwareDevice *pHardwareDevice);
+
+#endif /* HARDWARE_DEVICE_H */
