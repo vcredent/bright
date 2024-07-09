@@ -27,6 +27,7 @@ int main(int argc, char **argv)
 {
     HardwareDevice *hardware;
     hardware_device_hint(HARDWARE_CLIENT_API, HARDWARE_VULKAN_API);
+    hardware_device_hint(HARDWARE_WINDOW_VISIBLE, HARDWARE_TRUE);
     hardware_device_create(800, 600, "PortableEngine", &hardware);
 
     while (!hardware->window_should_close()) {

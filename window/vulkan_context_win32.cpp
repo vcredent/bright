@@ -24,7 +24,8 @@
 
 VulkanContextWin32::VulkanContextWin32()
 {
-    // ...
+    if (!glfwInit())
+        EXIT_FAIL("-engine error: glfw init error!");
 }
 
 VulkanContextWin32::~VulkanContextWin32()
@@ -35,19 +36,20 @@ VulkanContextWin32::~VulkanContextWin32()
 
 void VulkanContextWin32::window_create(int width, int height, const char *title, struct hardware_device_hint *p_hint)
 {
-    glfwInit();
-    glfwInitHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwInitHint(GLFW_VISIBLE,  p_hint->window_visible);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_VISIBLE, p_hint->window_visible);
 
     window = glfwCreateWindow(width, height, title, NULL, NULL);
     EXIT_FAIL_V(window != NULL, "-engine error: create glfw window failed! cause: window is null.");
 
     /* create surface. */
     VkSurfaceKHR surface;
-    glfwCreateWindowSurface(get_instance(), window, NULL, &surface);
-    EXIT_FAIL_V(surface != NULL, "-engine error: glfw create window surface error, cause: VkSurfaceKHR is null.");
+    VkResult U_ASSERT_ONLY err;
+    err = glfwCreateWindowSurface(get_instance(), window, NULL, &surface);
+    assert(!err);
 
     _window_create(width, height, surface);
+    _initialize();
 }
 
 bool VulkanContextWin32::window_should_close()

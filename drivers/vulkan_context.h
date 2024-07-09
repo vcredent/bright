@@ -33,10 +33,10 @@ public:
 
 protected:
     void _window_create(int width, int height, VkSurfaceKHR p_surface);
+    void _initialize();
 
 private:
     void _create_physical_device(VkSurfaceKHR p_surface);
-    void _initialize();
 
 private:
     VkInstance inst;
