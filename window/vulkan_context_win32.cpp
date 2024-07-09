@@ -44,7 +44,7 @@ void VulkanContextWin32::window_create(int width, int height, const char *title,
 
     /* create surface. */
     VkSurfaceKHR surface;
-    VkResult ASSERT_ONLY err;
+    VkResult U_ASSERT_ONLY err;
     err = glfwCreateWindowSurface(get_instance(), window, NULL, &surface);
     assert(!err);
 

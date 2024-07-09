@@ -23,6 +23,6 @@
 #ifndef _TYPEALIAS_H_
 #define _TYPEALIAS_H_
 
-#define ASSERT_ONLY __attribute__((unused))
+#define U_ASSERT_ONLY __attribute__((unused))
 
 #endif /* _TYPEALIAS_H_ */

@@ -36,13 +36,23 @@ protected:
 
 private:
     void _create_physical_device(VkSurfaceKHR surface);
+    void _initialize_queues(VkPhysicalDevice gpu, VkSurfaceKHR surface);
     void _create_device(VkDevice *p_device);
+    void _create_command_pool(VkDevice device);
+
+    struct DisplayWindow {
+        VkSurfaceKHR surface;
+        VkSwapchainKHR swapchain;
+    };
+
+    void _initialize_display_window(VkDevice device, VkSurfaceKHR surface);
 
 private:
     VkInstance inst;
-    VkSurfaceKHR surface;
     VkPhysicalDevice gpu;
     VkDevice device;
     uint32_t graph_queue_family;
     VkQueue graph_command_queue;
+    VkCommandPool command_pool;
+    DisplayWindow *display_window;
 };

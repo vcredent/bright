@@ -23,9 +23,11 @@
 #include "vulkan_context.h"
 #include <vector>
 
+VkAllocationCallbacks *allocation_callbacks = nullptr;
+
 VulkanContext::VulkanContext()
 {
-    VkResult ASSERT_ONLY err;
+    VkResult U_ASSERT_ONLY err;
     void *nextptr = nullptr;
 
     VkApplicationInfo application_info = {
@@ -58,15 +60,19 @@ VulkanContext::VulkanContext()
         /* ppEnabledExtensionNames */ std::data(inst_extensions)
     };
 
-    err = vkCreateInstance(&instance_create_info, nullptr, &inst);
+    err = vkCreateInstance(&instance_create_info, allocation_callbacks, &inst);
     assert(!err);
 }
 
 VulkanContext::~VulkanContext()
 {
-    VkAllocationCallbacks *allocation_callbacks = nullptr;
+    // clean handle about display window.
+    // vkDestroySwapchainKHR(device, display_window->swapchain, allocation_callbacks);
+    vkDestroySurfaceKHR(inst, display_window->surface, allocation_callbacks);
+    free(display_window);
+
+    vkDestroyCommandPool(device, command_pool, allocation_callbacks);
     vkDestroyDevice(device, allocation_callbacks);
-    vkDestroySurfaceKHR(inst, surface, allocation_callbacks);
     vkDestroyInstance(inst, allocation_callbacks);
 }
 
@@ -74,11 +80,13 @@ void VulkanContext::_window_create(VkSurfaceKHR surface)
 {
     _create_physical_device(surface);
     _create_device(&device);
+    _create_command_pool(device);
+    _initialize_display_window(device, surface);
 }
 
 void VulkanContext::_create_physical_device(VkSurfaceKHR surface)
 {
-    VkResult ASSERT_ONLY err;
+    VkResult U_ASSERT_ONLY err;
 
     /* select high performance GPU in this machine. */
     uint32_t gpu_count;
@@ -105,6 +113,12 @@ void VulkanContext::_create_physical_device(VkSurfaceKHR surface)
     gpu = physical_devices[gpu_number];
     free(physical_devices);
 
+    _initialize_queues(gpu, surface);
+}
+
+void VulkanContext::_initialize_queues(VkPhysicalDevice gpu, VkSurfaceKHR surface)
+{
+    VkResult U_ASSERT_ONLY err;
     /* find graphics and present queue family. */
     uint32_t queue_family_count;
     vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queue_family_count, nullptr);
@@ -124,15 +138,13 @@ void VulkanContext::_create_physical_device(VkSurfaceKHR surface)
     }
 
     free(queue_family_properties);
-
-    this->surface = surface;
 }
 
 void VulkanContext::_create_device(VkDevice *p_device)
 {
     void *nextptr = nullptr;
     float priorities = 1.0f;
-    VkResult ASSERT_ONLY err;
+    VkResult U_ASSERT_ONLY err;
 
     VkDeviceQueueCreateInfo queue_create_info = {
         /* sType */ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
@@ -157,7 +169,53 @@ void VulkanContext::_create_device(VkDevice *p_device)
         /* pEnabledFeatures */ nullptr,
     };
 
-    err = vkCreateDevice(gpu, &device_create_info, nullptr, p_device);
+    err = vkCreateDevice(gpu, &device_create_info, allocation_callbacks, p_device);
     assert(!err);
     vkGetDeviceQueue(device, graph_queue_family, 0, &graph_command_queue);
+}
+
+void VulkanContext::_create_command_pool(VkDevice device)
+{
+    void *nextptr = nullptr;
+    VkResult U_ASSERT_ONLY err;
+
+    VkCommandPoolCreateInfo command_pool_create_info = {
+        /* sType */ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        /* pNext */ nextptr,
+        /* flags */ 0,
+        /* queueFamilyIndex */ graph_queue_family
+    };
+
+    err = vkCreateCommandPool(device, &command_pool_create_info, allocation_callbacks, &command_pool);
+    assert(!err);
+}
+
+void VulkanContext::_initialize_display_window(VkDevice device, VkSurfaceKHR surface)
+{
+    /* malloc display window struct and set surface */
+    display_window = (DisplayWindow *) malloc(sizeof(DisplayWindow));
+    display_window->surface = surface;
+
+    VkSwapchainCreateInfoKHR swapchain_create_info = {
+        /* sType */
+        /* pNext */
+        /* flags */
+        /* surface */
+        /* minImageCount */
+        /* imageFormat */
+        /* imageColorSpace */
+        /* imageExtent */
+        /* imageArrayLayers */
+        /* imageUsage */
+        /* imageSharingMode */
+        /* queueFamilyIndexCount */
+        /* pQueueFamilyIndices */
+        /* preTransform */
+        /* compositeAlpha */
+        /* presentMode */
+        /* clipped */
+        /* oldSwapchain */
+    };
+
+    vkCreateSwapchainKHR(device, &swapchain_create_info, allocation_callbacks, &display_window->swapchain);
 }

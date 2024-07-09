@@ -33,8 +33,8 @@ public:
 
 public:
     void window_create(int width, int height, const char *title, struct hardware_device_hint *p_hint);
-    bool window_should_close() override final;
-    void poll_events() override final;
+    virtual bool window_should_close() override final;
+    virtual void poll_events() override final;
 
 private:
     GLFWwindow *window;
