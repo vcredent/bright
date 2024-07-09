@@ -32,17 +32,17 @@ public:
     VkInstance get_instance() { return inst; }
 
 protected:
-    void _window_create(int width, int height, VkSurfaceKHR p_surface);
-    void _initialize();
+    void _window_create(VkSurfaceKHR surface); /* initialize */
 
 private:
-    void _create_physical_device(VkSurfaceKHR p_surface);
+    void _create_physical_device(VkSurfaceKHR surface);
+    void _create_device(VkDevice *p_device);
 
 private:
     VkInstance inst;
     VkSurfaceKHR surface;
     VkPhysicalDevice gpu;
     VkDevice device;
-    uint32_t graphics_queue_family;
-    uint32_t present_queue_family;
+    uint32_t graph_queue_family;
+    VkQueue graph_command_queue;
 };

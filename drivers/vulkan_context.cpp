@@ -25,7 +25,7 @@
 
 VulkanContext::VulkanContext()
 {
-    VkResult U_ASSERT_ONLY err;
+    VkResult ASSERT_ONLY err;
     void *nextptr = nullptr;
 
     VkApplicationInfo application_info = {
@@ -64,19 +64,21 @@ VulkanContext::VulkanContext()
 
 VulkanContext::~VulkanContext()
 {
-    vkDestroySurfaceKHR(inst, surface, nullptr);
-    vkDestroyInstance(inst, nullptr);
+    VkAllocationCallbacks *allocation_callbacks = nullptr;
+    vkDestroyDevice(device, allocation_callbacks);
+    vkDestroySurfaceKHR(inst, surface, allocation_callbacks);
+    vkDestroyInstance(inst, allocation_callbacks);
 }
 
-void VulkanContext::_window_create(int width, int height, VkSurfaceKHR p_surface)
+void VulkanContext::_window_create(VkSurfaceKHR surface)
 {
-    this->surface = p_surface;
-    _create_physical_device(p_surface);
+    _create_physical_device(surface);
+    _create_device(&device);
 }
 
-void VulkanContext::_create_physical_device(VkSurfaceKHR p_surface)
+void VulkanContext::_create_physical_device(VkSurfaceKHR surface)
 {
-    VkResult U_ASSERT_ONLY err;
+    VkResult ASSERT_ONLY err;
 
     /* select high performance GPU in this machine. */
     uint32_t gpu_count;
@@ -113,28 +115,41 @@ void VulkanContext::_create_physical_device(VkSurfaceKHR p_surface)
     // families, try to find one that supports both.
     for (uint32_t i = 0; i < queue_family_count; i++) {
         VkBool32 is_present;
-        err = vkGetPhysicalDeviceSurfaceSupportKHR(gpu, i, p_surface, &is_present);
+        err = vkGetPhysicalDeviceSurfaceSupportKHR(gpu, i, surface, &is_present);
         assert(!err);
         if ((queue_family_properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) && (is_present == VK_TRUE)) {
-            graphics_queue_family = i;
+            graph_queue_family = i;
             break;
         }
     }
 
     free(queue_family_properties);
+
+    this->surface = surface;
 }
 
-void VulkanContext::_initialize()
+void VulkanContext::_create_device(VkDevice *p_device)
 {
     void *nextptr = nullptr;
+    float priorities = 1.0f;
+    VkResult ASSERT_ONLY err;
+
+    VkDeviceQueueCreateInfo queue_create_info = {
+        /* sType */ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+        /* pNext */ nextptr,
+        /* flags */ 0,
+        /* queueFamilyIndex */ graph_queue_family,
+        /* queueCount */ 1,
+        /* pQueuePriorities */ &priorities
+    };
 
     /* create device. */
     VkDeviceCreateInfo device_create_info = {
         /* sType */ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
         /* pNext */ nextptr,
         /* flags */ 0,
-        /* queueCreateInfoCount */ 0,
-        /* pQueueCreateInfos */ nullptr,
+        /* queueCreateInfoCount */ 1,
+        /* pQueueCreateInfos */ &queue_create_info,
         /* enabledLayerCount */ 0,
         /* ppEnabledLayerNames */ nullptr,
         /* enabledExtensionCount */ 0,
@@ -142,5 +157,7 @@ void VulkanContext::_initialize()
         /* pEnabledFeatures */ nullptr,
     };
 
-    vkCreateDevice(gpu, &device_create_info, nullptr, &device);
+    err = vkCreateDevice(gpu, &device_create_info, nullptr, p_device);
+    assert(!err);
+    vkGetDeviceQueue(device, graph_queue_family, 0, &graph_command_queue);
 }

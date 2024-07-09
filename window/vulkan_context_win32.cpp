@@ -44,12 +44,11 @@ void VulkanContextWin32::window_create(int width, int height, const char *title,
 
     /* create surface. */
     VkSurfaceKHR surface;
-    VkResult U_ASSERT_ONLY err;
+    VkResult ASSERT_ONLY err;
     err = glfwCreateWindowSurface(get_instance(), window, NULL, &surface);
     assert(!err);
 
-    _window_create(width, height, surface);
-    _initialize();
+    _window_create(surface);
 }
 
 bool VulkanContextWin32::window_should_close()
