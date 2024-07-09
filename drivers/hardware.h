@@ -35,10 +35,10 @@
 #define HARDWARE_DIRECT3D_API   0x000000010 /* HINT:  HARDWARE_CLIENT_API          */
 #define HARDWARE_WINDOW_VISIBLE 0x000000012 /* VALUE: HARDWARE_TRUE/HARDWARE_FALSE */
 
-struct hardware_device_hint {
+typedef struct HardwareDeviceHint {
     int client_api = HARDWARE_VULKAN_API;
     int window_visible = HARDWARE_TRUE;
-};
+} HardwareDeviceHint;
 
 class HardwareDevice {
 public:

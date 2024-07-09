@@ -40,10 +40,10 @@ private:
     void _create_device(VkDevice *p_device);
     void _create_command_pool(VkDevice device);
 
-    struct DisplayWindow {
+    typedef struct DisplayWindow {
         VkSurfaceKHR surface;
         VkSwapchainKHR swapchain;
-    };
+    } DisplayWindow;
 
     void _initialize_display_window(VkDevice device, VkSurfaceKHR surface);
 

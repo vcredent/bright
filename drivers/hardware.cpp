@@ -23,7 +23,7 @@
 #include "hardware.h"
 #include "window/vulkan_context_win32.h"
 
-struct hardware_device_hint _hint;
+struct HardwareDeviceHint _hint;
 
 HardwareDevice::~HardwareDevice()
 {

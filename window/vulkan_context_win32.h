@@ -32,7 +32,7 @@ public:
     ~VulkanContextWin32() override;
 
 public:
-    void window_create(int width, int height, const char *title, struct hardware_device_hint *p_hint);
+    void window_create(int width, int height, const char *title, HardwareDeviceHint *p_hint);
     virtual bool window_should_close() override final;
     virtual void poll_events() override final;
 

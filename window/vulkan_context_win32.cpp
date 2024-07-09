@@ -34,7 +34,7 @@ VulkanContextWin32::~VulkanContextWin32()
     glfwTerminate();
 }
 
-void VulkanContextWin32::window_create(int width, int height, const char *title, struct hardware_device_hint *p_hint)
+void VulkanContextWin32::window_create(int width, int height, const char *title, HardwareDeviceHint *p_hint)
 {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_VISIBLE, p_hint->window_visible);
