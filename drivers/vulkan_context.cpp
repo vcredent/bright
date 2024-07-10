@@ -86,7 +86,7 @@ VkContext::~VkContext()
     _clean_up_context();
 }
 
-void VkContext::allocate_buffer(VkDeviceSize size, VkBufferUsageFlags usage, Buffer **p_buffer)
+void VkContext::allocate_buffer(VkDeviceSize size, VkBufferUsageFlags usage, Buffer *p_buffer)
 {
     void *nextptr = nullptr;
 
@@ -106,7 +106,7 @@ void VkContext::allocate_buffer(VkDeviceSize size, VkBufferUsageFlags usage, Buf
     VmaAllocation allocation;
     vmaCreateBuffer(allocator, &buffer_create_info, &allocation_create_info, &buffer, &allocation, nullptr);
 
-    Buffer *buffer_return = (Buffer *) imalloc(sizeof(Buffer));
+    Buffer buffer_return = (Buffer_T *) imalloc(sizeof(Buffer_T));
 
     buffer_return->buffer = buffer;
     buffer_return->allocation = allocation;
@@ -116,11 +116,16 @@ void VkContext::allocate_buffer(VkDeviceSize size, VkBufferUsageFlags usage, Buf
     *p_buffer = buffer_return;
 }
 
-void VkContext::free_buffer(Buffer *buffer)
+void VkContext::free_buffer(Buffer buffer)
 {
     vkDestroyBuffer(device, buffer->buffer, allocation_callbacks);
     vmaFreeMemory(allocator, buffer->allocation);
     free(buffer);
+}
+
+void VkContext::bind_image_memory(Buffer buffer, VkImage image)
+{
+    vmaBindImageMemory(allocator, buffer->allocation, image);
 }
 
 void VkContext::_window_create(VkSurfaceKHR surface)
@@ -346,6 +351,10 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
     err = vkCreateSwapchainKHR(device, &swapchain_create_info, allocation_callbacks, &window->swapchain);
     assert(!err);
 
+    VkImage *swap_chain_images =
+            (VkImage *) imalloc(sizeof(VkImage) * window->image_buffer_count);
+    vkGetSwapchainImagesKHR(device, window->swapchain, &window->image_buffer_count, swap_chain_images);
+
     // create swap chain image resource by image buffer count,
     // create handles:
     //   - VkImage
@@ -355,28 +364,9 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
     window->swap_chain_resources =
             (SwapchainImageResource *) imalloc(sizeof(SwapchainImageResource) * window->image_buffer_count);
 
-    VkImageCreateInfo image_create_info = {
-        /* sType */ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-        /* pNext */ nextptr,
-        /* flags */ 0,
-        /* imageType */ VK_IMAGE_TYPE_2D,
-        /* format */ window->format,
-        /* extent */
-            {
-                .width = window->width,
-                .height = window->height,
-                .depth = 1
-            },
-        /* mipLevels */ 1,
-        /* arrayLayers */ 1,
-        /* samples */ VK_SAMPLE_COUNT_1_BIT,
-        /* tiling */ VK_IMAGE_TILING_LINEAR,
-        /* usage */ VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-        /* sharingMode */ VK_SHARING_MODE_EXCLUSIVE,
-        /* queueFamilyIndexCount */ 1,
-        /* pQueueFamilyIndices */ &graph_queue_family,
-        /* initialLayout */ VK_IMAGE_LAYOUT_UNDEFINED,
-    };
+    for (uint32_t i = 0; i < window->image_buffer_count; i++)
+        window->swap_chain_resources[i].image = swap_chain_images[i];
+    free(swap_chain_images);
 
     VkImageViewCreateInfo image_view_create_info = {
         /* sType */ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -423,10 +413,6 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
     };
 
     for (uint32_t i = 0; i < window->image_buffer_count; i++) {
-        // create image buffer
-        err = vkCreateImage(device, &image_create_info, allocation_callbacks, &(window->swap_chain_resources[i].image));
-        assert(!err);
-
         // use current create image buffer object to create image view
         image_view_create_info.image = window->swap_chain_resources[i].image;
         err = vkCreateImageView(device, &image_view_create_info, allocation_callbacks, &(window->swap_chain_resources[i].image_view));
@@ -450,7 +436,6 @@ void VkContext::_clean_up_swap_chain(VkDevice device, Window *window)
 
     // clean up swap chain resource
     for (uint32_t i = 0; i < window->image_buffer_count; i++) {
-        vkDestroyImage(device, window->swap_chain_resources[i].image, allocation_callbacks);
         vkDestroyImageView(device, window->swap_chain_resources[i].image_view, allocation_callbacks);
         // vkDestroyFramebuffer(device, window->swap_chain_resources[i].framebuffer, allocation_callbacks);
     }

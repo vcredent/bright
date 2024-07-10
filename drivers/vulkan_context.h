@@ -33,15 +33,17 @@ public:
     VkInstance get_instance() { return inst; }
     VkDevice get_device() { return device; }
 
-    typedef struct Buffer {
+    typedef struct Buffer_T {
         VkBuffer buffer;
         VmaAllocation allocation;
         VmaMemoryUsage usage;
         VkDeviceSize size;
-    } Buffer;
+    } *Buffer;
 
-    void allocate_buffer(VkDeviceSize size, VkBufferUsageFlags usage, Buffer **p_buffer);
-    void free_buffer(Buffer *buffer);
+    // buffer memory allocated in the GPU
+    void allocate_buffer(VkDeviceSize size, VkBufferUsageFlags usage, Buffer *p_buffer);
+    void free_buffer(Buffer buffer);
+    void bind_image_memory(Buffer buffer, VkImage image);
 
 protected:
     void _window_create(VkSurfaceKHR surface); /* initialize */
@@ -53,14 +55,14 @@ private:
     void _create_device(VkDevice *p_device);
     void _initialize_vma(VkInstance inst, VkPhysicalDevice gpu, VkDevice device, VmaAllocator *p_allocator);
 
-    typedef struct SwapchainImageResource {
+    struct SwapchainImageResource {
         VkImage image;
         VkImageView image_view;
         VkFramebuffer framebuffer;
         VkCommandBuffer command_buffer;
-    } SwapchainImageResource;
+    };
 
-    typedef struct Window {
+    struct Window {
         VkSurfaceKHR surface;
         VkSurfaceCapabilitiesKHR capabilities;
         VkSwapchainKHR swapchain = nullptr;
@@ -74,7 +76,7 @@ private:
         VkPresentModeKHR present_mode;
         SwapchainImageResource *swap_chain_resources = nullptr;
         VkCommandPool command_pool;
-    } Window;
+    };
 
     void _initialize_window(VkPhysicalDevice physical_device, VkSurfaceKHR surface);
     void _create_swap_chain(VkDevice device, Window *window);
