@@ -20,9 +20,15 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include <vulkan/vulkan.h>
-#include <vma/vk_mem_alloc.h>
 #include "hardware.h"
+
+#ifdef VOLK_LOADER
+#  include <volk/volk.h>
+# else
+#  include <vulkan/vulkan.h>
+#endif
+
+#include <vma/vk_mem_alloc.h>
 
 class VkContext : public HardwareDevice {
 public:
