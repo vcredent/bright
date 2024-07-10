@@ -21,7 +21,7 @@
 /*                                                                          */
 /* ======================================================================== */
 #include "vulkan_context.h"
-#include <vector>
+#include <algorithm>
 
 VkAllocationCallbacks *allocation_callbacks = nullptr;
 
@@ -57,13 +57,13 @@ VulkanContext::VulkanContext()
         /* apiVersion */ VK_API_VERSION_1_3
     };
 
-    std::vector<const char *> inst_extensions = {
+    const char * extensions[] = {
             "VK_KHR_surface",
             "VK_KHR_win32_surface"
     };
 
-    std::vector<const char *> inst_layers = {
-            "VK_LAYER_KHRONOS_validation" /* must install Vulkan SDK. */
+    const char * layers[] = {
+            "VK_LAYER_KHRONOS_validation" /* required install Vulkan SDK */
     };
 
     VkInstanceCreateInfo instance_create_info = {
@@ -71,10 +71,10 @@ VulkanContext::VulkanContext()
         /* pNext */ nextptr,
         /* flags */ 0,
         /* pApplicationInfo */ &application_info,
-        /* enabledLayerCount */ (uint32_t) std::size(inst_layers),
-        /* ppEnabledLayerNames */ std::data(inst_layers),
-        /* enabledExtensionCount */ (uint32_t) std::size(inst_extensions),
-        /* ppEnabledExtensionNames */ std::data(inst_extensions)
+        /* enabledLayerCount */ ARRAY_SIZE(layers),
+        /* ppEnabledLayerNames */ layers,
+        /* enabledExtensionCount */ ARRAY_SIZE(extensions),
+        /* ppEnabledExtensionNames */ extensions
     };
 
     err = vkCreateInstance(&instance_create_info, allocation_callbacks, &inst);
@@ -90,20 +90,17 @@ void VulkanContext::_window_create(VkSurfaceKHR surface)
 {
     _create_physical_device(surface);
     _create_device(&device);
-    _create_command_pool(device);
     _initialize_window(gpu, surface);
-    _create_swap_chain(device, nullptr, window);
-    _allocate_command_buffers(device, command_pool, window);
+    _create_swap_chain(device, window);
 }
 
 void VulkanContext::_clean_up_all()
 {
     // clean handle about display window.
-    _clean_swap_chain(device, command_pool, window);
+    _clean_up_swap_chain(device, window);
     vkDestroySurfaceKHR(inst, window->surface, allocation_callbacks);
     free(window);
 
-    vkDestroyCommandPool(device, command_pool, allocation_callbacks);
     vkDestroyDevice(device, allocation_callbacks);
     vkDestroyInstance(inst, allocation_callbacks);
 }
@@ -121,7 +118,7 @@ void VulkanContext::_create_physical_device(VkSurfaceKHR surface)
     if (gpu_count <= 0)
         EXIT_FAIL("-engine error: no available device (GPU), gpu count is: %d\n", gpu_count);
 
-    VkPhysicalDevice *physical_devices = (VkPhysicalDevice *) malloc(sizeof(VkPhysicalDevice) * gpu_count);
+    VkPhysicalDevice *physical_devices = (VkPhysicalDevice *) imalloc(sizeof(VkPhysicalDevice) * gpu_count);
     err = vkEnumeratePhysicalDevices(inst, &gpu_count, physical_devices);
     assert(!err);
 
@@ -146,7 +143,7 @@ void VulkanContext::_initialize_queues(VkPhysicalDevice gpu, VkSurfaceKHR surfac
     /* find graphics and present queue family. */
     uint32_t queue_family_count;
     vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queue_family_count, nullptr);
-    VkQueueFamilyProperties *queue_family_properties = (VkQueueFamilyProperties *) malloc(sizeof(VkQueueFamilyProperties) * queue_family_count);
+    VkQueueFamilyProperties *queue_family_properties = (VkQueueFamilyProperties *) imalloc(sizeof(VkQueueFamilyProperties) * queue_family_count);
     vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queue_family_count, queue_family_properties);
 
     // search for a graphics and present queue in the array of queue
@@ -202,22 +199,6 @@ void VulkanContext::_create_device(VkDevice *p_device)
     vkGetDeviceQueue(device, graph_queue_family, 0, &graph_command_queue);
 }
 
-void VulkanContext::_create_command_pool(VkDevice device)
-{
-    void *nextptr = nullptr;
-    VkResult U_ASSERT_ONLY err;
-
-    VkCommandPoolCreateInfo command_pool_create_info = {
-        /* sType */ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-        /* pNext */ nextptr,
-        /* flags */ 0,
-        /* queueFamilyIndex */ graph_queue_family
-    };
-
-    err = vkCreateCommandPool(device, &command_pool_create_info, allocation_callbacks, &command_pool);
-    assert(!err);
-}
-
 void VulkanContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surface)
 {
     void *nextptr = nullptr;
@@ -226,8 +207,9 @@ void VulkanContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surfac
     if (window)
         return;
 
-    /* malloc display window struct and set surface */
-    window = (Window *) malloc(sizeof(Window));
+    /* imalloc display window struct and set surface */
+    window = (Window *) imalloc(sizeof(Window));
+    memset(window, 0, sizeof(Window));
     window->surface = surface;
 
     err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &window->capabilities);
@@ -244,7 +226,7 @@ void VulkanContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surfac
     if (surface_format_count <= 0)
         EXIT_FAIL("-engine error: vulkan surface image format error, no available surface format, format count: %d\n", surface_format_count);
 
-    VkSurfaceFormatKHR *surface_image_formats = (VkSurfaceFormatKHR *) malloc(sizeof(VkSurfaceFormatKHR) * surface_format_count);
+    VkSurfaceFormatKHR *surface_image_formats = (VkSurfaceFormatKHR *) imalloc(sizeof(VkSurfaceFormatKHR) * surface_format_count);
     err = vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &surface_format_count, surface_image_formats);
     assert(!err);
 
@@ -253,15 +235,9 @@ void VulkanContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surfac
     window->colorspace = final_surface_format.colorSpace;
     free(surface_image_formats);
 
-    // try to set 3 buffer count of image
-    uint32_t desired_buffer_count = 3;
-    if (desired_buffer_count < window->capabilities.minImageCount)
-        desired_buffer_count = window->capabilities.minImageCount;
-
-    if ((window->capabilities.maxImageCount > 0) && (desired_buffer_count > window->capabilities.maxImageCount))
-        desired_buffer_count = window->capabilities.maxImageCount;
-
-    window->desired_buffer_count = desired_buffer_count;
+    // we hope the image buffer count eq 3 buffer count
+    window->image_buffer_count =
+            std::clamp<uint32_t>(3, window->capabilities.minImageCount, window->capabilities.maxImageCount);
 
     // surface pre transform
     window->transform = (window->capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) ?
@@ -273,17 +249,27 @@ void VulkanContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surfac
     window->present_mode = VK_PRESENT_MODE_FIFO_KHR;
 }
 
-void VulkanContext::_create_swap_chain(VkDevice device, VkSwapchainKHR old_swap_chain, Window *window)
+void VulkanContext::_create_swap_chain(VkDevice device, Window *window)
 {
     void *nextptr = nullptr;
     VkResult U_ASSERT_ONLY err;
+
+    VkCommandPoolCreateInfo command_pool_create_info = {
+            /* sType */ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+            /* pNext */ nextptr,
+            /* flags */ 0,
+            /* queueFamilyIndex */ graph_queue_family
+    };
+
+    err = vkCreateCommandPool(device, &command_pool_create_info, allocation_callbacks, &window->command_pool);
+    assert(!err);
 
     VkSwapchainCreateInfoKHR swapchain_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
             /* pNext */ nextptr,
             /* flags */ 0,
             /* surface */ window->surface,
-            /* minImageCount */ window->desired_buffer_count,
+            /* minImageCount */ window->image_buffer_count,
             /* imageFormat */ window->format,
             /* imageColorSpace */ window->colorspace,
             /* imageExtent */
@@ -300,35 +286,125 @@ void VulkanContext::_create_swap_chain(VkDevice device, VkSwapchainKHR old_swap_
             /* compositeAlpha */ window->composite_alpha,
             /* presentMode */ window->present_mode,
             /* clipped */ VK_TRUE,
-            /* oldSwapchain */ old_swap_chain,
+            /* oldSwapchain */ window->swapchain,
     };
 
     err = vkCreateSwapchainKHR(device, &swapchain_create_info, allocation_callbacks, &window->swapchain);
     assert(!err);
-}
 
-void VulkanContext::_clean_swap_chain(VkDevice device, VkCommandPool command_pool, Window *window)
-{
-    vkDestroySwapchainKHR(device, window->swapchain, allocation_callbacks);
-    window->swapchain = nullptr;
-    vkFreeCommandBuffers(device, command_pool, window->desired_buffer_count, window->command_buffers);
-    window->command_buffers = nullptr;
-}
+    // create swap chain image resource by image buffer count,
+    // create handles:
+    //   - VkImage
+    //   - VkImageView
+    //   - VkFramebuffer
+    //   - VkCommandBuffer
+    window->swap_chain_resources =
+            (SwapchainImageResource *) imalloc(sizeof(SwapchainImageResource) * window->image_buffer_count);
 
-void VulkanContext::_allocate_command_buffers(VkDevice device, VkCommandPool command_pool, Window *window)
-{
-    void *nextptr = nullptr;
-    VkResult U_ASSERT_ONLY err;
+    VkImageCreateInfo image_create_info = {
+        /* sType */ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        /* pNext */ nextptr,
+        /* flags */ 0,
+        /* imageType */ VK_IMAGE_TYPE_2D,
+        /* format */ window->format,
+        /* extent */
+            {
+                .width = window->width,
+                .height = window->height,
+                .depth = 1
+            },
+        /* mipLevels */ 1,
+        /* arrayLayers */ 1,
+        /* samples */ VK_SAMPLE_COUNT_1_BIT,
+        /* tiling */ VK_IMAGE_TILING_LINEAR,
+        /* usage */ VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        /* sharingMode */ VK_SHARING_MODE_EXCLUSIVE,
+        /* queueFamilyIndexCount */ 1,
+        /* pQueueFamilyIndices */ &graph_queue_family,
+        /* initialLayout */ VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    VkImageViewCreateInfo image_view_create_info = {
+        /* sType */ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        /* pNext */ nextptr,
+        /* flags */ 0,
+        /* image */ nullptr,
+        /* viewType */ VK_IMAGE_VIEW_TYPE_2D,
+        /* format */ window->format,
+        /* components */
+            {
+                .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .a = VK_COMPONENT_SWIZZLE_IDENTITY,
+            },
+        /* subresourceRange */
+            {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .baseMipLevel = 0,
+                .levelCount = 1,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            },
+    };
+
+    VkFramebufferCreateInfo framebuffer_create_info = {
+         /* sType */ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+         /* pNext */ nextptr,
+         /* flags */ 0,
+         /* renderPass */ nullptr,
+         /* attachmentCount */ 0,
+         /* pAttachments */ nullptr,
+         /* width */ window->width,
+         /* height */ window->height,
+         /* layers */ 0
+    };
 
     VkCommandBufferAllocateInfo command_buffer_allocate_info = {
         /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
         /* pNext */ nextptr,
-        /* commandPool */ command_pool,
+        /* commandPool */ window->command_pool,
         /* level */ VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-        /* commandBufferCount */ window->desired_buffer_count,
+        /* commandBufferCount */ 1,
     };
 
-    window->command_buffers = (VkCommandBuffer *) malloc(sizeof(VkCommandBuffer) * window->desired_buffer_count);
-    err = vkAllocateCommandBuffers(device, &command_buffer_allocate_info, window->command_buffers);
-    assert(!err);
+    for (uint32_t i = 0; i < window->image_buffer_count; i++) {
+        // create image buffer
+        err = vkCreateImage(device, &image_create_info, allocation_callbacks, &(window->swap_chain_resources[i].image));
+        assert(!err);
+
+        // use current create image buffer object to create image view
+        image_view_create_info.image = window->swap_chain_resources[i].image;
+        err = vkCreateImageView(device, &image_view_create_info, allocation_callbacks, &(window->swap_chain_resources[i].image_view));
+        assert(!err);
+
+        // create framebuffer
+        // err = vkCreateFramebuffer(device, &framebuffer_create_info, allocation_callbacks, &(window->swap_chain_resources[i].framebuffer));
+        // assert(!err);
+
+        // allocate command buffer
+        err = vkAllocateCommandBuffers(device, &command_buffer_allocate_info, &(window->swap_chain_resources[i].command_buffer));
+        assert(!err);
+    }
+}
+
+void VulkanContext::_clean_up_swap_chain(VkDevice device, Window *window)
+{
+    vkDestroySwapchainKHR(device, window->swapchain, allocation_callbacks);
+    window->swapchain = nullptr;
+    vkDestroyCommandPool(device, window->command_pool, allocation_callbacks);
+
+    // clean up swap chain resource
+    for (uint32_t i = 0; i < window->image_buffer_count; i++) {
+        vkDestroyImage(device, window->swap_chain_resources[i].image, allocation_callbacks);
+        vkDestroyImageView(device, window->swap_chain_resources[i].image_view, allocation_callbacks);
+        // vkDestroyFramebuffer(device, window->swap_chain_resources[i].framebuffer, allocation_callbacks);
+    }
+}
+
+void VulkanContext::_update_swap_chain(VkDevice device, Window *window)
+{
+    if (window->swapchain)
+        _clean_up_swap_chain(device, window);
+    _create_swap_chain(device, window);
 }

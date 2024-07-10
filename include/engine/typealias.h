@@ -23,7 +23,21 @@
 #ifndef _TYPEALIAS_H_
 #define _TYPEALIAS_H_
 
+#include <string.h>
+
 #define U_ASSERT_ONLY __attribute__((unused))
 #define ARRAY_SIZE(a) ( sizeof(a) / sizeof(a[0]) )
+
+// allocate memory and initialize members to zero,
+// the default malloc does not initialize members
+inline static void *imalloc(size_t size)
+{
+    void *ptr;
+
+    ptr = malloc(size);
+    memset(ptr, 0, size);
+
+    return ptr;
+}
 
 #endif /* _TYPEALIAS_H_ */

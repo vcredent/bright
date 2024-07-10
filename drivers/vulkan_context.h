@@ -31,7 +31,6 @@ public:
 public:
     VkInstance get_instance() { return inst; }
     VkDevice get_device() { return device; }
-    VkCommandBuffer pick_command_buffer(uint32_t index) { return window->command_buffers[index]; }
 
 protected:
     void _window_create(VkSurfaceKHR surface); /* initialize */
@@ -41,27 +40,34 @@ private:
     void _create_physical_device(VkSurfaceKHR surface);
     void _initialize_queues(VkPhysicalDevice gpu, VkSurfaceKHR surface);
     void _create_device(VkDevice *p_device);
-    void _create_command_pool(VkDevice device);
+
+    typedef struct SwapchainImageResource {
+        VkImage image;
+        VkImageView image_view;
+        VkFramebuffer framebuffer;
+        VkCommandBuffer command_buffer;
+    } SwapchainImageResource;
 
     typedef struct Window {
         VkSurfaceKHR surface;
         VkSurfaceCapabilitiesKHR capabilities;
-        VkSwapchainKHR swapchain;
+        VkSwapchainKHR swapchain = nullptr;
         VkFormat format;
         VkColorSpaceKHR colorspace;
-        uint32_t desired_buffer_count;
+        uint32_t image_buffer_count;
         VkSurfaceTransformFlagBitsKHR transform;
         uint32_t width;
         uint32_t height;
         VkCompositeAlphaFlagBitsKHR composite_alpha;
         VkPresentModeKHR present_mode;
-        VkCommandBuffer *command_buffers = nullptr;
+        SwapchainImageResource *swap_chain_resources = nullptr;
+        VkCommandPool command_pool;
     } Window;
 
     void _initialize_window(VkPhysicalDevice physical_device, VkSurfaceKHR surface);
-    void _create_swap_chain(VkDevice device, VkSwapchainKHR old_swap_chain, Window *window);
-    void _clean_swap_chain(VkDevice device, VkCommandPool command_pool, Window *window);
-    void _allocate_command_buffers(VkDevice device, VkCommandPool command_pool, Window *window);
+    void _create_swap_chain(VkDevice device, Window *window);
+    void _clean_up_swap_chain(VkDevice device, Window *window);
+    void _update_swap_chain(VkDevice device, Window *window);
 
 private:
     VkInstance inst;
@@ -69,6 +75,5 @@ private:
     VkDevice device;
     uint32_t graph_queue_family;
     VkQueue graph_command_queue;
-    VkCommandPool command_pool;
     Window *window = nullptr;
 };
