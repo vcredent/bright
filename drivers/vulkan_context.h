@@ -33,6 +33,7 @@ public:
     VkInstance get_instance() { return inst; }
     VkDevice get_device() { return device; }
     const char *get_device_name() { return gpu_properties.deviceName; }
+    VmaAllocator get_allocator() { return allocator; }
 
 protected:
     void _window_create(VkSurfaceKHR surface); /* initialize */
