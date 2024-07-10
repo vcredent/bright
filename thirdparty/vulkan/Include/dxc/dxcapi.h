@@ -114,13 +114,13 @@ typedef struct DxcShaderHash {
 #define DXC_PART_PDB DXC_FOURCC('I', 'L', 'D', 'B')
 #define DXC_PART_PDB_NAME DXC_FOURCC('I', 'L', 'D', 'N')
 #define DXC_PART_PRIVATE_DATA DXC_FOURCC('P', 'R', 'I', 'V')
-#define DXC_PART_ROOT_SIGVECTRAFLUX DXC_FOURCC('R', 'T', 'S', '0')
+#define DXC_PART_ROOT_SIGNATURE DXC_FOURCC('R', 'T', 'S', '0')
 #define DXC_PART_DXIL DXC_FOURCC('D', 'X', 'I', 'L')
 #define DXC_PART_REFLECTION_DATA DXC_FOURCC('S', 'T', 'A', 'T')
 #define DXC_PART_SHADER_HASH DXC_FOURCC('H', 'A', 'S', 'H')
-#define DXC_PART_INPUT_SIGVECTRAFLUX DXC_FOURCC('I', 'S', 'G', '1')
-#define DXC_PART_OUTPUT_SIGVECTRAFLUX DXC_FOURCC('O', 'S', 'G', '1')
-#define DXC_PART_PATCH_CONSTANT_SIGVECTRAFLUX DXC_FOURCC('P', 'S', 'G', '1')
+#define DXC_PART_INPUT_SIGNATURE DXC_FOURCC('I', 'S', 'G', '1')
+#define DXC_PART_OUTPUT_SIGNATURE DXC_FOURCC('O', 'S', 'G', '1')
+#define DXC_PART_PATCH_CONSTANT_SIGNATURE DXC_FOURCC('P', 'S', 'G', '1')
 
 // Some option arguments are defined here for continuity with D3DCompile
 // interface.
@@ -380,7 +380,7 @@ struct IDxcOperationResult : public IUnknown {
   /// * DXC_OUT_OBJECT - Compile() with shader or library target
   /// * DXC_OUT_DISASSEMBLY - Disassemble()
   /// * DXC_OUT_HLSL - Compile() with -P
-  /// * DXC_OUT_ROOT_SIGVECTRAFLUX - Compile() with rootsig_* target
+  /// * DXC_OUT_ROOT_SIGNATURE - Compile() with rootsig_* target
   virtual HRESULT STDMETHODCALLTYPE
   GetResult(_COM_Outptr_result_maybenull_ IDxcBlob **ppResult) = 0;
 
@@ -659,7 +659,7 @@ struct IDxcUtils : public IUnknown {
   ///
   /// \param pShader The shader to retrieve the part from.
   ///
-  /// \param DxcPart The part to retrieve (eg DXC_PART_ROOT_SIGVECTRAFLUX).
+  /// \param DxcPart The part to retrieve (eg DXC_PART_ROOT_SIGNATURE).
   ///
   /// \param ppPartData Address of the pointer that receives a pointer to the
   /// part.
@@ -734,7 +734,7 @@ typedef enum DXC_OUT_KIND {
   DXC_OUT_TEXT = 7, ///< IDxcBlobUtf8 or IDxcBlobWide - other text, such as
                     ///< -ast-dump or -Odump.
   DXC_OUT_REFLECTION = 8,     ///< IDxcBlob - RDAT part with reflection data.
-  DXC_OUT_ROOT_SIGVECTRAFLUX = 9, ///< IDxcBlob - Serialized root signature output.
+  DXC_OUT_ROOT_SIGNATURE = 9, ///< IDxcBlob - Serialized root signature output.
   DXC_OUT_EXTRA_OUTPUTS = 10, ///< IDxcExtraOutputs - Extra outputs.
   DXC_OUT_REMARKS =
       11, ///< IDxcBlobUtf8 or IDxcBlobWide - text directed at stdout.
