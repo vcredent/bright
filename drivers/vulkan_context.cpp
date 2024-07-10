@@ -84,7 +84,7 @@ VulkanContext::VulkanContext()
 VulkanContext::~VulkanContext()
 {
     // clean handle about display window.
-    vkDestroySwapchainKHR(device, window->swapchain, allocation_callbacks);
+    _clean_swap_chain(device, command_pool, window);
     vkDestroySurfaceKHR(inst, window->surface, allocation_callbacks);
     free(window);
 
@@ -100,6 +100,7 @@ void VulkanContext::_window_create(VkSurfaceKHR surface)
     _create_command_pool(device);
     _initialize_window(gpu, surface);
     _create_swap_chain(device, nullptr, window);
+    _allocate_command_buffers(device, command_pool, window);
 }
 
 void VulkanContext::_create_physical_device(VkSurfaceKHR surface)
@@ -221,7 +222,7 @@ void VulkanContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surfac
         return;
 
     /* malloc display window struct and set surface */
-    window = (struct _window *) malloc(sizeof(struct _window));
+    window = (Window *) malloc(sizeof(Window));
     window->surface = surface;
 
     err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &window->capabilities);
@@ -255,10 +256,10 @@ void VulkanContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surfac
     if ((window->capabilities.maxImageCount > 0) && (desired_buffer_count > window->capabilities.maxImageCount))
         desired_buffer_count = window->capabilities.maxImageCount;
 
-    window->image_count = desired_buffer_count;
+    window->desired_buffer_count = desired_buffer_count;
 
     // surface pre transform
-    window->pre_transform = (window->capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) ?
+    window->transform = (window->capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) ?
             VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR : window->capabilities.currentTransform;
 
     // composite alpha
@@ -267,7 +268,7 @@ void VulkanContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surfac
     window->present_mode = VK_PRESENT_MODE_FIFO_KHR;
 }
 
-void VulkanContext::_create_swap_chain(VkDevice device, VkSwapchainKHR old_swap_chain, struct _window *window)
+void VulkanContext::_create_swap_chain(VkDevice device, VkSwapchainKHR old_swap_chain, Window *window)
 {
     void *nextptr = nullptr;
     VkResult U_ASSERT_ONLY err;
@@ -277,7 +278,7 @@ void VulkanContext::_create_swap_chain(VkDevice device, VkSwapchainKHR old_swap_
             /* pNext */ nextptr,
             /* flags */ 0,
             /* surface */ window->surface,
-            /* minImageCount */ window->image_count,
+            /* minImageCount */ window->desired_buffer_count,
             /* imageFormat */ window->format,
             /* imageColorSpace */ window->colorspace,
             /* imageExtent */
@@ -290,7 +291,7 @@ void VulkanContext::_create_swap_chain(VkDevice device, VkSwapchainKHR old_swap_
             /* imageSharingMode */ VK_SHARING_MODE_EXCLUSIVE,
             /* queueFamilyIndexCount */ 1,
             /* pQueueFamilyIndices */ &graph_queue_family,
-            /* preTransform */ window->pre_transform,
+            /* preTransform */ window->transform,
             /* compositeAlpha */ window->composite_alpha,
             /* presentMode */ window->present_mode,
             /* clipped */ VK_TRUE,
@@ -298,5 +299,31 @@ void VulkanContext::_create_swap_chain(VkDevice device, VkSwapchainKHR old_swap_
     };
 
     err = vkCreateSwapchainKHR(device, &swapchain_create_info, allocation_callbacks, &window->swapchain);
+    assert(!err);
+}
+
+void VulkanContext::_clean_swap_chain(VkDevice device, VkCommandPool command_pool, Window *window)
+{
+    vkDestroySwapchainKHR(device, window->swapchain, allocation_callbacks);
+    window->swapchain = nullptr;
+    vkFreeCommandBuffers(device, command_pool, window->desired_buffer_count, window->command_buffers);
+    window->command_buffers = nullptr;
+}
+
+void VulkanContext::_allocate_command_buffers(VkDevice device, VkCommandPool command_pool, Window *window)
+{
+    void *nextptr = nullptr;
+    VkResult U_ASSERT_ONLY err;
+
+    VkCommandBufferAllocateInfo command_buffer_allocate_info = {
+        /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        /* pNext */ nextptr,
+        /* commandPool */ command_pool,
+        /* level */ VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        /* commandBufferCount */ window->desired_buffer_count,
+    };
+
+    window->command_buffers = (VkCommandBuffer *) malloc(sizeof(VkCommandBuffer) * window->desired_buffer_count);
+    err = vkAllocateCommandBuffers(device, &command_buffer_allocate_info, window->command_buffers);
     assert(!err);
 }

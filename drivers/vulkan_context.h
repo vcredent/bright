@@ -29,7 +29,8 @@ public:
     ~VulkanContext() override;
 
 public:
-    VkInstance get_instance() { return inst; }
+    const VkInstance get_instance() const { return inst; }
+    const VkDevice get_device() const { return device; }
 
 protected:
     void _window_create(VkSurfaceKHR surface); /* initialize */
@@ -40,22 +41,25 @@ private:
     void _create_device(VkDevice *p_device);
     void _create_command_pool(VkDevice device);
 
-    struct _window {
+    typedef struct Window {
         VkSurfaceKHR surface;
         VkSurfaceCapabilitiesKHR capabilities;
         VkSwapchainKHR swapchain;
         VkFormat format;
         VkColorSpaceKHR colorspace;
-        uint32_t image_count;
-        VkSurfaceTransformFlagBitsKHR pre_transform;
+        uint32_t desired_buffer_count;
+        VkSurfaceTransformFlagBitsKHR transform;
         uint32_t width;
         uint32_t height;
         VkCompositeAlphaFlagBitsKHR composite_alpha;
         VkPresentModeKHR present_mode;
-    };
+        VkCommandBuffer *command_buffers = nullptr;
+    } Window;
 
     void _initialize_window(VkPhysicalDevice physical_device, VkSurfaceKHR surface);
-    void _create_swap_chain(VkDevice device, VkSwapchainKHR old_swap_chain, struct _window *window);
+    void _create_swap_chain(VkDevice device, VkSwapchainKHR old_swap_chain, Window *window);
+    void _clean_swap_chain(VkDevice device, VkCommandPool command_pool, Window *window);
+    void _allocate_command_buffers(VkDevice device, VkCommandPool command_pool, Window *window);
 
 private:
     VkInstance inst;
@@ -64,5 +68,5 @@ private:
     uint32_t graph_queue_family;
     VkQueue graph_command_queue;
     VkCommandPool command_pool;
-    struct _window *window = nullptr;
+    Window *window = nullptr;
 };
