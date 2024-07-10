@@ -40,7 +40,7 @@ void hardware_device_hint(int hint, int value)
             _hint.window_visible = value;
             break;
         default:
-            EXIT_FAIL("-engine error: unknown hint: %d", hint);
+            EXIT_FAIL("-engine error: unknown hint: %d\n", hint);
     }
 }
 

@@ -25,6 +25,23 @@
 
 VkAllocationCallbacks *allocation_callbacks = nullptr;
 
+static VkSurfaceFormatKHR pick_surface_format(const VkSurfaceFormatKHR *surface_formats, uint32_t count)
+{
+    VkFormat format;
+    for (uint32_t i = 0; i < count; i++) {
+        format = surface_formats[i].format;
+        if (format == VK_FORMAT_R8G8B8A8_UNORM || format == VK_FORMAT_B8G8R8A8_UNORM ||
+                format == VK_FORMAT_A2B10G10R10_UNORM_PACK32 || format == VK_FORMAT_A2R10G10B10_UNORM_PACK32 ||
+                format == VK_FORMAT_R16G16B16A16_SFLOAT)
+            return surface_formats[i];
+    }
+
+    printf("Can't find our preferred formats... Falling back to first exposed format. Rendering may be incorrect.\n");
+
+    assert(count >= 1);
+    return surface_formats[0];
+}
+
 VulkanContext::VulkanContext()
 {
     VkResult U_ASSERT_ONLY err;
@@ -81,7 +98,7 @@ void VulkanContext::_window_create(VkSurfaceKHR surface)
     _create_physical_device(surface);
     _create_device(&device);
     _create_command_pool(device);
-    _initialize_display_window(device, surface);
+    _initialize_display_window(gpu, device, surface);
 }
 
 void VulkanContext::_create_physical_device(VkSurfaceKHR surface)
@@ -190,32 +207,56 @@ void VulkanContext::_create_command_pool(VkDevice device)
     assert(!err);
 }
 
-void VulkanContext::_initialize_display_window(VkDevice device, VkSurfaceKHR surface)
+void VulkanContext::_initialize_display_window(VkPhysicalDevice gpu, VkDevice device, VkSurfaceKHR surface)
 {
+    void *nextptr = nullptr;
+    VkResult U_ASSERT_ONLY err;
+
     /* malloc display window struct and set surface */
     display_window = (DisplayWindow *) malloc(sizeof(DisplayWindow));
     display_window->surface = surface;
 
+    err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &display_window->capabilities);
+    assert(!err);
+
+    /* try to find surface format */
+    uint32_t surface_format_count;
+    err = vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &surface_format_count, nullptr);
+    assert(!err);
+
+    if (surface_format_count <= 0)
+        EXIT_FAIL("-engine error: vulkan surface image format error, no available surface format, format count: %d\n", surface_format_count);
+
+    VkSurfaceFormatKHR *surface_image_formats = (VkSurfaceFormatKHR *) malloc(sizeof(VkSurfaceFormatKHR) * surface_format_count);
+    err = vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &surface_format_count, surface_image_formats);
+    assert(!err);
+
+    VkSurfaceFormatKHR final_surface_format = pick_surface_format(surface_image_formats, surface_format_count);
+    display_window->format = final_surface_format.format;
+    display_window->colorspace = final_surface_format.colorSpace;
+    free(surface_image_formats);
+
     VkSwapchainCreateInfoKHR swapchain_create_info = {
-        /* sType */
-        /* pNext */
-        /* flags */
-        /* surface */
-        /* minImageCount */
-        /* imageFormat */
-        /* imageColorSpace */
-        /* imageExtent */
-        /* imageArrayLayers */
-        /* imageUsage */
-        /* imageSharingMode */
-        /* queueFamilyIndexCount */
-        /* pQueueFamilyIndices */
-        /* preTransform */
-        /* compositeAlpha */
-        /* presentMode */
-        /* clipped */
-        /* oldSwapchain */
+        /* sType */ VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+        /* pNext */ nextptr,
+        /* flags */ 0,
+        /* surface */ display_window->surface,
+        /* minImageCount */ 0,
+        /* imageFormat */ display_window->format,
+        /* imageColorSpace */ display_window->colorspace,
+        /* imageExtent */ display_window->capabilities.currentExtent,
+        /* imageArrayLayers */ 0,
+        /* imageUsage */ VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+        /* imageSharingMode */ VK_SHARING_MODE_EXCLUSIVE,
+        /* queueFamilyIndexCount */ 1,
+        /* pQueueFamilyIndices */ &graph_queue_family,
+        /* preTransform */ VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
+        /* compositeAlpha */ VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+        /* presentMode */ VK_PRESENT_MODE_FIFO_KHR,
+        /* clipped */ VK_TRUE,
+        /* oldSwapchain */ nullptr,
     };
 
-    vkCreateSwapchainKHR(device, &swapchain_create_info, allocation_callbacks, &display_window->swapchain);
+    err = vkCreateSwapchainKHR(device, &swapchain_create_info, allocation_callbacks, &display_window->swapchain);
+    assert(!err);
 }

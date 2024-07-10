@@ -42,10 +42,13 @@ private:
 
     typedef struct DisplayWindow {
         VkSurfaceKHR surface;
+        VkSurfaceCapabilitiesKHR capabilities;
         VkSwapchainKHR swapchain;
+        VkFormat format;
+        VkColorSpaceKHR colorspace;
     } DisplayWindow;
 
-    void _initialize_display_window(VkDevice device, VkSurfaceKHR surface);
+    void _initialize_display_window(VkPhysicalDevice physical_device, VkDevice device, VkSurfaceKHR surface);
 
 private:
     VkInstance inst;
