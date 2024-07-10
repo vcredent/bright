@@ -135,6 +135,9 @@ void VkContext::_create_physical_device(VkSurfaceKHR surface)
     gpu = physical_devices[gpu_number];
     free(physical_devices);
 
+    vkGetPhysicalDeviceProperties(gpu, &gpu_properties);
+    vkGetPhysicalDeviceFeatures(gpu, &gpu_features);
+
     _initialize_queues(gpu, surface);
 }
 

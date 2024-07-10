@@ -32,6 +32,7 @@ public:
 public:
     VkInstance get_instance() { return inst; }
     VkDevice get_device() { return device; }
+    const char *get_device_name() { return device_name; }
 
 protected:
     void _window_create(VkSurfaceKHR surface); /* initialize */
@@ -74,9 +75,12 @@ private:
 private:
     VkInstance inst;
     VkPhysicalDevice gpu;
+    VkPhysicalDeviceProperties gpu_properties;
+    VkPhysicalDeviceFeatures gpu_features;
     VkDevice device;
     VmaAllocator allocator = VK_NULL_HANDLE;
     uint32_t graph_queue_family;
     VkQueue graph_command_queue;
     Window *window = nullptr;
+    const char *device_name;
 };
