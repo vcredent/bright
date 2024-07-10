@@ -26,10 +26,10 @@
 #include "drivers/vulkan_context.h"
 #include <GLFW/glfw3.h>
 
-class VulkanContextWin32 : public VulkanContext {
+class VkContextWin32 : public VkContext {
 public:
-    explicit VulkanContextWin32();
-    ~VulkanContextWin32() override;
+    explicit VkContextWin32();
+    ~VkContextWin32() override;
 
 public:
     void window_create(int width, int height, const char *title, HardwareDeviceHint *p_hint);

@@ -22,19 +22,19 @@
 /* ======================================================================== */
 #include "vulkan_context_win32.h"
 
-VulkanContextWin32::VulkanContextWin32()
+VkContextWin32::VkContextWin32()
 {
     if (!glfwInit())
         EXIT_FAIL("-engine error: glfw init error!\n");
 }
 
-VulkanContextWin32::~VulkanContextWin32()
+VkContextWin32::~VkContextWin32()
 {
     glfwDestroyWindow(hwindow);
     glfwTerminate();
 }
 
-void VulkanContextWin32::window_create(int width, int height, const char *title, HardwareDeviceHint *p_hint)
+void VkContextWin32::window_create(int width, int height, const char *title, HardwareDeviceHint *p_hint)
 {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_VISIBLE, p_hint->window_visible);
@@ -51,12 +51,12 @@ void VulkanContextWin32::window_create(int width, int height, const char *title,
     _window_create(surface);
 }
 
-bool VulkanContextWin32::window_should_close()
+bool VkContextWin32::window_should_close()
 {
     return glfwWindowShouldClose(hwindow);
 }
 
-void VulkanContextWin32::poll_events()
+void VkContextWin32::poll_events()
 {
     glfwPollEvents();
 }

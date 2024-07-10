@@ -24,14 +24,24 @@
 #include <vma/vk_mem_alloc.h>
 #include "hardware.h"
 
-class VulkanContext : public HardwareDevice {
+class VkContext : public HardwareDevice {
 public:
-    explicit VulkanContext();
-    ~VulkanContext() override;
+    explicit VkContext();
+    ~VkContext() override;
 
 public:
     VkInstance get_instance() { return inst; }
     VkDevice get_device() { return device; }
+
+    typedef struct Buffer {
+        VkBuffer buffer;
+        VmaAllocation allocation;
+        VmaMemoryUsage usage;
+        VkDeviceSize size;
+    } Buffer;
+
+    void allocate_buffer(VkDeviceSize size, VkBufferUsageFlags usage, Buffer **p_buffer);
+    void free_buffer(Buffer *buffer);
 
 protected:
     void _window_create(VkSurfaceKHR surface); /* initialize */

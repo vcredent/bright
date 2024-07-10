@@ -46,7 +46,7 @@ void hardware_device_hint(int hint, int value)
 
 Error hardware_device_create(int width, int height, const char *title, HardwareDevice **p_hardware)
 {
-    VulkanContextWin32 *vulkan_context_win32 = new VulkanContextWin32();
+    VkContextWin32 *vulkan_context_win32 = new VkContextWin32();
     vulkan_context_win32->window_create(width, height, title, &_hint);
     *p_hardware = vulkan_context_win32;
     return OK;

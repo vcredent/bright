@@ -42,7 +42,7 @@ static VkSurfaceFormatKHR pick_surface_format(const VkSurfaceFormatKHR *surface_
     return surface_formats[0];
 }
 
-VulkanContext::VulkanContext()
+VkContext::VkContext()
 {
     VkResult U_ASSERT_ONLY err;
     void *nextptr = nullptr;
@@ -81,12 +81,49 @@ VulkanContext::VulkanContext()
     assert(!err);
 }
 
-VulkanContext::~VulkanContext()
+VkContext::~VkContext()
 {
     _clean_up_context();
 }
 
-void VulkanContext::_window_create(VkSurfaceKHR surface)
+void VkContext::allocate_buffer(VkDeviceSize size, VkBufferUsageFlags usage, Buffer **p_buffer)
+{
+    void *nextptr = nullptr;
+
+    VkBufferCreateInfo buffer_create_info = {
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .pNext = nextptr,
+        .flags = 0,
+        .size = size,
+        .usage = usage,
+    };
+
+    VmaAllocationCreateInfo allocation_create_info = {
+        .usage = VMA_MEMORY_USAGE_CPU_TO_GPU
+    };
+
+    VkBuffer buffer;
+    VmaAllocation allocation;
+    vmaCreateBuffer(allocator, &buffer_create_info, &allocation_create_info, &buffer, &allocation, nullptr);
+
+    Buffer *buffer_return = (Buffer *) imalloc(sizeof(Buffer));
+
+    buffer_return->buffer = buffer;
+    buffer_return->allocation = allocation;
+    buffer_return->usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+    buffer_return->size = size;
+
+    *p_buffer = buffer_return;
+}
+
+void VkContext::free_buffer(Buffer *buffer)
+{
+    vkDestroyBuffer(device, buffer->buffer, allocation_callbacks);
+    vmaFreeMemory(allocator, buffer->allocation);
+    free(buffer);
+}
+
+void VkContext::_window_create(VkSurfaceKHR surface)
 {
     _create_physical_device(surface);
     _create_device(&device);
@@ -94,7 +131,7 @@ void VulkanContext::_window_create(VkSurfaceKHR surface)
     _create_swap_chain(device, window);
 }
 
-void VulkanContext::_clean_up_context()
+void VkContext::_clean_up_context()
 {
     // clean handle about display window.
     _clean_up_swap_chain(device, window);
@@ -106,7 +143,7 @@ void VulkanContext::_clean_up_context()
     vkDestroyInstance(inst, allocation_callbacks);
 }
 
-void VulkanContext::_create_physical_device(VkSurfaceKHR surface)
+void VkContext::_create_physical_device(VkSurfaceKHR surface)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -138,7 +175,7 @@ void VulkanContext::_create_physical_device(VkSurfaceKHR surface)
     _initialize_queues(gpu, surface);
 }
 
-void VulkanContext::_initialize_queues(VkPhysicalDevice gpu, VkSurfaceKHR surface)
+void VkContext::_initialize_queues(VkPhysicalDevice gpu, VkSurfaceKHR surface)
 {
     VkResult U_ASSERT_ONLY err;
     /* find graphics and present queue family. */
@@ -162,7 +199,7 @@ void VulkanContext::_initialize_queues(VkPhysicalDevice gpu, VkSurfaceKHR surfac
     free(queue_family_properties);
 }
 
-void VulkanContext::_create_device(VkDevice *p_device)
+void VkContext::_create_device(VkDevice *p_device)
 {
     void *nextptr = nullptr;
     float priorities = 1.0f;
@@ -203,7 +240,7 @@ void VulkanContext::_create_device(VkDevice *p_device)
     _initialize_vma(inst, gpu, device, &allocator);
 }
 
-void VulkanContext::_initialize_vma(VkInstance inst, VkPhysicalDevice gpu, VkDevice device, VmaAllocator *p_allocator)
+void VkContext::_initialize_vma(VkInstance inst, VkPhysicalDevice gpu, VkDevice device, VmaAllocator *p_allocator)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -216,7 +253,7 @@ void VulkanContext::_initialize_vma(VkInstance inst, VkPhysicalDevice gpu, VkDev
     assert(!err);
 }
 
-void VulkanContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surface)
+void VkContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surface)
 {
     void *nextptr = nullptr;
     VkResult U_ASSERT_ONLY err;
@@ -266,7 +303,7 @@ void VulkanContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surfac
     window->present_mode = VK_PRESENT_MODE_FIFO_KHR;
 }
 
-void VulkanContext::_create_swap_chain(VkDevice device, Window *window)
+void VkContext::_create_swap_chain(VkDevice device, Window *window)
 {
     void *nextptr = nullptr;
     VkResult U_ASSERT_ONLY err;
@@ -405,7 +442,7 @@ void VulkanContext::_create_swap_chain(VkDevice device, Window *window)
     }
 }
 
-void VulkanContext::_clean_up_swap_chain(VkDevice device, Window *window)
+void VkContext::_clean_up_swap_chain(VkDevice device, Window *window)
 {
     vkDestroySwapchainKHR(device, window->swapchain, allocation_callbacks);
     window->swapchain = nullptr;
@@ -419,7 +456,7 @@ void VulkanContext::_clean_up_swap_chain(VkDevice device, Window *window)
     }
 }
 
-void VulkanContext::_update_swap_chain(VkDevice device, Window *window)
+void VkContext::_update_swap_chain(VkDevice device, Window *window)
 {
     if (window->swapchain)
         _clean_up_swap_chain(device, window);
