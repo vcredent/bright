@@ -30,7 +30,7 @@ VulkanContextWin32::VulkanContextWin32()
 
 VulkanContextWin32::~VulkanContextWin32()
 {
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(hwindow);
     glfwTerminate();
 }
 
@@ -39,13 +39,13 @@ void VulkanContextWin32::window_create(int width, int height, const char *title,
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_VISIBLE, p_hint->window_visible);
 
-    window = glfwCreateWindow(width, height, title, NULL, NULL);
-    EXIT_FAIL_V(window != NULL, "-engine error: create glfw window failed! cause: window is null.\n");
+    hwindow = glfwCreateWindow(width, height, title, NULL, NULL);
+    EXIT_FAIL_V(hwindow != NULL, "-engine error: create glfw window failed! cause: window is null.\n");
 
     /* create surface. */
     VkSurfaceKHR surface;
     VkResult U_ASSERT_ONLY err;
-    err = glfwCreateWindowSurface(get_instance(), window, NULL, &surface);
+    err = glfwCreateWindowSurface(get_instance(), hwindow, NULL, &surface);
     assert(!err);
 
     _window_create(surface);
@@ -53,7 +53,7 @@ void VulkanContextWin32::window_create(int width, int height, const char *title,
 
 bool VulkanContextWin32::window_should_close()
 {
-    return glfwWindowShouldClose(window);
+    return glfwWindowShouldClose(hwindow);
 }
 
 void VulkanContextWin32::poll_events()

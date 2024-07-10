@@ -24,5 +24,6 @@
 #define _TYPEALIAS_H_
 
 #define U_ASSERT_ONLY __attribute__((unused))
+#define ARRAY_SIZE(a) ( sizeof(a) / sizeof(a[0]) )
 
 #endif /* _TYPEALIAS_H_ */

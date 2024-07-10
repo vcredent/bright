@@ -40,15 +40,22 @@ private:
     void _create_device(VkDevice *p_device);
     void _create_command_pool(VkDevice device);
 
-    typedef struct DisplayWindow {
+    struct _window {
         VkSurfaceKHR surface;
         VkSurfaceCapabilitiesKHR capabilities;
         VkSwapchainKHR swapchain;
         VkFormat format;
         VkColorSpaceKHR colorspace;
-    } DisplayWindow;
+        uint32_t image_count;
+        VkSurfaceTransformFlagBitsKHR pre_transform;
+        uint32_t width;
+        uint32_t height;
+        VkCompositeAlphaFlagBitsKHR composite_alpha;
+        VkPresentModeKHR present_mode;
+    };
 
-    void _initialize_display_window(VkPhysicalDevice physical_device, VkDevice device, VkSurfaceKHR surface);
+    void _initialize_window(VkPhysicalDevice physical_device, VkSurfaceKHR surface);
+    void _create_swap_chain(VkDevice device, VkSwapchainKHR old_swap_chain, struct _window *window);
 
 private:
     VkInstance inst;
@@ -57,5 +64,5 @@ private:
     uint32_t graph_queue_family;
     VkQueue graph_command_queue;
     VkCommandPool command_pool;
-    DisplayWindow *display_window;
+    struct _window *window = nullptr;
 };

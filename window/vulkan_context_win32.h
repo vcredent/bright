@@ -37,7 +37,7 @@ public:
     virtual void poll_events() override final;
 
 private:
-    GLFWwindow *window;
+    GLFWwindow *hwindow;
 };
 
 #endif /* _VULKAN_CONTEXT_WIN32_H_ */
