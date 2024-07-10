@@ -86,48 +86,6 @@ VkContext::~VkContext()
     _clean_up_context();
 }
 
-void VkContext::allocate_buffer(VkDeviceSize size, VkBufferUsageFlags usage, Buffer *p_buffer)
-{
-    void *nextptr = nullptr;
-
-    VkBufferCreateInfo buffer_create_info = {
-        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .pNext = nextptr,
-        .flags = 0,
-        .size = size,
-        .usage = usage,
-    };
-
-    VmaAllocationCreateInfo allocation_create_info = {
-        .usage = VMA_MEMORY_USAGE_CPU_TO_GPU
-    };
-
-    VkBuffer buffer;
-    VmaAllocation allocation;
-    vmaCreateBuffer(allocator, &buffer_create_info, &allocation_create_info, &buffer, &allocation, nullptr);
-
-    Buffer buffer_return = (Buffer_T *) imalloc(sizeof(Buffer_T));
-
-    buffer_return->buffer = buffer;
-    buffer_return->allocation = allocation;
-    buffer_return->usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-    buffer_return->size = size;
-
-    *p_buffer = buffer_return;
-}
-
-void VkContext::free_buffer(Buffer buffer)
-{
-    vkDestroyBuffer(device, buffer->buffer, allocation_callbacks);
-    vmaFreeMemory(allocator, buffer->allocation);
-    free(buffer);
-}
-
-void VkContext::bind_image_memory(Buffer buffer, VkImage image)
-{
-    vmaBindImageMemory(allocator, buffer->allocation, image);
-}
-
 void VkContext::_window_create(VkSurfaceKHR surface)
 {
     _create_physical_device(surface);

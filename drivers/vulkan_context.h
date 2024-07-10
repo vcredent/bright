@@ -33,18 +33,6 @@ public:
     VkInstance get_instance() { return inst; }
     VkDevice get_device() { return device; }
 
-    typedef struct Buffer_T {
-        VkBuffer buffer;
-        VmaAllocation allocation;
-        VmaMemoryUsage usage;
-        VkDeviceSize size;
-    } *Buffer;
-
-    // buffer memory allocated in the GPU
-    void allocate_buffer(VkDeviceSize size, VkBufferUsageFlags usage, Buffer *p_buffer);
-    void free_buffer(Buffer buffer);
-    void bind_image_memory(Buffer buffer, VkImage image);
-
 protected:
     void _window_create(VkSurfaceKHR surface); /* initialize */
     void _clean_up_context(); /* destroy */
