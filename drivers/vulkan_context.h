@@ -32,7 +32,7 @@ public:
 public:
     VkInstance get_instance() { return inst; }
     VkDevice get_device() { return device; }
-    const char *get_device_name() { return device_name; }
+    const char *get_device_name() { return gpu_properties.deviceName; }
 
 protected:
     void _window_create(VkSurfaceKHR surface); /* initialize */
@@ -82,5 +82,4 @@ private:
     uint32_t graph_queue_family;
     VkQueue graph_command_queue;
     Window *window = nullptr;
-    const char *device_name;
 };
