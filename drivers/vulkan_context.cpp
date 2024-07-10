@@ -83,14 +83,7 @@ VulkanContext::VulkanContext()
 
 VulkanContext::~VulkanContext()
 {
-    // clean handle about display window.
-    _clean_swap_chain(device, command_pool, window);
-    vkDestroySurfaceKHR(inst, window->surface, allocation_callbacks);
-    free(window);
-
-    vkDestroyCommandPool(device, command_pool, allocation_callbacks);
-    vkDestroyDevice(device, allocation_callbacks);
-    vkDestroyInstance(inst, allocation_callbacks);
+    _clean_up_all();
 }
 
 void VulkanContext::_window_create(VkSurfaceKHR surface)
@@ -101,6 +94,18 @@ void VulkanContext::_window_create(VkSurfaceKHR surface)
     _initialize_window(gpu, surface);
     _create_swap_chain(device, nullptr, window);
     _allocate_command_buffers(device, command_pool, window);
+}
+
+void VulkanContext::_clean_up_all()
+{
+    // clean handle about display window.
+    _clean_swap_chain(device, command_pool, window);
+    vkDestroySurfaceKHR(inst, window->surface, allocation_callbacks);
+    free(window);
+
+    vkDestroyCommandPool(device, command_pool, allocation_callbacks);
+    vkDestroyDevice(device, allocation_callbacks);
+    vkDestroyInstance(inst, allocation_callbacks);
 }
 
 void VulkanContext::_create_physical_device(VkSurfaceKHR surface)

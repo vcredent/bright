@@ -29,11 +29,13 @@ public:
     ~VulkanContext() override;
 
 public:
-    const VkInstance get_instance() const { return inst; }
-    const VkDevice get_device() const { return device; }
+    VkInstance get_instance() { return inst; }
+    VkDevice get_device() { return device; }
+    VkCommandBuffer pick_command_buffer(uint32_t index) { return window->command_buffers[index]; }
 
 protected:
     void _window_create(VkSurfaceKHR surface); /* initialize */
+    void _clean_up_all(); /* destroy */
 
 private:
     void _create_physical_device(VkSurfaceKHR surface);
