@@ -27,21 +27,27 @@ project(PortableEngine)
 set(CMAKE_CXX_STANDARD 23)
 set(PROGRAM_NAME engine)
 
+include_directories(${PROJECT_NAME} SYSTEM thirdparty)
 include_directories(${PROJECT_NAME} SYSTEM thirdparty/vulkan/Include)
 include_directories(${PROJECT_NAME} SYSTEM thirdparty/glfw/include)
 include_directories(${PROJECT_NAME} SYSTEM include)
 include_directories(${PROJECT_NAME} /)
 
 link_directories(
-        thirdparty/vulkan
-        thirdparty/glfw/lib-mingw-w64
+    thirdparty/vulkan
+    thirdparty/glfw/lib-mingw-w64
 )
 
 add_executable(${PROGRAM_NAME}
-        main.cpp
-        drivers/hardware.cpp
-        drivers/vulkan_context.cpp
-        window/vulkan_context_win32.cpp
+    main.cpp
+    drivers/hardware.cpp
+    drivers/vulkan_context.cpp
+    window/vulkan_context_win32.cpp
+
+    # ============================ #
+    #        implementation        #
+    # ============================ #
+    thirdparty/vma/vk_mem_alloc.cpp
 )
 
 target_link_libraries(${PROGRAM_NAME}

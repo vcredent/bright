@@ -21,6 +21,7 @@
 /*                                                                          */
 /* ======================================================================== */
 #include <vulkan/vulkan.h>
+#include <vma/vk_mem_alloc.h>
 #include "hardware.h"
 
 class VulkanContext : public HardwareDevice {
@@ -34,12 +35,13 @@ public:
 
 protected:
     void _window_create(VkSurfaceKHR surface); /* initialize */
-    void _clean_up_all(); /* destroy */
+    void _clean_up_context(); /* destroy */
 
 private:
     void _create_physical_device(VkSurfaceKHR surface);
     void _initialize_queues(VkPhysicalDevice gpu, VkSurfaceKHR surface);
     void _create_device(VkDevice *p_device);
+    void _initialize_vma(VkInstance inst, VkPhysicalDevice gpu, VkDevice device, VmaAllocator *p_allocator);
 
     typedef struct SwapchainImageResource {
         VkImage image;
@@ -73,6 +75,7 @@ private:
     VkInstance inst;
     VkPhysicalDevice gpu;
     VkDevice device;
+    VmaAllocator allocator = VK_NULL_HANDLE;
     uint32_t graph_queue_family;
     VkQueue graph_command_queue;
     Window *window = nullptr;

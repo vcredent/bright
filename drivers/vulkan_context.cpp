@@ -83,7 +83,7 @@ VulkanContext::VulkanContext()
 
 VulkanContext::~VulkanContext()
 {
-    _clean_up_all();
+    _clean_up_context();
 }
 
 void VulkanContext::_window_create(VkSurfaceKHR surface)
@@ -94,13 +94,14 @@ void VulkanContext::_window_create(VkSurfaceKHR surface)
     _create_swap_chain(device, window);
 }
 
-void VulkanContext::_clean_up_all()
+void VulkanContext::_clean_up_context()
 {
     // clean handle about display window.
     _clean_up_swap_chain(device, window);
     vkDestroySurfaceKHR(inst, window->surface, allocation_callbacks);
     free(window);
 
+    vmaDestroyAllocator(allocator);
     vkDestroyDevice(device, allocation_callbacks);
     vkDestroyInstance(inst, allocation_callbacks);
 }
@@ -197,6 +198,22 @@ void VulkanContext::_create_device(VkDevice *p_device)
     err = vkCreateDevice(gpu, &device_create_info, allocation_callbacks, p_device);
     assert(!err);
     vkGetDeviceQueue(device, graph_queue_family, 0, &graph_command_queue);
+
+    // initialize vma
+    _initialize_vma(inst, gpu, device, &allocator);
+}
+
+void VulkanContext::_initialize_vma(VkInstance inst, VkPhysicalDevice gpu, VkDevice device, VmaAllocator *p_allocator)
+{
+    VkResult U_ASSERT_ONLY err;
+
+    VmaAllocatorCreateInfo vma_allocate_create_info = {};
+    vma_allocate_create_info.instance = inst;
+    vma_allocate_create_info.physicalDevice = gpu;
+    vma_allocate_create_info.device = device;
+
+    err = vmaCreateAllocator(&vma_allocate_create_info, p_allocator);
+    assert(!err);
 }
 
 void VulkanContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surface)
