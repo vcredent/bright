@@ -23,8 +23,6 @@
 #include "vulkan_context.h"
 #include <algorithm>
 
-VkAllocationCallbacks *allocation_callbacks = nullptr;
-
 static VkSurfaceFormatKHR pick_surface_format(const VkSurfaceFormatKHR *surface_formats, uint32_t count)
 {
     VkFormat format;

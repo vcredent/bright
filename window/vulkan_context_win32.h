@@ -29,12 +29,12 @@
 class VkContextWin32 : public VkContext {
 public:
     explicit VkContextWin32();
-    ~VkContextWin32() override;
+    ~VkContextWin32();
 
 public:
-    void window_create(int width, int height, const char *title, HardwareDeviceHint *p_hint);
-    virtual bool window_should_close() override final;
-    virtual void poll_events() override final;
+    void window_create(int width, int height, const char *title);
+    bool window_should_close();
+    void poll_events();
 
 private:
     GLFWwindow *hwindow;

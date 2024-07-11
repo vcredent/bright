@@ -21,20 +21,21 @@
 /*                                                                          */
 /* ======================================================================== */
 #include <iostream>
-#include "drivers/hardware.h"
+#include "window/vulkan_context_win32.h"
+#include "drivers/rendering_device_driver_vulkan.h"
 
 int main(int argc, char **argv)
 {
-    HardwareDevice *hardware;
-    hardware_device_hint(HARDWARE_CLIENT_API, HARDWARE_VULKAN_API);
-    hardware_device_hint(HARDWARE_WINDOW_VISIBLE, HARDWARE_TRUE);
-    hardware_device_create(800, 600, "PortableEngine", &hardware);
+    VkContextWin32 *vkctx_win32 = new VkContextWin32();
+    vkctx_win32->window_create(800, 600, "portable");
+    RenderingDeviceDriverVulkan *driver = new RenderingDeviceDriverVulkan(vkctx_win32);
 
-    while (!hardware->window_should_close()) {
-        hardware->poll_events();
+    while (!vkctx_win32->window_should_close()) {
+        vkctx_win32->poll_events();
     }
 
-    hardware_device_destroy(hardware);
+    delete vkctx_win32;
+    delete driver;
 
     return 0;
 }

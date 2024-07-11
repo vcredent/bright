@@ -34,10 +34,9 @@ VkContextWin32::~VkContextWin32()
     glfwTerminate();
 }
 
-void VkContextWin32::window_create(int width, int height, const char *title, HardwareDeviceHint *p_hint)
+void VkContextWin32::window_create(int width, int height, const char *title)
 {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_VISIBLE, p_hint->window_visible);
 
     hwindow = glfwCreateWindow(width, height, title, NULL, NULL);
     EXIT_FAIL_V(hwindow != NULL, "-engine error: create glfw window failed! cause: window is null.\n");

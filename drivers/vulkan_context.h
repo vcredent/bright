@@ -20,7 +20,8 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "hardware.h"
+#ifndef _VULKAN_CONTEXT_H_
+#define _VULKAN_CONTEXT_H_
 
 #ifdef VOLK_LOADER
 #  include <volk/volk.h>
@@ -29,11 +30,17 @@
 #endif
 
 #include <vma/vk_mem_alloc.h>
+#include <engine/error.h>
+#include <engine/typealias.h>
 
-class VkContext : public HardwareDevice {
+#define no_flag_bits         0
+#define nextptr              nullptr
+#define allocation_callbacks nullptr
+
+class VkContext {
 public:
     explicit VkContext();
-    ~VkContext() override;
+    ~VkContext();
 
 public:
     VkInstance get_instance() { return inst; }
@@ -91,3 +98,5 @@ private:
     VkQueue graph_command_queue;
     Window *window = VK_NULL_HANDLE;
 };
+
+#endif /* _VULKAN_CONTEXT_H_ */

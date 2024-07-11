@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* hardware.cpp                                                             */
+/* rendering_device_driver_vulkan.h                                         */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           PORTABLE ENGINE                                */
@@ -20,39 +20,23 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "hardware.h"
-#include "window/vulkan_context_win32.h"
+#ifndef _RENDERING_DEVICE_DRIVER_VULKAN_H_
+#define _RENDERING_DEVICE_DRIVER_VULKAN_H_
 
-struct HardwareDeviceHint _hint;
+#include "vulkan_context.h"
 
-HardwareDevice::~HardwareDevice()
-{
-    // ...
-}
+class RenderingDeviceDriverVulkan {
+public:
+    RenderingDeviceDriverVulkan(VkContext *context);
+    ~RenderingDeviceDriverVulkan();
 
-void hardware_device_hint(int hint, int value)
-{
-    switch (hint) {
-        case HARDWARE_CLIENT_API:
-            _hint.client_api = value;
-            break;
-        case HARDWARE_WINDOW_VISIBLE:
-            _hint.window_visible = value;
-            break;
-        default:
-            EXIT_FAIL("-engine error: unknown hint: %d\n", hint);
-    }
-}
+public:
+    void create_render_pipeline();
 
-Error hardware_device_create(int width, int height, const char *title, HardwareDevice **p_hardware)
-{
-    VkContextWin32 *vulkan_context_win32 = new VkContextWin32();
-    vulkan_context_win32->window_create(width, height, title, &_hint);
-    *p_hardware = vulkan_context_win32;
-    return OK;
-}
+private:
+    VkContext *vk_context = VK_NULL_HANDLE;
+    VkDevice device = VK_NULL_HANDLE;
+    VmaAllocator allocator = VK_NULL_HANDLE;
+};
 
-void hardware_device_destroy(HardwareDevice *hardware)
-{
-    delete hardware;
-}
+#endif /* _RENDERING_DEVICE_DRIVER_VULKAN_H_ */
