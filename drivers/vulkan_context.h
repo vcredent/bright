@@ -61,7 +61,7 @@ private:
     typedef struct Window {
         VkSurfaceKHR surface;
         VkSurfaceCapabilitiesKHR capabilities;
-        VkSwapchainKHR swapchain = nullptr;
+        VkSwapchainKHR swapchain = VK_NULL_HANDLE;
         VkFormat format;
         VkColorSpaceKHR colorspace;
         uint32_t image_buffer_count;
@@ -70,8 +70,9 @@ private:
         uint32_t height;
         VkCompositeAlphaFlagBitsKHR composite_alpha;
         VkPresentModeKHR present_mode;
-        SwapchainImageResource *swap_chain_resources = nullptr;
+        SwapchainImageResource *swap_chain_resources = VK_NULL_HANDLE;
         VkCommandPool command_pool;
+        VkRenderPass render_pass;
     } Window;
 
     void _initialize_window(VkPhysicalDevice physical_device, VkSurfaceKHR surface);
@@ -88,5 +89,5 @@ private:
     VmaAllocator allocator = VK_NULL_HANDLE;
     uint32_t graph_queue_family;
     VkQueue graph_command_queue;
-    Window *window = nullptr;
+    Window *window = VK_NULL_HANDLE;
 };

@@ -284,6 +284,56 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
     err = vkCreateCommandPool(device, &command_pool_create_info, allocation_callbacks, &window->command_pool);
     assert(!err);
 
+    // render pass create
+    // first need create attachment description structure,
+    // and subpass, the subpass desciprtion need include color attachment,
+    // that's so fucking ....crazy
+    VkAttachmentDescription attachment_description = {
+        /* flags */ 0,
+        /* format */ window->format,
+        /* samples */ VK_SAMPLE_COUNT_1_BIT,
+        /* loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
+        /* storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
+        /* stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        /* stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        /* initialLayout */ VK_IMAGE_LAYOUT_UNDEFINED,
+        /* finalLayout */ VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+    };
+
+    VkAttachmentReference color_attachment = {
+        /* attachment */ 0,
+        /* layout */ VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    };
+
+    VkSubpassDescription subpass_description = {
+        /* flags */ 0,
+        /* pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+        /* inputAttachmentCount */ 0,
+        /* pInputAttachments */ nullptr,
+        /* colorAttachmentCount */ 1,
+        /* pColorAttachments */ &color_attachment,
+        /* pResolveAttachments */ nullptr,
+        /* pDepthStencilAttachment */ nullptr,
+        /* preserveAttachmentCount */ 0,
+        /* pPreserveAttachments */ nullptr
+    };
+
+    VkRenderPassCreateInfo render_pass_create_info = {
+        /* sType */ VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+        /* pNext */ nextptr,
+        /* flags */ 0,
+        /* attachmentCount */ 1,
+        /* pAttachments */ &attachment_description,
+        /* subpassCount */ 1,
+        /* pSubpasses */ &subpass_description,
+        /* dependencyCount */ 0,
+        /* pDependencies */ nullptr,
+    };
+
+    err = vkCreateRenderPass(device, &render_pass_create_info, allocation_callbacks, &window->render_pass);
+    assert(!err);
+
+    // swap chain create
     VkSwapchainCreateInfoKHR swapchain_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
             /* pNext */ nextptr,
@@ -316,9 +366,8 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
             (VkImage *) imalloc(sizeof(VkImage) * window->image_buffer_count);
     vkGetSwapchainImagesKHR(device, window->swapchain, &window->image_buffer_count, swap_chain_images);
 
-    // create swap chain image resource by image buffer count,
+    // batch create swap chain image resource by image buffer count,
     // create handles:
-    //   - VkImage
     //   - VkImageView
     //   - VkFramebuffer
     //   - VkCommandBuffer
@@ -357,12 +406,12 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
          /* sType */ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
          /* pNext */ nextptr,
          /* flags */ 0,
-         /* renderPass */ nullptr,
-         /* attachmentCount */ 0,
-         /* pAttachments */ nullptr,
+         /* renderPass */ window->render_pass,
+         /* attachmentCount (update in for loop) */ 0,
+         /* pAttachments (update in for loop) */ nullptr,
          /* width */ window->width,
          /* height */ window->height,
-         /* layers */ 0
+         /* layers */ 1
     };
 
     VkCommandBufferAllocateInfo command_buffer_allocate_info = {
@@ -380,8 +429,10 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
         assert(!err);
 
         // create framebuffer
-        // err = vkCreateFramebuffer(device, &framebuffer_create_info, allocation_callbacks, &(window->swap_chain_resources[i].framebuffer));
-        // assert(!err);
+        framebuffer_create_info.attachmentCount = 1;
+        framebuffer_create_info.pAttachments = &(window->swap_chain_resources[i].image_view);
+        err = vkCreateFramebuffer(device, &framebuffer_create_info, allocation_callbacks, &(window->swap_chain_resources[i].framebuffer));
+        assert(!err);
 
         // allocate command buffer
         err = vkAllocateCommandBuffers(device, &command_buffer_allocate_info, &(window->swap_chain_resources[i].command_buffer));
@@ -391,14 +442,19 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
 
 void VkContext::_clean_up_swap_chain(VkDevice device, Window *window)
 {
+    vkDeviceWaitIdle(device);
+
     vkDestroySwapchainKHR(device, window->swapchain, allocation_callbacks);
-    window->swapchain = nullptr;
+    window->swapchain = VK_NULL_HANDLE;
     vkDestroyCommandPool(device, window->command_pool, allocation_callbacks);
+    window->command_pool = VK_NULL_HANDLE;
+    vkDestroyRenderPass(device, window->render_pass, allocation_callbacks);
+    window->render_pass = VK_NULL_HANDLE;
 
     // clean up swap chain resource
     for (uint32_t i = 0; i < window->image_buffer_count; i++) {
         vkDestroyImageView(device, window->swap_chain_resources[i].image_view, allocation_callbacks);
-        // vkDestroyFramebuffer(device, window->swap_chain_resources[i].framebuffer, allocation_callbacks);
+        vkDestroyFramebuffer(device, window->swap_chain_resources[i].framebuffer, allocation_callbacks);
     }
 }
 
