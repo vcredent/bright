@@ -51,14 +51,14 @@ private:
     void _create_device(VkDevice *p_device);
     void _initialize_vma(VkInstance inst, VkPhysicalDevice gpu, VkDevice device, VmaAllocator *p_allocator);
 
-    struct SwapchainImageResource {
+    typedef struct SwapchainImageResource {
         VkImage image;
         VkImageView image_view;
         VkFramebuffer framebuffer;
         VkCommandBuffer command_buffer;
-    };
+    } SwapchainImageResource;
 
-    struct Window {
+    typedef struct Window {
         VkSurfaceKHR surface;
         VkSurfaceCapabilitiesKHR capabilities;
         VkSwapchainKHR swapchain = nullptr;
@@ -72,7 +72,7 @@ private:
         VkPresentModeKHR present_mode;
         SwapchainImageResource *swap_chain_resources = nullptr;
         VkCommandPool command_pool;
-    };
+    } Window;
 
     void _initialize_window(VkPhysicalDevice physical_device, VkSurfaceKHR surface);
     void _create_swap_chain(VkDevice device, Window *window);
