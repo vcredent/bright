@@ -43,7 +43,6 @@ static VkSurfaceFormatKHR pick_surface_format(const VkSurfaceFormatKHR *surface_
 VkContext::VkContext()
 {
     VkResult U_ASSERT_ONLY err;
-    void *nextptr = nullptr;
 
     VkApplicationInfo application_info = {
         /* sType */ VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -67,7 +66,7 @@ VkContext::VkContext()
     VkInstanceCreateInfo instance_create_info = {
         /* sType */ VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         /* pNext */ nextptr,
-        /* flags */ 0,
+        /* flags */ no_flag_bits,
         /* pApplicationInfo */ &application_info,
         /* enabledLayerCount */ ARRAY_SIZE(layers),
         /* ppEnabledLayerNames */ layers,
@@ -165,14 +164,13 @@ void VkContext::_initialize_queues(VkPhysicalDevice gpu, VkSurfaceKHR surface)
 
 void VkContext::_create_device(VkDevice *p_device)
 {
-    void *nextptr = nullptr;
     float priorities = 1.0f;
     VkResult U_ASSERT_ONLY err;
 
     VkDeviceQueueCreateInfo queue_create_info = {
         /* sType */ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
         /* pNext */ nextptr,
-        /* flags */ 0,
+        /* flags */ no_flag_bits,
         /* queueFamilyIndex */ graph_queue_family,
         /* queueCount */ 1,
         /* pQueuePriorities */ &priorities
@@ -186,7 +184,7 @@ void VkContext::_create_device(VkDevice *p_device)
     VkDeviceCreateInfo device_create_info = {
         /* sType */ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
         /* pNext */ nextptr,
-        /* flags */ 0,
+        /* flags */ no_flag_bits,
         /* queueCreateInfoCount */ 1,
         /* pQueueCreateInfos */ &queue_create_info,
         /* enabledLayerCount */ 0,
@@ -219,7 +217,6 @@ void VkContext::_initialize_vma(VkInstance inst, VkPhysicalDevice gpu, VkDevice 
 
 void VkContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surface)
 {
-    void *nextptr = nullptr;
     VkResult U_ASSERT_ONLY err;
 
     if (window)
@@ -269,13 +266,12 @@ void VkContext::_initialize_window(VkPhysicalDevice gpu, VkSurfaceKHR surface)
 
 void VkContext::_create_swap_chain(VkDevice device, Window *window)
 {
-    void *nextptr = nullptr;
     VkResult U_ASSERT_ONLY err;
 
     VkCommandPoolCreateInfo command_pool_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
             /* pNext */ nextptr,
-            /* flags */ 0,
+            /* flags */ no_flag_bits,
             /* queueFamilyIndex */ graph_queue_family
     };
 
@@ -287,7 +283,7 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
     // and subpass, the subpass desciprtion need include color attachment,
     // that's so fucking ....crazy
     VkAttachmentDescription attachment_description = {
-        /* flags */ 0,
+        /* flags */ no_flag_bits,
         /* format */ window->format,
         /* samples */ VK_SAMPLE_COUNT_1_BIT,
         /* loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
@@ -304,7 +300,7 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
     };
 
     VkSubpassDescription subpass_description = {
-        /* flags */ 0,
+        /* flags */ no_flag_bits,
         /* pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
         /* inputAttachmentCount */ 0,
         /* pInputAttachments */ nullptr,
@@ -319,7 +315,7 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
     VkRenderPassCreateInfo render_pass_create_info = {
         /* sType */ VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
         /* pNext */ nextptr,
-        /* flags */ 0,
+        /* flags */ no_flag_bits,
         /* attachmentCount */ 1,
         /* pAttachments */ &attachment_description,
         /* subpassCount */ 1,
@@ -335,7 +331,7 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
     VkSwapchainCreateInfoKHR swapchain_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
             /* pNext */ nextptr,
-            /* flags */ 0,
+            /* flags */ no_flag_bits,
             /* surface */ window->surface,
             /* minImageCount */ window->image_buffer_count,
             /* imageFormat */ window->format,
@@ -379,7 +375,7 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
     VkImageViewCreateInfo image_view_create_info = {
         /* sType */ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         /* pNext */ nextptr,
-        /* flags */ 0,
+        /* flags */ no_flag_bits,
         /* image */ nullptr,
         /* viewType */ VK_IMAGE_VIEW_TYPE_2D,
         /* format */ window->format,
@@ -403,7 +399,7 @@ void VkContext::_create_swap_chain(VkDevice device, Window *window)
     VkFramebufferCreateInfo framebuffer_create_info = {
          /* sType */ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
          /* pNext */ nextptr,
-         /* flags */ 0,
+         /* flags */ no_flag_bits,
          /* renderPass */ window->render_pass,
          /* attachmentCount (update in for loop) */ 0,
          /* pAttachments (update in for loop) */ nullptr,
