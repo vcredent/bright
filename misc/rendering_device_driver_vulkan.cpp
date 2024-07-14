@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* main.cpp                                                                 */
+/* rendering_device_driver_vulkan.cpp                                       */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           PORTABLE ENGINE                                */
@@ -20,7 +20,17 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-int main(int argc, char **argv)
+#include "rendering_device_driver_vulkan.h"
+
+RenderingDeviceDriverVulkan::RenderingDeviceDriverVulkan(VkContext *context)
+    : vk_context(context)
 {
-    return 0;
+    // initialize
+    device = vk_context->get_device();
+    allocator = vk_context->get_allocator();
+}
+
+RenderingDeviceDriverVulkan::~RenderingDeviceDriverVulkan()
+{
+    // ...
 }

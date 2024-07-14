@@ -32,10 +32,10 @@
     exit(1);                           \
 } while(0)
 
-#define EXIT_FAIL_V(retval, ...) do {  \
-    if (!(retval)) {                   \
-        EXIT_FAIL(__VA_ARGS__);        \
-    }                                  \
+#define EXIT_FAIL_COND_V(retval, ...) do {  \
+    if (!(retval)) {                        \
+        EXIT_FAIL(__VA_ARGS__);             \
+    }                                       \
 } while(0)
 
 enum Error {

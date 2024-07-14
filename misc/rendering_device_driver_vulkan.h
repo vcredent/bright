@@ -30,9 +30,6 @@ public:
     RenderingDeviceDriverVulkan(VkContext *context);
     ~RenderingDeviceDriverVulkan();
 
-public:
-    void create_render_pipeline();
-
 private:
     VkContext *vk_context = VK_NULL_HANDLE;
     VkDevice device = VK_NULL_HANDLE;

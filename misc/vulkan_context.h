@@ -42,7 +42,6 @@ public:
     explicit VkContext();
     ~VkContext();
 
-public:
     VkInstance get_instance() { return inst; }
     VkDevice get_device() { return device; }
     const char *get_device_name() { return gpu_properties.deviceName; }

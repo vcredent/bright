@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* main.cpp                                                                 */
+/* rendering_context_driver_vulkan.h                                        */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           PORTABLE ENGINE                                */
@@ -20,7 +20,49 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-int main(int argc, char **argv)
-{
-    return 0;
-}
+#ifndef _RENDERING_CONTEXT_DRIVER_VULKAN_H
+#define _RENDERING_CONTEXT_DRIVER_VULKAN_H
+
+#ifdef VOLK_LOADER
+#  include <volk/volk.h>
+#else
+#  include <vulkan/vulkan.h>
+#endif
+
+#include <vma/vk_mem_alloc.h>
+
+// Render context driver of vulkan
+#include <engine/error.h>
+#include <engine/typealias.h>
+
+#define no_flag_bits         0
+#define nextptr              nullptr
+#define allocation_callbacks nullptr
+
+class RenderingContextDriverVulkan {
+public:
+    RenderingContextDriverVulkan();
+    ~RenderingContextDriverVulkan();
+
+    Error initialize();
+    VkInstance get_instance() { return instance; }
+    VkPhysicalDevice get_physical_device() { return physical_device; }
+    const char *get_device_name() { return physical_device_properties.deviceName; }
+    VkDevice get_device() { return device; }
+
+private:
+    void _create_instance();
+    void _initialize_physical_device();
+    void _initialize_queue();
+    void _create_device();
+    void _create_swap_chain();
+
+    VkInstance instance;
+    VkSurfaceKHR surface;
+    VkPhysicalDevice physical_device;
+    VkPhysicalDeviceProperties physical_device_properties;
+    VkPhysicalDeviceFeatures physical_device_features;
+    VkDevice device;
+};
+
+#endif /* _RENDERING_CONTEXT_DRIVER_VULKAN_H */
