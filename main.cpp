@@ -36,6 +36,10 @@ int main(int argc, char **argv)
     // initialize
     driver->initialize();
 
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+    }
+
     glfwDestroyWindow(window);
     glfwTerminate();
 
