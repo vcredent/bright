@@ -32,6 +32,7 @@ include_directories(${PROJECT_NAME} SYSTEM thirdparty/vulkan/Include)
 include_directories(${PROJECT_NAME} SYSTEM thirdparty/glfw/include)
 include_directories(${PROJECT_NAME} SYSTEM include)
 include_directories(${PROJECT_NAME} /)
+include_directories(${PROJECT_NAME} /platform)
 
 link_directories(
     thirdparty/vulkan
@@ -41,6 +42,7 @@ link_directories(
 add_executable(${PROGRAM_NAME}
     main.cpp
     drivers/rendering_context_driver_vulkan.cpp
+    platform/win32/rendering_context_driver_vulkan_win32.cpp
     # ============================ #
     #        implementation        #
     # ============================ #

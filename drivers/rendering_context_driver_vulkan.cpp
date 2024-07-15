@@ -25,27 +25,11 @@
 
 RenderingContextDriverVulkan::RenderingContextDriverVulkan()
 {
-    // nothing in here...
-}
-
-RenderingContextDriverVulkan::~RenderingContextDriverVulkan()
-{
-    vkDestroyInstance(instance, allocation_callbacks);
-    vkDestroyDevice(device, allocation_callbacks);
-}
-
-Error RenderingContextDriverVulkan::initialize()
-{
-    _create_instance();
-    _initialize_physical_device();
-
-    return OK;
-}
-
-void RenderingContextDriverVulkan::_create_instance()
-{
     VkResult U_ASSERT_ONLY err;
 
+    // ************************************************* //
+    //                initialize instance                //
+    // ************************************************* //
     VkApplicationInfo application_info = {
             /* sType */ VK_STRUCTURE_TYPE_APPLICATION_INFO,
             /* pNext */ nextptr,
@@ -78,13 +62,10 @@ void RenderingContextDriverVulkan::_create_instance()
 
     err = vkCreateInstance(&instance_create_info, allocation_callbacks, &instance);
     assert(!err);
-}
 
-void RenderingContextDriverVulkan::_initialize_physical_device()
-{
-    VkResult U_ASSERT_ONLY err;
-
-    /* select high performance GPU in this machine. */
+    // ******************************************************** //
+    //                initialize physical device                //
+    // ******************************************************** //
     uint32_t gpu_count;
     uint32_t gpu_number = 0;
     err = vkEnumeratePhysicalDevices(instance, &gpu_count, nullptr);
@@ -111,4 +92,124 @@ void RenderingContextDriverVulkan::_initialize_physical_device()
 
     vkGetPhysicalDeviceProperties(physical_device, &physical_device_properties);
     vkGetPhysicalDeviceFeatures(physical_device, &physical_device_features);
+}
+
+RenderingContextDriverVulkan::~RenderingContextDriverVulkan()
+{
+    _clean_up_window();
+
+    vmaDestroyAllocator(allocator);
+    vkDestroyCommandPool(device, command_pool, allocation_callbacks);
+    vkDestroyDevice(device, allocation_callbacks);
+    vkDestroyInstance(instance, allocation_callbacks);
+}
+
+Error RenderingContextDriverVulkan::initialize()
+{
+    _create_device();
+    _create_command_pool();
+    _create_vma_allocator();
+    _create_swap_chain();
+
+    return OK;
+}
+
+void RenderingContextDriverVulkan::_initialize_window(VkSurfaceKHR surface)
+{
+    window = (Window *) imalloc(sizeof(Window));
+    window->surface = surface;
+
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &window->capabilities);
+}
+
+void RenderingContextDriverVulkan::_clean_up_window()
+{
+    vkDestroySurfaceKHR(instance, window->surface, allocation_callbacks);
+    free(window);
+}
+
+void RenderingContextDriverVulkan::_create_device()
+{
+    VkResult U_ASSERT_ONLY err;
+
+    /* add queue create info */
+    uint32_t queue_family_count = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, nullptr);
+    VkQueueFamilyProperties *queue_family_properties = (VkQueueFamilyProperties *) imalloc(sizeof(VkQueueFamilyProperties) * queue_family_count);
+    vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, queue_family_properties);
+
+    for (uint32_t i = 0; i < queue_family_count; i++) {
+        VkQueueFamilyProperties properties = queue_family_properties[i];
+
+        VkBool32 is_support_present = VK_FALSE;
+        vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, window->surface, &is_support_present);
+        if ((properties.queueFlags & VK_QUEUE_GRAPHICS_BIT) && is_support_present) {
+            graph_queue_family = i;
+            break;
+        }
+    }
+
+    free(queue_family_properties);
+
+    float priorities = 1.0f;
+    VkDeviceQueueCreateInfo queue_create_info = {
+            /* sType */ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            /* pNext */ nextptr,
+            /* flags */ no_flag_bits,
+            /* queueFamilyIndex */ graph_queue_family,
+            /* queueCount */ 1,
+            /* pQueuePriorities */ &priorities
+    };
+
+    /* create logic device */
+    VkDeviceCreateInfo device_create_info = {
+            /* sType */ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+            /* pNext */ nextptr,
+            /* flags */ no_flag_bits,
+            /* queueCreateInfoCount */ 1,
+            /* pQueueCreateInfos */ &queue_create_info,
+            /* enabledLayerCount */ 0,
+            /* ppEnabledLayerNames */ nullptr,
+            /* enabledExtensionCount */ 0,
+            /* ppEnabledExtensionNames */ nullptr,
+            /* pEnabledFeatures */ nullptr,
+    };
+
+    err = vkCreateDevice(physical_device, &device_create_info, allocation_callbacks, &device);
+    assert(!err);
+
+    vkGetDeviceQueue(device, graph_queue_family, 0, &graph_queue);
+}
+
+void RenderingContextDriverVulkan::_create_command_pool()
+{
+    VkResult U_ASSERT_ONLY err;
+
+    VkCommandPoolCreateInfo command_pool_create_info = {
+            /* sType */ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+            /* pNext */ nextptr,
+            /* flags */ no_flag_bits,
+            /* queueFamilyIndex */ graph_queue_family
+    };
+
+    err = vkCreateCommandPool(device, &command_pool_create_info, allocation_callbacks, &command_pool);
+    assert(!err);
+}
+
+void RenderingContextDriverVulkan::_create_vma_allocator()
+{
+    VkResult U_ASSERT_ONLY err;
+
+    VmaAllocatorCreateInfo vma_allocator_create_info = {};
+    vma_allocator_create_info.instance = instance;
+    vma_allocator_create_info.physicalDevice = physical_device;
+    vma_allocator_create_info.device = device;
+
+    err = vmaCreateAllocator(&vma_allocator_create_info, &allocator);
+    assert(!err);
+}
+
+void RenderingContextDriverVulkan::_create_swap_chain()
+{
+
 }

@@ -49,20 +49,34 @@ public:
     VkPhysicalDevice get_physical_device() { return physical_device; }
     const char *get_device_name() { return physical_device_properties.deviceName; }
     VkDevice get_device() { return device; }
+    VmaAllocator get_allocator() { return allocator; }
+
+protected:
+    struct Window {
+        VkSurfaceKHR surface;
+        VkSurfaceCapabilitiesKHR capabilities;
+    };
+
+    void _initialize_window(VkSurfaceKHR surface);
 
 private:
-    void _create_instance();
-    void _initialize_physical_device();
-    void _initialize_queue();
+    void _clean_up_window();
+
     void _create_device();
+    void _create_command_pool();
+    void _create_vma_allocator();
     void _create_swap_chain();
 
-    VkInstance instance;
-    VkSurfaceKHR surface;
-    VkPhysicalDevice physical_device;
+    VkInstance instance = VK_NULL_HANDLE;
+    Window *window = VK_NULL_HANDLE;
+    VkPhysicalDevice physical_device = VK_NULL_HANDLE;
     VkPhysicalDeviceProperties physical_device_properties;
     VkPhysicalDeviceFeatures physical_device_features;
-    VkDevice device;
+    VkDevice device = VK_NULL_HANDLE;
+    uint32_t graph_queue_family;
+    VkQueue graph_queue = VK_NULL_HANDLE;
+    VkCommandPool command_pool = VK_NULL_HANDLE;
+    VmaAllocator allocator = VK_NULL_HANDLE;
 };
 
 #endif /* _RENDERING_CONTEXT_DRIVER_VULKAN_H */

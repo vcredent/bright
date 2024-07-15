@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* main.cpp                                                                 */
+/* rendering_context_driver_vulkan_win32.cpp                                */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           PORTABLE ENGINE                                */
@@ -20,24 +20,16 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "platform/win32/rendering_context_driver_vulkan_win32.h"
-#include <memory>
+#include "rendering_context_driver_vulkan_win32.h"
 
-int main(int argc, char **argv)
+RenderingContextDriverVulkanWin32::RenderingContextDriverVulkanWin32(GLFWwindow *window)
 {
-    glfwInit();
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    VkSurfaceKHR surface;
+    glfwCreateWindowSurface(get_instance(), window, allocation_callbacks, &surface);
+    _initialize_window(surface);
+}
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "PortableEngine", nullptr, nullptr);
-    assert(window != nullptr);
-
-    std::unique_ptr<RenderingContextDriverVulkanWin32> driver = std::make_unique<RenderingContextDriverVulkanWin32>(window);
-
-    // initialize
-    driver->initialize();
-
-    glfwDestroyWindow(window);
-    glfwTerminate();
-
-    return 0;
+RenderingContextDriverVulkanWin32::~RenderingContextDriverVulkanWin32()
+{
+    /* do nothing in here... */
 }
