@@ -53,8 +53,10 @@ public:
 
 protected:
     struct Window {
-        VkSurfaceKHR surface;
+        VkSurfaceKHR surface = VK_NULL_HANDLE;
         VkSurfaceCapabilitiesKHR capabilities;
+        int width;
+        int height;
     };
 
     void _initialize_window(VkSurfaceKHR surface);

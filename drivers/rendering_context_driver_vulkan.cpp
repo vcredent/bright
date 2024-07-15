@@ -23,6 +23,23 @@
 #include "rendering_context_driver_vulkan.h"
 #include <algorithm>
 
+static VkSurfaceFormatKHR pick_surface_format(const VkSurfaceFormatKHR *surface_formats, uint32_t count)
+{
+    VkFormat format;
+    for (uint32_t i = 0; i < count; i++) {
+        format = surface_formats[i].format;
+        if (format == VK_FORMAT_R8G8B8A8_UNORM || format == VK_FORMAT_B8G8R8A8_UNORM ||
+            format == VK_FORMAT_A2B10G10R10_UNORM_PACK32 || format == VK_FORMAT_A2R10G10B10_UNORM_PACK32 ||
+            format == VK_FORMAT_R16G16B16A16_SFLOAT)
+            return surface_formats[i];
+    }
+
+    printf("Can't find our preferred formats... Falling back to first exposed format. Rendering may be incorrect.\n");
+
+    assert(count >= 1);
+    return surface_formats[0];
+}
+
 RenderingContextDriverVulkan::RenderingContextDriverVulkan()
 {
     VkResult U_ASSERT_ONLY err;
@@ -116,10 +133,21 @@ Error RenderingContextDriverVulkan::initialize()
 
 void RenderingContextDriverVulkan::_initialize_window(VkSurfaceKHR surface)
 {
+    VkResult U_ASSERT_ONLY err;
+    if (window)
+        return;
+
+    /* imalloc display window struct and set surface */
     window = (Window *) imalloc(sizeof(Window));
+    memset(window, 0, sizeof(Window));
     window->surface = surface;
 
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &window->capabilities);
+    err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &window->capabilities);
+    assert(!err);
+
+    window->width = window->capabilities.currentExtent.width;
+    window->height = window->capabilities.currentExtent.height;
+
 }
 
 void RenderingContextDriverVulkan::_clean_up_window()
