@@ -35,6 +35,8 @@
 #include <copilot/error.h>
 #include <copilot/typealias.h>
 #include <copilot/memalloc.h>
+// std
+#include <time.h>
 
 #define no_flag_bits         0
 #define nextptr              nullptr

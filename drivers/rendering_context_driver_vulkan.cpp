@@ -22,7 +22,6 @@
 /* ======================================================================== */
 #include "rendering_context_driver_vulkan.h"
 #include <algorithm>
-#include <time.h>
 
 static VkSurfaceFormatKHR pick_surface_format(const VkSurfaceFormatKHR *surface_formats, uint32_t count)
 {
@@ -159,6 +158,8 @@ void RenderingContextDriverVulkan::_initialize_window(VkSurfaceKHR surface)
     VkSurfaceFormatKHR surface_format = pick_surface_format(surface_formats_khr, foramt_count);
     window->format = surface_format.format;
     window->color_space = surface_format.colorSpace;
+
+    free(surface_formats_khr);
 
     /* image buffer count */
     uint32_t desired_buffer_count = 3;
@@ -332,8 +333,8 @@ void RenderingContextDriverVulkan::_create_swap_chain()
 
     start = clock();
     err = vkCreateSwapchainKHR(device, &swap_chain_create_info, allocation_callbacks, &window->swap_chain);
-    assert(!err);
     end = clock();
+    assert(!err);
 
     printf("update swap chain exec time: %ldms\n", end - start);
 
