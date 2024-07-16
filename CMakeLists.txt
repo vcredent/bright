@@ -2,7 +2,7 @@
 #! PortableMain.cpp                                                         !#
 #! ======================================================================== !#
 #!                        This file is part of:                             !#
-#!                           PORTABLE ENGINE                                !#
+#!                           COPILOT ENGINE                                 !#
 #! ======================================================================== !#
 #!                                                                          !#
 #! Copyright (C) 2022 Vcredent All rights reserved.                         !#
@@ -22,7 +22,7 @@
 #! ======================================================================== !#
 
 cmake_minimum_required(VERSION 3.26)
-project(PortableEngine)
+project(copilot)
 
 set(CMAKE_CXX_STANDARD 23)
 set(PROGRAM_NAME engine)

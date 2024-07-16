@@ -2,7 +2,7 @@
 /* rendering_context_driver_vulkan.h                                        */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           PORTABLE ENGINE                                */
+/*                           COPILOT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -57,6 +57,7 @@ protected:
         VkSurfaceCapabilitiesKHR capabilities;
         int width;
         int height;
+        VkFormat format;
     };
 
     void _initialize_window(VkSurfaceKHR surface);
