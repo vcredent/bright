@@ -31,17 +31,17 @@
 
 #include <vma/vk_mem_alloc.h>
 
-// Render context driver of vulkan
+// copilot
 #include <copilot/error.h>
 #include <copilot/typealias.h>
 #include <copilot/memalloc.h>
-// std
 #include <time.h>
 
 #define no_flag_bits         0
 #define nextptr              nullptr
 #define allocation_callbacks nullptr
 
+// Render context driver of vulkan
 class RenderingContextDriverVulkan {
 public:
     RenderingContextDriverVulkan();

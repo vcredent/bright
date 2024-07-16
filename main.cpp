@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     GLFWwindow *window = glfwCreateWindow(800, 600, "CopilotEngine", nullptr, nullptr);
     assert(window != nullptr);
 
-    std::unique_ptr<RenderingContextDriverVulkanWin32> driver = std::make_unique<RenderingContextDriverVulkanWin32>(window);
+    auto driver = std::make_unique<RenderingContextDriverVulkanWin32>(window);
 
     // initialize
     driver->initialize();
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
         clock_t start, end;
 
         start = clock();
-        RenderingContextDriverVulkanWin32 *driver = (RenderingContextDriverVulkanWin32 *) glfwGetWindowUserPointer(window);
+        auto *driver = (RenderingContextDriverVulkanWin32 *) glfwGetWindowUserPointer(window);
         driver->update_window();
         end = clock();
 
