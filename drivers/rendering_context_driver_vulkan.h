@@ -51,13 +51,27 @@ public:
     VkDevice get_device() { return device; }
     VmaAllocator get_allocator() { return allocator; }
 
+    void update_window();
+
 protected:
+    struct SwapchainResource {
+        VkCommandBuffer command_buffer;
+        VkImage image;
+        VkImageView image_view;
+        VkFramebuffer framebuffer;
+    };
+
     struct Window {
         VkSurfaceKHR surface = VK_NULL_HANDLE;
         VkSurfaceCapabilitiesKHR capabilities;
-        int width;
-        int height;
         VkFormat format;
+        VkColorSpaceKHR color_space;
+        uint32_t image_buffer_count;
+        VkCompositeAlphaFlagBitsKHR composite_alpha;
+        VkPresentModeKHR present_mode;
+        VkRenderPass render_pass = VK_NULL_HANDLE;
+        VkSwapchainKHR swap_chain = VK_NULL_HANDLE;
+        SwapchainResource *swap_chain_resources;
     };
 
     void _initialize_window(VkSurfaceKHR surface);
@@ -69,6 +83,8 @@ private:
     void _create_command_pool();
     void _create_vma_allocator();
     void _create_swap_chain();
+    void _clean_up_swap_chain();
+    void _update_swap_chain();
 
     VkInstance instance = VK_NULL_HANDLE;
     Window *window = VK_NULL_HANDLE;

@@ -22,13 +22,16 @@
 /* ======================================================================== */
 #include "platform/win32/rendering_context_driver_vulkan_win32.h"
 #include <memory>
+#include <time.h>
+#include <thread>
+#include <future>
 
 int main(int argc, char **argv)
 {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "PortableEngine", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(800, 600, "CopilotEngine", nullptr, nullptr);
     assert(window != nullptr);
 
     std::unique_ptr<RenderingContextDriverVulkanWin32> driver = std::make_unique<RenderingContextDriverVulkanWin32>(window);
@@ -36,12 +39,28 @@ int main(int argc, char **argv)
     // initialize
     driver->initialize();
 
+    static float time = 0.0f;
+
+    glfwSetWindowUserPointer(window, driver.get());
+    glfwSetWindowSizeCallback(window, [] (GLFWwindow *window, int w, int h) {
+        clock_t start, end;
+
+        start = clock();
+        RenderingContextDriverVulkanWin32 *driver = (RenderingContextDriverVulkanWin32 *) glfwGetWindowUserPointer(window);
+        driver->update_window();
+        end = clock();
+
+        time = (float) end - start;
+    });
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
     }
 
     glfwDestroyWindow(window);
     glfwTerminate();
+
+    printf("update swap chain exec time: %fms\n", time);
 
     return 0;
 }

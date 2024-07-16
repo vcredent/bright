@@ -22,6 +22,7 @@
 /* ======================================================================== */
 #include "rendering_context_driver_vulkan.h"
 #include <algorithm>
+#include <time.h>
 
 static VkSurfaceFormatKHR pick_surface_format(const VkSurfaceFormatKHR *surface_formats, uint32_t count)
 {
@@ -131,27 +132,47 @@ Error RenderingContextDriverVulkan::initialize()
     return OK;
 }
 
+void RenderingContextDriverVulkan::update_window()
+{
+    _update_swap_chain();
+}
+
 void RenderingContextDriverVulkan::_initialize_window(VkSurfaceKHR surface)
 {
     VkResult U_ASSERT_ONLY err;
-    if (window)
-        return;
 
     /* imalloc display window struct and set surface */
     window = (Window *) imalloc(sizeof(Window));
-    memset(window, 0, sizeof(Window));
     window->surface = surface;
 
-    err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &window->capabilities);
+    err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, window->surface, &window->capabilities);
     assert(!err);
 
-    window->width = window->capabilities.currentExtent.width;
-    window->height = window->capabilities.currentExtent.height;
+    /* pick surface format */
+    uint32_t foramt_count = 0;
+    err = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, window->surface, &foramt_count, nullptr);
+    assert(!err);
 
+    VkSurfaceFormatKHR *surface_formats_khr = (VkSurfaceFormatKHR *) imalloc(sizeof(VkSurfaceFormatKHR) * foramt_count);
+    err = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, window->surface, &foramt_count, surface_formats_khr);
+    assert(!err);
+
+    VkSurfaceFormatKHR surface_format = pick_surface_format(surface_formats_khr, foramt_count);
+    window->format = surface_format.format;
+    window->color_space = surface_format.colorSpace;
+
+    /* image buffer count */
+    uint32_t desired_buffer_count = 3;
+    desired_buffer_count = std::clamp(desired_buffer_count, window->capabilities.minImageCount, window->capabilities.maxImageCount);
+    window->image_buffer_count = desired_buffer_count;
+
+    window->composite_alpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    window->present_mode = VK_PRESENT_MODE_FIFO_KHR;
 }
 
 void RenderingContextDriverVulkan::_clean_up_window()
 {
+    _clean_up_swap_chain();
     vkDestroySurfaceKHR(instance, window->surface, allocation_callbacks);
     free(window);
 }
@@ -190,6 +211,10 @@ void RenderingContextDriverVulkan::_create_device()
     };
 
     /* create logic device */
+    const char *extensions[] = {
+            "VK_KHR_swapchain"
+    };
+
     VkDeviceCreateInfo device_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
             /* pNext */ nextptr,
@@ -198,8 +223,8 @@ void RenderingContextDriverVulkan::_create_device()
             /* pQueueCreateInfos */ &queue_create_info,
             /* enabledLayerCount */ 0,
             /* ppEnabledLayerNames */ nullptr,
-            /* enabledExtensionCount */ 0,
-            /* ppEnabledExtensionNames */ nullptr,
+            /* enabledExtensionCount */ ARRAY_SIZE(extensions),
+            /* ppEnabledExtensionNames */ extensions,
             /* pEnabledFeatures */ nullptr,
     };
 
@@ -239,5 +264,133 @@ void RenderingContextDriverVulkan::_create_vma_allocator()
 
 void RenderingContextDriverVulkan::_create_swap_chain()
 {
+    VkResult U_ASSERT_ONLY err;
 
+    // update capabilities, update window extent
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, window->surface, &window->capabilities);
+
+    // attachment
+    VkAttachmentDescription attachment_description = {};
+    attachment_description.format = window->format;
+    attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
+    attachment_description.loadOp =  VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+    attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    // subpass
+    VkAttachmentReference color_attachment = {};
+    color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass_description = {};
+    subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass_description.colorAttachmentCount = 1;
+    subpass_description.pColorAttachments = &color_attachment;
+
+    // create render pass
+    VkRenderPassCreateInfo render_pass_create_info = {};
+    render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    render_pass_create_info.attachmentCount = 1;
+    render_pass_create_info.pAttachments = &attachment_description;
+    render_pass_create_info.subpassCount = 1;
+    render_pass_create_info.pSubpasses = &subpass_description;
+
+    err = vkCreateRenderPass(device, &render_pass_create_info, allocation_callbacks, &window->render_pass);
+    assert(!err);
+
+    /* create swap chain */
+    VkSwapchainCreateInfoKHR swap_chain_create_info = {
+            /* sType */ VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+            /* pNext */ nextptr,
+            /* flags */ no_flag_bits,
+            /* surface */ window->surface,
+            /* minImageCount */ window->image_buffer_count,
+            /* imageFormat */ window->format,
+            /* imageColorSpace */ window->color_space,
+            /* imageExtent */ window->capabilities.currentExtent,
+            /* imageArrayLayers */ 1,
+            /* imageUsage */ VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+            /* imageSharingMode */ VK_SHARING_MODE_EXCLUSIVE,
+            /* queueFamilyIndexCount */ 1,
+            /* pQueueFamilyIndices */ &graph_queue_family,
+            /* preTransform */ window->capabilities.currentTransform,
+            /* compositeAlpha */ window->composite_alpha,
+            /* presentMode */ window->present_mode,
+            /* clipped */ VK_TRUE,
+            /* oldSwapchain */ nullptr,
+    };
+
+    err = vkCreateSwapchainKHR(device, &swap_chain_create_info, allocation_callbacks, &window->swap_chain);
+    assert(!err);
+
+    /* initialize swap chain resources */
+    window->swap_chain_resources = (SwapchainResource *) imalloc(sizeof(SwapchainResource) * window->image_buffer_count);
+
+    VkImage swap_chain_images[window->image_buffer_count];
+    err = vkGetSwapchainImagesKHR(device, window->swap_chain, &window->image_buffer_count, swap_chain_images);
+    assert(!err);
+
+    for (uint32_t i = 0; i < window->image_buffer_count; i++) {
+        SwapchainResource *resource = &window->swap_chain_resources[i];
+        resource->image = swap_chain_images[i];
+
+        VkCommandBufferAllocateInfo command_allocate_info = {
+                /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+                /* pNext */ nextptr,
+                /* commandPool */ command_pool,
+                /* level */ VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+                /* commandBufferCount */ 1
+        };
+
+        vkAllocateCommandBuffers(device, &command_allocate_info, &resource->command_buffer);
+
+        VkImageViewCreateInfo image_view_create_info = {
+                /* sType */ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+                /* pNext */ nextptr,
+                /* flags */ no_flag_bits,
+                /* image */ resource->image,
+                /* viewType */ VK_IMAGE_VIEW_TYPE_2D,
+                /* format */ window->format,
+                /* components */
+                    {
+                        .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                        .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                        .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                        .a = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    },
+                /* subresourceRange */
+                    {
+                        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                        .baseMipLevel = 0,
+                        .levelCount = 1,
+                        .baseArrayLayer = 0,
+                        .layerCount = 1,
+                    },
+        };
+
+        err = vkCreateImageView(device, &image_view_create_info, allocation_callbacks, &resource->image_view);
+        assert(!err);
+    }
+}
+
+void RenderingContextDriverVulkan::_clean_up_swap_chain()
+{
+    vkDestroySwapchainKHR(device, window->swap_chain, allocation_callbacks);
+    vkDestroyRenderPass(device, window->render_pass, allocation_callbacks);
+
+    for (uint32_t i = 0; i < window->image_buffer_count; i++) {
+        vkFreeCommandBuffers(device, command_pool, 1, &window->swap_chain_resources[i].command_buffer);
+        vkDestroyImageView(device, window->swap_chain_resources[i].image_view, allocation_callbacks);
+    }
+
+    free(window->swap_chain_resources);
+}
+
+void RenderingContextDriverVulkan::_update_swap_chain()
+{
+    vkDeviceWaitIdle(device);
+    _clean_up_swap_chain();
+    _create_swap_chain();
 }
