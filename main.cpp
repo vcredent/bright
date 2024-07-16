@@ -23,8 +23,6 @@
 #include "platform/win32/rendering_context_driver_vulkan_win32.h"
 #include <memory>
 #include <time.h>
-#include <thread>
-#include <future>
 
 int main(int argc, char **argv)
 {
@@ -39,8 +37,6 @@ int main(int argc, char **argv)
     // initialize
     driver->initialize();
 
-    static float time = 0.0f;
-
     glfwSetWindowUserPointer(window, driver.get());
     glfwSetWindowSizeCallback(window, [] (GLFWwindow *window, int w, int h) {
         clock_t start, end;
@@ -50,7 +46,7 @@ int main(int argc, char **argv)
         driver->update_window();
         end = clock();
 
-        time = (float) end - start;
+        printf("glfw resize event exec time: %ldms\n", end - start);
     });
 
     while (!glfwWindowShouldClose(window)) {
@@ -59,8 +55,6 @@ int main(int argc, char **argv)
 
     glfwDestroyWindow(window);
     glfwTerminate();
-
-    printf("update swap chain exec time: %fms\n", time);
 
     return 0;
 }

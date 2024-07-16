@@ -32,8 +32,9 @@
 #include <vma/vk_mem_alloc.h>
 
 // Render context driver of vulkan
-#include <engine/error.h>
-#include <engine/typealias.h>
+#include <copilot/error.h>
+#include <copilot/typealias.h>
+#include <copilot/memalloc.h>
 
 #define no_flag_bits         0
 #define nextptr              nullptr

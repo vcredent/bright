@@ -115,7 +115,6 @@ RenderingContextDriverVulkan::RenderingContextDriverVulkan()
 RenderingContextDriverVulkan::~RenderingContextDriverVulkan()
 {
     _clean_up_window();
-
     vmaDestroyAllocator(allocator);
     vkDestroyCommandPool(device, command_pool, allocation_callbacks);
     vkDestroyDevice(device, allocation_callbacks);
@@ -172,6 +171,8 @@ void RenderingContextDriverVulkan::_initialize_window(VkSurfaceKHR surface)
 
 void RenderingContextDriverVulkan::_clean_up_window()
 {
+    vkDestroySwapchainKHR(device, window->swap_chain, allocation_callbacks);
+    vkDestroyRenderPass(device, window->render_pass, allocation_callbacks);
     _clean_up_swap_chain();
     vkDestroySurfaceKHR(instance, window->surface, allocation_callbacks);
     free(window);
@@ -265,40 +266,45 @@ void RenderingContextDriverVulkan::_create_vma_allocator()
 void RenderingContextDriverVulkan::_create_swap_chain()
 {
     VkResult U_ASSERT_ONLY err;
+    VkSwapchainKHR old_swap_chain;
+
+    old_swap_chain = window->swap_chain;
 
     // update capabilities, update window extent
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, window->surface, &window->capabilities);
 
-    // attachment
-    VkAttachmentDescription attachment_description = {};
-    attachment_description.format = window->format;
-    attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
-    attachment_description.loadOp =  VK_ATTACHMENT_LOAD_OP_CLEAR;
-    attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-    attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    if (!old_swap_chain) {
+        // attachment
+        VkAttachmentDescription attachment_description = {};
+        attachment_description.format = window->format;
+        attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
+        attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+                attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-    // subpass
-    VkAttachmentReference color_attachment = {};
-    color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        // subpass
+        VkAttachmentReference color_attachment = {};
+        color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-    VkSubpassDescription subpass_description = {};
-    subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass_description.colorAttachmentCount = 1;
-    subpass_description.pColorAttachments = &color_attachment;
+        VkSubpassDescription subpass_description = {};
+        subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass_description.colorAttachmentCount = 1;
+        subpass_description.pColorAttachments = &color_attachment;
 
-    // create render pass
-    VkRenderPassCreateInfo render_pass_create_info = {};
-    render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    render_pass_create_info.attachmentCount = 1;
-    render_pass_create_info.pAttachments = &attachment_description;
-    render_pass_create_info.subpassCount = 1;
-    render_pass_create_info.pSubpasses = &subpass_description;
+        // create render pass
+        VkRenderPassCreateInfo render_pass_create_info = {};
+        render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        render_pass_create_info.attachmentCount = 1;
+        render_pass_create_info.pAttachments = &attachment_description;
+        render_pass_create_info.subpassCount = 1;
+        render_pass_create_info.pSubpasses = &subpass_description;
 
-    err = vkCreateRenderPass(device, &render_pass_create_info, allocation_callbacks, &window->render_pass);
-    assert(!err);
+        err = vkCreateRenderPass(device, &render_pass_create_info, allocation_callbacks, &window->render_pass);
+        assert(!err);
+    }
 
     /* create swap chain */
     VkSwapchainCreateInfoKHR swap_chain_create_info = {
@@ -319,13 +325,23 @@ void RenderingContextDriverVulkan::_create_swap_chain()
             /* compositeAlpha */ window->composite_alpha,
             /* presentMode */ window->present_mode,
             /* clipped */ VK_TRUE,
-            /* oldSwapchain */ nullptr,
+            /* oldSwapchain */ old_swap_chain,
     };
 
+    clock_t start, end;
+
+    start = clock();
     err = vkCreateSwapchainKHR(device, &swap_chain_create_info, allocation_callbacks, &window->swap_chain);
     assert(!err);
+    end = clock();
+
+    printf("update swap chain exec time: %ldms\n", end - start);
+
+    if (old_swap_chain)
+        vkDestroySwapchainKHR(device, old_swap_chain, allocation_callbacks);
 
     /* initialize swap chain resources */
+    start = clock();
     window->swap_chain_resources = (SwapchainResource *) imalloc(sizeof(SwapchainResource) * window->image_buffer_count);
 
     VkImage swap_chain_images[window->image_buffer_count];
@@ -373,13 +389,13 @@ void RenderingContextDriverVulkan::_create_swap_chain()
         err = vkCreateImageView(device, &image_view_create_info, allocation_callbacks, &resource->image_view);
         assert(!err);
     }
+
+    end = clock();
+    printf("initialize swap chain resources exec time: %ldms\n", end - start);
 }
 
 void RenderingContextDriverVulkan::_clean_up_swap_chain()
 {
-    vkDestroySwapchainKHR(device, window->swap_chain, allocation_callbacks);
-    vkDestroyRenderPass(device, window->render_pass, allocation_callbacks);
-
     for (uint32_t i = 0; i < window->image_buffer_count; i++) {
         vkFreeCommandBuffers(device, command_pool, 1, &window->swap_chain_resources[i].command_buffer);
         vkDestroyImageView(device, window->swap_chain_resources[i].image_view, allocation_callbacks);

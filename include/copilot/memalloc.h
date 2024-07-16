@@ -1,5 +1,5 @@
 /* ************************************************************************ */
-/* typealias.h                                                              */
+/* memalloc.h                                                               */
 /* ************************************************************************ */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,14 +20,14 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ************************************************************************ */
-#ifndef _TYPEALIAS_H_
-#define _TYPEALIAS_H_
+#ifndef _MEMALLOC_H_
+#define _MEMALLOC_H_
 
 #include <stdlib.h>
 #include <string.h>
 
-#define U_ASSERT_ONLY __attribute__((unused))
-#define ARRAY_SIZE(a) ( sizeof(a) / sizeof(a[0]) )
+/* use follow the memory allocate */
+#define _post_memory_allocate(size) malloc(size)
 
 // allocate memory and initialize members to zero,
 // the default malloc does not initialize members
@@ -35,10 +35,10 @@ inline static void *imalloc(size_t size)
 {
     void *ptr;
 
-    ptr = malloc(size);
+    ptr = _post_memory_allocate(size);
     memset(ptr, 0, size);
 
     return ptr;
 }
 
-#endif /* _TYPEALIAS_H_ */
+#endif /* _MEMALLOC_H_ */
