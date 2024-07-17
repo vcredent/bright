@@ -51,14 +51,36 @@ int main(int argc, char **argv)
         printf("glfw resize event exec time: %ldms\n", end - start);
     });
 
-    VkPipeline pipeline = VK_NULL_HANDLE;
-    rd->create_graph_pipeline(&pipeline);
-    vkDestroyPipeline(render_context->get_device(), pipeline, allocation_callbacks);
+    const char *vertex = "../shader/vertex.glsl.spv";
+    const char *fragment = "../shader/fragment.glsl.spv";
 
+    VkVertexInputBindingDescription binds[] = {
+            { 0, 0, VK_VERTEX_INPUT_RATE_VERTEX },
+    };
+
+    VkVertexInputAttributeDescription attribute[] = {
+            { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 }
+    };
+
+    VkPipeline pipeline = VK_NULL_HANDLE;
+    rd->create_graph_pipeline(vertex, fragment,
+                              ARRAY_SIZE(binds), binds,
+                              ARRAY_SIZE(attribute), attribute,
+                              &pipeline);
+
+    RenderingDeviceDriverVulkan::Buffer *buffer = rd->create_buffer(1024);
+
+    VkCommandBuffer graph_command_buffer;
     while (!glfwWindowShouldClose(window)) {
+        rd->begin_graph_command_buffer(&graph_command_buffer);
+        {
+            rd->command_bind_graph_pipeline(graph_command_buffer, pipeline);
+        }
+        rd->end_graph_command_buffer(graph_command_buffer);
         glfwPollEvents();
     }
 
+    rd->destroy_buffer(buffer);
     render_context->destroy_render_device(rd);
     glfwDestroyWindow(window);
     glfwTerminate();

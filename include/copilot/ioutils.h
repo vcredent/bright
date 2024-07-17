@@ -26,7 +26,7 @@
 #include <fstream>
 #include <copilot/memalloc.h>
 
-static char *read_file_binary(const char *path, size_t *size)
+static char *io_read_bytecode(const char *path, size_t *size)
 {
     std::ifstream file(path, std::ios::ate | std::ios::binary);
     if (!file.is_open())
@@ -43,7 +43,7 @@ static char *read_file_binary(const char *path, size_t *size)
     return buf;
 }
 
-static void free_file_binary(char *buf)
+static void io_free_buf(char *buf)
 {
     free(buf);
 }

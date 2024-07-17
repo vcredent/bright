@@ -31,15 +31,15 @@
 
 #include <vma/vk_mem_alloc.h>
 
-// copilot
 #include <copilot/error.h>
 #include <copilot/typealias.h>
-#include <copilot/memalloc.h>
 #include <time.h>
 
 #define no_flag_bits         0
 #define nextptr              nullptr
 #define allocation_callbacks nullptr
+
+#include "vulkan_utils.h"
 
 // Render context driver of vulkan
 class RenderingContextDriverVulkan {
@@ -56,6 +56,9 @@ public:
     uint32_t get_width() { return window->capabilities.currentExtent.width; }
     uint32_t get_height() { return window->capabilities.currentExtent.height; }
     VkRenderPass get_render_pass() { return window->render_pass; }
+
+    void allocate_command_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_command_buffer);
+    void free_command_buffer(VkCommandBuffer command_buffer);
 
     void update_window();
 

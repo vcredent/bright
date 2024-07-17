@@ -27,7 +27,7 @@
 #include <string.h>
 
 /* use follow the memory allocate */
-#define _post_memory_allocate(size) malloc(size)
+#define _post_initialize(ptr) (ptr)
 
 // allocate memory and initialize members to zero,
 // the default malloc does not initialize members
@@ -35,10 +35,13 @@ inline static void *imalloc(size_t size)
 {
     void *ptr;
 
-    ptr = _post_memory_allocate(size);
+    ptr = malloc(size);
     memset(ptr, 0, size);
 
-    return ptr;
+    return _post_initialize(ptr);
 }
+
+#define memnew(obj, ...) _post_initialize(new obj(__VA_ARGS__))
+#define memdel(ptr) delete (ptr)
 
 #endif /* _MEMALLOC_H_ */

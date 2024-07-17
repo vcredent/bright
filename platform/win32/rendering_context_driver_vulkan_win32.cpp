@@ -36,10 +36,10 @@ RenderingContextDriverVulkanWin32::~RenderingContextDriverVulkanWin32()
 
 RenderingDeviceDriverVulkan *RenderingContextDriverVulkanWin32::load_render_device()
 {
-    return new RenderingDeviceDriverVulkan(this);
+    return memnew(RenderingDeviceDriverVulkan, this);
 }
 
 void RenderingContextDriverVulkanWin32::destroy_render_device(RenderingDeviceDriverVulkan *p_render_device)
 {
-    delete p_render_device;
+    memdel(p_render_device);
 }

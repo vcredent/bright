@@ -23,23 +23,6 @@
 #include "rendering_context_driver_vulkan.h"
 #include <algorithm>
 
-static VkSurfaceFormatKHR pick_surface_format(const VkSurfaceFormatKHR *surface_formats, uint32_t count)
-{
-    VkFormat format;
-    for (uint32_t i = 0; i < count; i++) {
-        format = surface_formats[i].format;
-        if (format == VK_FORMAT_R8G8B8A8_UNORM || format == VK_FORMAT_B8G8R8A8_UNORM ||
-            format == VK_FORMAT_A2B10G10R10_UNORM_PACK32 || format == VK_FORMAT_A2R10G10B10_UNORM_PACK32 ||
-            format == VK_FORMAT_R16G16B16A16_SFLOAT)
-            return surface_formats[i];
-    }
-
-    printf("Can't find our preferred formats... Falling back to first exposed format. Rendering may be incorrect.\n");
-
-    assert(count >= 1);
-    return surface_formats[0];
-}
-
 RenderingContextDriverVulkan::RenderingContextDriverVulkan()
 {
     VkResult U_ASSERT_ONLY err;
@@ -128,6 +111,27 @@ Error RenderingContextDriverVulkan::initialize()
     _create_swap_chain();
 
     return OK;
+}
+
+void RenderingContextDriverVulkan::allocate_command_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_command_buffer)
+{
+    VkResult U_ASSERT_ONLY err;
+
+    VkCommandBufferAllocateInfo allocate_info = {
+            /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+            /* pNext */ nextptr,
+            /* commandPool */ command_pool,
+            /* level */ level,
+            /* commandBufferCount */ 1
+    };
+
+    err = vkAllocateCommandBuffers(device, &allocate_info, p_command_buffer);
+    assert(!err);
+}
+
+void RenderingContextDriverVulkan::free_command_buffer(VkCommandBuffer command_buffer)
+{
+    vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
 }
 
 void RenderingContextDriverVulkan::update_window()
@@ -243,7 +247,7 @@ void RenderingContextDriverVulkan::_create_command_pool()
     VkCommandPoolCreateInfo command_pool_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
             /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* flags */ VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
             /* queueFamilyIndex */ graph_queue_family
     };
 

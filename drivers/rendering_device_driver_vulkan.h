@@ -27,18 +27,40 @@
 
 class RenderingDeviceDriverVulkan {
 public:
-    RenderingDeviceDriverVulkan(RenderingContextDriverVulkan *p_ctx);
+    RenderingDeviceDriverVulkan(RenderingContextDriverVulkan *driver_context);
     ~RenderingDeviceDriverVulkan();
 
-    void create_graph_pipeline(VkPipeline *p_pipeline);
+    struct Buffer {
+        VkBuffer vk_buffer;
+        VkDeviceSize size;
+        VmaAllocation allocation;
+        VmaAllocationInfo allocation_info;
+    };
+
+    Buffer *create_buffer(VkDeviceSize size);
+    void destroy_buffer(Buffer *p_buffer);
+    void write_buffer(Buffer *buffer, VkDeviceSize offset, void *bytecode, VkDeviceSize size);
+
+    void create_graph_pipeline(const char *vertex_shader, const char *fragment_shader,
+                               uint32_t bind_count,
+                               VkVertexInputBindingDescription *p_bind,
+                               uint32_t attribute_count,
+                               VkVertexInputAttributeDescription *p_attribute,
+                               VkPipeline *p_pipeline);
+
+    void begin_graph_command_buffer(VkCommandBuffer *p_command_buffer);
+    void end_graph_command_buffer(VkCommandBuffer command_buffer);
+    void command_bind_vertex_buffer(Buffer *p_buffer);
+    void command_bind_graph_pipeline(VkCommandBuffer command_buffer, VkPipeline pipeline);
 
 private:
     void _initialize_descriptor_pool();
 
-    RenderingContextDriverVulkan *render_driver_context;
+    RenderingContextDriverVulkan *vk_driver_context;
     VkDevice vk_device;
     VmaAllocator allocator;
     VkDescriptorPool descriptor_pool;
+    VkCommandBuffer graph_command_buffer;
 };
 
 #endif /* _RENDERING_DEVICE_DRIVER_VULKAN_H */

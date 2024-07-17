@@ -21,14 +21,13 @@
 /*                                                                          */
 /* ======================================================================== */
 #include "rendering_device_driver_vulkan.h"
-// copilot
-#include "vulkan_utils.h"
 
-RenderingDeviceDriverVulkan::RenderingDeviceDriverVulkan(RenderingContextDriverVulkan *p_ctx)
-    : render_driver_context(p_ctx)
+RenderingDeviceDriverVulkan::RenderingDeviceDriverVulkan(RenderingContextDriverVulkan *driver_context)
+    : vk_driver_context(driver_context)
 {
-    vk_device = render_driver_context->get_device();
-    allocator = render_driver_context->get_allocator();
+    vk_device = vk_driver_context->get_device();
+    allocator = vk_driver_context->get_allocator();
+    vk_driver_context->allocate_command_buffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, &graph_command_buffer);
 
     _initialize_descriptor_pool();
 }
@@ -38,7 +37,47 @@ RenderingDeviceDriverVulkan::~RenderingDeviceDriverVulkan()
     vkDestroyDescriptorPool(vk_device, descriptor_pool, allocation_callbacks);
 }
 
-void RenderingDeviceDriverVulkan::create_graph_pipeline(VkPipeline *p_pipeline)
+RenderingDeviceDriverVulkan::Buffer *RenderingDeviceDriverVulkan::create_buffer(VkDeviceSize size)
+{
+    VkResult U_ASSERT_ONLY err;
+
+    VkBufferCreateInfo buffer_create_info = {};
+    buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    buffer_create_info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    buffer_create_info.size = size;
+
+    VmaAllocationCreateInfo allocation_create_info = {};
+    allocation_create_info.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+
+    Buffer *buffer = (Buffer *) imalloc(sizeof(Buffer));
+    buffer->size = size;
+
+    err = vmaCreateBuffer(allocator, &buffer_create_info, &allocation_create_info, &buffer->vk_buffer, &buffer->allocation, &buffer->allocation_info);
+    assert(!err);
+
+    return buffer;
+}
+
+void RenderingDeviceDriverVulkan::destroy_buffer(Buffer *p_buffer)
+{
+    vmaDestroyBuffer(allocator, p_buffer->vk_buffer, p_buffer->allocation);
+    free(p_buffer);
+}
+
+void RenderingDeviceDriverVulkan::write_buffer(Buffer *buffer, VkDeviceSize offset, void *bytecode, VkDeviceSize size)
+{
+    void **tmp;
+    vmaMapMemory(allocator, buffer->allocation, tmp);
+    memcpy((tmp + offset), bytecode, size);
+    vmaUnmapMemory(allocator, buffer->allocation);
+}
+
+void RenderingDeviceDriverVulkan::create_graph_pipeline(const char *vertex_shader, const char *fragment_shader,
+                                                        uint32_t bind_count,
+                                                        VkVertexInputBindingDescription *p_bind,
+                                                        uint32_t attribute_count,
+                                                        VkVertexInputAttributeDescription *p_attribute,
+                                                        VkPipeline *p_pipeline)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -58,8 +97,8 @@ void RenderingDeviceDriverVulkan::create_graph_pipeline(VkPipeline *p_pipeline)
 
     VkShaderModule vertex_shader_module, fragment_shader_module;
 
-    vertex_shader_module = load_shader_module(vk_device, "../shader/vertex.glsl.spv");
-    fragment_shader_module = load_shader_module(vk_device, "../shader/fragment.glsl.spv");
+    vertex_shader_module = load_shader_module(vk_device, vertex_shader);
+    fragment_shader_module = load_shader_module(vk_device, fragment_shader);
 
     VkPipelineShaderStageCreateInfo vertex_shader_create_info = {};
     vertex_shader_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -74,26 +113,17 @@ void RenderingDeviceDriverVulkan::create_graph_pipeline(VkPipeline *p_pipeline)
     fragment_shader_create_info.pName = "main";
 
     VkPipelineShaderStageCreateInfo shader_stages_info[] = {
-            vertex_shader_create_info,
-            fragment_shader_create_info
-    };
-
-    VkVertexInputBindingDescription input_binds[] = {
-            { 0, 0, VK_VERTEX_INPUT_RATE_VERTEX }
-    };
-
-    VkVertexInputAttributeDescription input_attributes[] = {
-            { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 }
+            vertex_shader_create_info, fragment_shader_create_info
     };
 
     VkPipelineVertexInputStateCreateInfo input_state_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
             /* pNext */ nextptr,
             /* flags */ no_flag_bits,
-            /* vertexBindingDescriptionCount */ ARRAY_SIZE(input_binds),
-            /* pVertexBindingDescriptions */ input_binds,
-            /* vertexAttributeDescriptionCount */ ARRAY_SIZE(input_attributes),
-            /* pVertexAttributeDescriptions */ input_attributes,
+            /* vertexBindingDescriptionCount */ bind_count,
+            /* pVertexBindingDescriptions */ p_bind,
+            /* vertexAttributeDescriptionCount */ attribute_count,
+            /* pVertexAttributeDescriptions */ p_attribute,
     };
 
     VkPipelineInputAssemblyStateCreateInfo input_assembly = {
@@ -107,16 +137,16 @@ void RenderingDeviceDriverVulkan::create_graph_pipeline(VkPipeline *p_pipeline)
     VkViewport viewport = {};
     viewport.x = 0;
     viewport.y = 0;
-    viewport.width = render_driver_context->get_width();
-    viewport.height = render_driver_context->get_height();
+    viewport.width = vk_driver_context->get_width();
+    viewport.height = vk_driver_context->get_height();
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor = {};
     scissor.offset.x = 0;
     scissor.offset.y = 0;
-    scissor.extent.width = render_driver_context->get_width();
-    scissor.extent.width = render_driver_context->get_height();
+    scissor.extent.width = vk_driver_context->get_width();
+    scissor.extent.width = vk_driver_context->get_height();
 
     VkPipelineViewportStateCreateInfo viewport_state_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
@@ -194,7 +224,7 @@ void RenderingDeviceDriverVulkan::create_graph_pipeline(VkPipeline *p_pipeline)
             /* pColorBlendState */ &color_blend_state_create_info,
             /* pDynamicState */ nullptr,
             /* layout */ pipeline_layout,
-            /* renderPass */ render_driver_context->get_render_pass(),
+            /* renderPass */ vk_driver_context->get_render_pass(),
             /* subpass */ 0,
             /* basePipelineHandle */ VK_NULL_HANDLE,
             /* basePipelineIndex */ -1,
@@ -236,4 +266,26 @@ void RenderingDeviceDriverVulkan::_initialize_descriptor_pool()
 
     err = vkCreateDescriptorPool(vk_device, &descriptor_pool_create_info, allocation_callbacks, &descriptor_pool);
     assert(!err);
+}
+
+void RenderingDeviceDriverVulkan::begin_graph_command_buffer(VkCommandBuffer *p_command_buffer)
+{
+    VkCommandBufferBeginInfo command_buffer_begin_info = {
+            /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+            /* pNext */ nextptr,
+            /* flags */ VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT,
+            /* pInheritanceInfo */ nullptr,
+    };
+    vkBeginCommandBuffer(graph_command_buffer, &command_buffer_begin_info);
+    *p_command_buffer = graph_command_buffer;
+}
+
+void RenderingDeviceDriverVulkan::end_graph_command_buffer(VkCommandBuffer command_buffer)
+{
+    vkEndCommandBuffer(command_buffer);
+}
+
+void RenderingDeviceDriverVulkan::command_bind_graph_pipeline(VkCommandBuffer command_buffer, VkPipeline pipeline)
+{
+    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 }
