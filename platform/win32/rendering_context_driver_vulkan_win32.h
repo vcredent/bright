@@ -23,7 +23,7 @@
 #ifndef _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H
 #define _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H
 
-#include "drivers/rendering_context_driver_vulkan.h"
+#include "drivers/rendering_device_driver_vulkan.h"
 #include <GLFW/glfw3.h>
 
 // Render driver context for vulkan
@@ -31,6 +31,9 @@ class RenderingContextDriverVulkanWin32 : public RenderingContextDriverVulkan {
 public:
     RenderingContextDriverVulkanWin32(GLFWwindow *window);
     ~RenderingContextDriverVulkanWin32();
+
+    RenderingDeviceDriverVulkan *load_render_device();
+    void destroy_render_device(RenderingDeviceDriverVulkan *p_render_device);
 };
 
 #endif /* _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H */

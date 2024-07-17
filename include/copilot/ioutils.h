@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* rendering_context_driver_vulkan_win32.cpp                                */
+/* ioutils.h                                                                */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,26 +20,32 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "rendering_context_driver_vulkan_win32.h"
+#ifndef _IOUTILS_H_
+#define _IOUTILS_H_
 
-RenderingContextDriverVulkanWin32::RenderingContextDriverVulkanWin32(GLFWwindow *window)
+#include <fstream>
+#include <copilot/memalloc.h>
+
+static char *read_file_binary(const char *path, size_t *size)
 {
-    VkSurfaceKHR surface;
-    glfwCreateWindowSurface(get_instance(), window, allocation_callbacks, &surface);
-    _initialize_window(surface);
+    std::ifstream file(path, std::ios::ate | std::ios::binary);
+    if (!file.is_open())
+        throw std::runtime_error("error open file failed!");
+
+    *size = file.tellg();
+    file.seekg(0);
+
+    /* malloc buffer */
+    char *buf = (char *) imalloc(*size);
+    file.read(buf, *size);
+    file.close();
+
+    return buf;
 }
 
-RenderingContextDriverVulkanWin32::~RenderingContextDriverVulkanWin32()
+static void free_file_binary(char *buf)
 {
-    /* do nothing in here... */
+    free(buf);
 }
 
-RenderingDeviceDriverVulkan *RenderingContextDriverVulkanWin32::load_render_device()
-{
-    return new RenderingDeviceDriverVulkan(this);
-}
-
-void RenderingContextDriverVulkanWin32::destroy_render_device(RenderingDeviceDriverVulkan *p_render_device)
-{
-    delete p_render_device;
-}
+#endif /* _IOUTILS_H_ */

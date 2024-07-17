@@ -53,6 +53,9 @@ public:
     const char *get_device_name() { return physical_device_properties.deviceName; }
     VkDevice get_device() { return device; }
     VmaAllocator get_allocator() { return allocator; }
+    uint32_t get_width() { return window->capabilities.currentExtent.width; }
+    uint32_t get_height() { return window->capabilities.currentExtent.height; }
+    VkRenderPass get_render_pass() { return window->render_pass; }
 
     void update_window();
 

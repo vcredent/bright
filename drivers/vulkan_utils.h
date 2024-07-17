@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* rendering_context_driver_vulkan_win32.cpp                                */
+/* vulkan_utils.h                                                           */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,26 +20,39 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "rendering_context_driver_vulkan_win32.h"
+#ifndef _VULKAN_UTILS_H
+#define _VULKAN_UTILS_H
 
-RenderingContextDriverVulkanWin32::RenderingContextDriverVulkanWin32(GLFWwindow *window)
+#include <vulkan/vulkan.h>
+#include <fstream>
+#include <stdexcept>
+#include <copilot/memalloc.h>
+#include <copilot/ioutils.h>
+
+// load shader module form .spv file content.
+static VkShaderModule load_shader_module(VkDevice device, const char *name)
 {
-    VkSurfaceKHR surface;
-    glfwCreateWindowSurface(get_instance(), window, allocation_callbacks, &surface);
-    _initialize_window(surface);
+    char *buf;
+    size_t size;
+    VkResult U_ASSERT_ONLY err;
+
+    buf = read_file_binary(name, &size);
+
+    VkShaderModuleCreateInfo shader_module_create_info = {
+            /* sType */ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+            /* pNext */ nextptr,
+            /* flags */ no_flag_bits,
+            /* codeSize */ size,
+            /* pCode */ reinterpret_cast<uint32_t *>(buf),
+    };
+
+    VkShaderModule shader_module;
+    err = vkCreateShaderModule(device, &shader_module_create_info, allocation_callbacks, &shader_module);
+    assert(!err);
+
+    free_file_binary(buf);
+
+    return shader_module;
 }
 
-RenderingContextDriverVulkanWin32::~RenderingContextDriverVulkanWin32()
-{
-    /* do nothing in here... */
-}
-
-RenderingDeviceDriverVulkan *RenderingContextDriverVulkanWin32::load_render_device()
-{
-    return new RenderingDeviceDriverVulkan(this);
-}
-
-void RenderingContextDriverVulkanWin32::destroy_render_device(RenderingDeviceDriverVulkan *p_render_device)
-{
-    delete p_render_device;
-}
+#endif /* _VULKAN_UTILS_H */

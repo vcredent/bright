@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* rendering_context_driver_vulkan_win32.cpp                                */
+/* rendering_device_driver_vulkan.h                                         */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,26 +20,25 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "rendering_context_driver_vulkan_win32.h"
+#ifndef _RENDERING_DEVICE_DRIVER_VULKAN_H
+#define _RENDERING_DEVICE_DRIVER_VULKAN_H
 
-RenderingContextDriverVulkanWin32::RenderingContextDriverVulkanWin32(GLFWwindow *window)
-{
-    VkSurfaceKHR surface;
-    glfwCreateWindowSurface(get_instance(), window, allocation_callbacks, &surface);
-    _initialize_window(surface);
-}
+#include "rendering_context_driver_vulkan.h"
 
-RenderingContextDriverVulkanWin32::~RenderingContextDriverVulkanWin32()
-{
-    /* do nothing in here... */
-}
+class RenderingDeviceDriverVulkan {
+public:
+    RenderingDeviceDriverVulkan(RenderingContextDriverVulkan *p_ctx);
+    ~RenderingDeviceDriverVulkan();
 
-RenderingDeviceDriverVulkan *RenderingContextDriverVulkanWin32::load_render_device()
-{
-    return new RenderingDeviceDriverVulkan(this);
-}
+    void create_graph_pipeline(VkPipeline *p_pipeline);
 
-void RenderingContextDriverVulkanWin32::destroy_render_device(RenderingDeviceDriverVulkan *p_render_device)
-{
-    delete p_render_device;
-}
+private:
+    void _initialize_descriptor_pool();
+
+    RenderingContextDriverVulkan *render_driver_context;
+    VkDevice vk_device;
+    VmaAllocator allocator;
+    VkDescriptorPool descriptor_pool;
+};
+
+#endif /* _RENDERING_DEVICE_DRIVER_VULKAN_H */

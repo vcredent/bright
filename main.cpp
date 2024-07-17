@@ -32,12 +32,14 @@ int main(int argc, char **argv)
     GLFWwindow *window = glfwCreateWindow(800, 600, "CopilotEngine", nullptr, nullptr);
     assert(window != nullptr);
 
-    auto driver = std::make_unique<RenderingContextDriverVulkanWin32>(window);
-
+    auto render_context = std::make_unique<RenderingContextDriverVulkanWin32>(window);
     // initialize
-    driver->initialize();
+    render_context->initialize();
 
-    glfwSetWindowUserPointer(window, driver.get());
+    RenderingDeviceDriverVulkan *rd;
+    rd = render_context->load_render_device();
+
+    glfwSetWindowUserPointer(window, render_context.get());
     glfwSetWindowSizeCallback(window, [] (GLFWwindow *window, int w, int h) {
         clock_t start, end;
 
@@ -49,10 +51,15 @@ int main(int argc, char **argv)
         printf("glfw resize event exec time: %ldms\n", end - start);
     });
 
+    VkPipeline pipeline = VK_NULL_HANDLE;
+    rd->create_graph_pipeline(&pipeline);
+    vkDestroyPipeline(render_context->get_device(), pipeline, allocation_callbacks);
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
     }
 
+    render_context->destroy_render_device(rd);
     glfwDestroyWindow(window);
     glfwTerminate();
 
