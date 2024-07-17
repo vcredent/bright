@@ -1,10 +1,10 @@
 #version 450
 
-layout(location = 0) in vec3 position;
+layout(location = 0) in vec3 inColor;
+layout(location = 1) in vec3 inPosition;
 // out
-layout(location = 0) out vec4 final_color;
+layout(location = 0) out vec4 outColor;
 
-void main()
-{
-    final_color = vec4(position, 1.0f);
+void main() {
+    outColor = vec4(inColor, 1.0f);
 }

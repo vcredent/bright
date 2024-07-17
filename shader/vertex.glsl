@@ -1,12 +1,14 @@
 #version 450
 
-// in
-layout(location = 0) in vec3 position;
-// out
-layout(location = 0) out vec3 color;
+layout(location = 0) in vec3 inPosition;
+layout(location = 1) in vec3 inColor;
+layout(location = 2) in vec2 inTexCoord;
 
-void main()
-{
-    color = position;
-    gl_Position = vec4(position, 1.0f);
+layout(location = 0) out vec3 outColor;
+layout(location = 1) out vec3 outPosition;
+
+void main() {
+    gl_Position = vec4(inPosition, 1.0f);
+    outColor = inColor;
+    outPosition = inPosition;
 }

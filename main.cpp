@@ -23,6 +23,25 @@
 #include "platform/win32/rendering_context_driver_vulkan_win32.h"
 #include <memory>
 #include <time.h>
+#include <glm/glm.hpp>
+#include <vector>
+
+struct Vertex {
+    glm::vec3 position;
+    glm::vec3 color;
+    glm::vec2 texCoord;
+};
+
+const std::vector<Vertex> vertices = {
+        {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+        {{0.5f,  -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{0.5f,  0.5f,  0.0f},  {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+        {{-0.5f, 0.5f,  0.0f},  {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+};
+
+const std::vector<uint32_t> indices = {
+        0, 1, 2, 2, 3, 0
+};
 
 int main(int argc, char **argv)
 {
@@ -54,33 +73,42 @@ int main(int argc, char **argv)
     const char *vertex = "../shader/vertex.glsl.spv";
     const char *fragment = "../shader/fragment.glsl.spv";
 
-    VkVertexInputBindingDescription binds[] = {
-            { 0, 0, VK_VERTEX_INPUT_RATE_VERTEX },
-    };
-
     VkVertexInputAttributeDescription attribute[] = {
-            { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 }
+            { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) },
+            { 0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color) },
+            { 0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, texCoord) },
     };
 
     VkPipeline pipeline = VK_NULL_HANDLE;
     rd->create_graph_pipeline(vertex, fragment,
-                              ARRAY_SIZE(binds), binds,
+                              0, nullptr,
                               ARRAY_SIZE(attribute), attribute,
                               &pipeline);
 
-    RenderingDeviceDriverVulkan::Buffer *buffer = rd->create_buffer(1024);
+    RenderingDeviceDriverVulkan::Buffer *vertex_buffer;
+    vertex_buffer = rd->create_buffer(std::size(vertices));
+    rd->write_buffer(vertex_buffer, 0, (void *) std::data(vertices), std::size(vertices));
+
+    RenderingDeviceDriverVulkan::Buffer *index_buffer;
+    index_buffer = rd->create_buffer(std::size(indices));
+    rd->write_buffer(index_buffer, 0, (void *) std::data(indices), std::size(indices));
 
     VkCommandBuffer graph_command_buffer;
     while (!glfwWindowShouldClose(window)) {
         rd->begin_graph_command_buffer(&graph_command_buffer);
         {
+            VkDeviceSize offset = 0;
+            vkCmdBindVertexBuffers(graph_command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
+            vkCmdBindIndexBuffer(graph_command_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
             rd->command_bind_graph_pipeline(graph_command_buffer, pipeline);
+            vkCmdDrawIndexed(graph_command_buffer, std::size(indices), 1, 0, 0, 0);
         }
         rd->end_graph_command_buffer(graph_command_buffer);
         glfwPollEvents();
     }
 
-    rd->destroy_buffer(buffer);
+    rd->destroy_buffer(index_buffer);
+    rd->destroy_buffer(vertex_buffer);
     render_context->destroy_render_device(rd);
     glfwDestroyWindow(window);
     glfwTerminate();
