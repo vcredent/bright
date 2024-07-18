@@ -37,24 +37,29 @@ public:
         VmaAllocationInfo allocation_info;
     };
 
+    struct Pipeline {
+        VkPipeline pipeline;
+        VkPipelineLayout pipeline_layout;
+    };
+
     Buffer *create_buffer(VkDeviceSize size);
     void destroy_buffer(Buffer *p_buffer);
     void write_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
     void read_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
 
-    void create_graph_pipeline(const char *vertex_shader, const char *fragment_shader,
-                               uint32_t bind_count,
-                               VkVertexInputBindingDescription *p_bind,
-                               uint32_t attribute_count,
-                               VkVertexInputAttributeDescription *p_attribute,
-                               VkPipeline *p_pipeline);
+    Pipeline *create_graph_pipeline(const char *vertex_shader, const char *fragment_shader,
+                                    uint32_t bind_count,
+                                    VkVertexInputBindingDescription *p_bind,
+                                    uint32_t attribute_count,
+                                    VkVertexInputAttributeDescription *p_attribute);
+    void destroy_pipeline(Pipeline *p_pipeline);
 
     void command_buffer_begin(VkCommandBuffer *p_command_buffer);
     void command_buffer_end(VkCommandBuffer command_buffer);
     void command_begin_render_pass(VkCommandBuffer command_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect);
     void command_end_render_pass(VkCommandBuffer command_buffer);
     void command_bind_vertex_buffer(Buffer *p_buffer);
-    void command_bind_graph_pipeline(VkCommandBuffer command_buffer, VkPipeline pipeline);
+    void command_bind_graph_pipeline(VkCommandBuffer command_buffer, Pipeline *p_pipeline);
 
 private:
     void _initialize_descriptor_pool();

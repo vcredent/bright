@@ -401,6 +401,23 @@ void RenderingContextDriverVulkan::_create_swap_chain()
 
         err = vkCreateImageView(device, &image_view_create_info, allocation_callbacks, &resource->image_view);
         assert(!err);
+
+        VkImageView framebuffer_attachments[] = { window->swap_chain_resources[i].image_view };
+
+        VkFramebufferCreateInfo framebuffer_create_info = {
+                /* sType */ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+                /* pNext */ nextptr,
+                /* flags */ no_flag_bits,
+                /* renderPass */ window->render_pass,
+                /* attachmentCount */ ARRAY_SIZE(framebuffer_attachments),
+                /* pAttachments */ framebuffer_attachments,
+                /* width */ window->capabilities.currentExtent.width,
+                /* height */ window->capabilities.currentExtent.height,
+                /* layers */ 1,
+        };
+
+        err = vkCreateFramebuffer(device, &framebuffer_create_info, allocation_callbacks, &(window->swap_chain_resources[i].framebuffer));
+        assert(!err);
     }
 
     end = clock();
@@ -411,6 +428,7 @@ void RenderingContextDriverVulkan::_clean_up_swap_chain()
 {
     for (uint32_t i = 0; i < window->image_buffer_count; i++) {
         vkFreeCommandBuffers(device, command_pool, 1, &window->swap_chain_resources[i].command_buffer);
+        vkDestroyFramebuffer(device, window->swap_chain_resources[i].framebuffer, allocation_callbacks);
         vkDestroyImageView(device, window->swap_chain_resources[i].image_view, allocation_callbacks);
     }
 

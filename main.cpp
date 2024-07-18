@@ -93,11 +93,10 @@ int main(int argc, char **argv)
     index_buffer = rd->create_buffer(index_buffer_size);
     rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
 
-    VkPipeline pipeline = VK_NULL_HANDLE;
-    rd->create_graph_pipeline(vertex, fragment,
-                              ARRAY_SIZE(binds), binds,
-                              ARRAY_SIZE(attributes), attributes,
-                              &pipeline);
+    RenderingDeviceDriverVulkan::Pipeline *pipeline =
+            rd->create_graph_pipeline(vertex, fragment,
+                                      ARRAY_SIZE(binds), binds,
+                                      ARRAY_SIZE(attributes), attributes);
 
     uint32_t index = 0;
     VkCommandBuffer graph_command_buffer;
@@ -128,6 +127,7 @@ int main(int argc, char **argv)
 
     rd->destroy_buffer(index_buffer);
     rd->destroy_buffer(vertex_buffer);
+    rd->destroy_pipeline(pipeline);
     rc->destroy_render_device(rd);
     glfwDestroyWindow(window);
     glfwTerminate();
