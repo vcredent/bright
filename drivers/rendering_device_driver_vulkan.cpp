@@ -86,7 +86,7 @@ RenderingDeviceDriverVulkan::create_descriptor_set_layout(uint32_t bind_count, V
 {
     VkResult U_ASSERT_ONLY err;
 
-    VkDescriptorSetLayoutCreateInfo descriptor_layout_create_info = {
+    VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
             /* pNext */ nextptr,
             /* flags */ no_flag_bits,
@@ -94,7 +94,7 @@ RenderingDeviceDriverVulkan::create_descriptor_set_layout(uint32_t bind_count, V
             /* pBindings */ p_bind,
     };
 
-    err = vkCreateDescriptorSetLayout(vk_device, &descriptor_layout_create_info, allocation_callbacks, p_descriptor_set_layout);
+    err = vkCreateDescriptorSetLayout(vk_device, &descriptor_set_layout_create_info, allocation_callbacks, p_descriptor_set_layout);
     assert(!err);
 }
 
@@ -104,9 +104,9 @@ void RenderingDeviceDriverVulkan::destroy_descriptor_set_layout(VkDescriptorSetL
 }
 
 void
-RenderingDeviceDriverVulkan::allocate_descriptor_set(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor)
+RenderingDeviceDriverVulkan::allocate_descriptor(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor)
 {
-    VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {
+    VkDescriptorSetAllocateInfo descriptor_allocate_info = {
             /* sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
             /* pNext */ nextptr,
             /* descriptorPool */ descriptor_pool,
@@ -114,15 +114,15 @@ RenderingDeviceDriverVulkan::allocate_descriptor_set(VkDescriptorSetLayout descr
             /* pSetLayouts */ &descriptor_set_layout,
     };
 
-    vkAllocateDescriptorSets(vk_device, &descriptor_set_allocate_info, p_descriptor);
+    vkAllocateDescriptorSets(vk_device, &descriptor_allocate_info, p_descriptor);
 }
 
-void RenderingDeviceDriverVulkan::free_descriptor_set(VkDescriptorSet descriptor)
+void RenderingDeviceDriverVulkan::free_descriptor(VkDescriptorSet descriptor)
 {
     vkFreeDescriptorSets(vk_device, descriptor_pool, 1, &descriptor);
 }
 
-void RenderingDeviceDriverVulkan::write_descriptor(Buffer *p_buffer, VkDescriptorSet descriptor_set)
+void RenderingDeviceDriverVulkan::write_descriptor_set(Buffer *p_buffer, VkDescriptorSet descriptor_set)
 {
     VkDescriptorBufferInfo buffer_info = {
             /* buffer */ p_buffer->vk_buffer,
@@ -146,7 +146,7 @@ void RenderingDeviceDriverVulkan::write_descriptor(Buffer *p_buffer, VkDescripto
     vkUpdateDescriptorSets(vk_device, 1, &write_info, 0, nullptr);
 }
 
-RenderingDeviceDriverVulkan::Pipeline *RenderingDeviceDriverVulkan::create_graph_pipeline(const char *vertex_shader, const char *fragment_shader, uint32_t bind_count, VkVertexInputBindingDescription *p_bind, uint32_t attribute_count, VkVertexInputAttributeDescription *p_attribute, uint32_t layout_count, VkDescriptorSetLayout *p_descriptor_set_layout)
+RenderingDeviceDriverVulkan::Pipeline *RenderingDeviceDriverVulkan::create_graph_pipeline(ShaderInfo *p_shader_info)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -154,8 +154,8 @@ RenderingDeviceDriverVulkan::Pipeline *RenderingDeviceDriverVulkan::create_graph
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
             /* pNext */ nextptr,
             /* flags */ no_flag_bits,
-            /* setLayoutCount */ layout_count,
-            /* pSetLayouts */ p_descriptor_set_layout,
+            /* setLayoutCount */ p_shader_info->descriptor_count,
+            /* pSetLayouts */ p_shader_info->descriptor_set_layouts,
             /* pushConstantRangeCount */ 0,
             /* pPushConstantRanges */ nullptr,
     };
@@ -166,8 +166,8 @@ RenderingDeviceDriverVulkan::Pipeline *RenderingDeviceDriverVulkan::create_graph
 
     VkShaderModule vertex_shader_module, fragment_shader_module;
 
-    vertex_shader_module = load_shader_module(vk_device, vertex_shader);
-    fragment_shader_module = load_shader_module(vk_device, fragment_shader);
+    vertex_shader_module = load_shader_module(vk_device, p_shader_info->vertex);
+    fragment_shader_module = load_shader_module(vk_device, p_shader_info->fragment);
 
     VkPipelineShaderStageCreateInfo vertex_shader_create_info = {};
     vertex_shader_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -189,10 +189,10 @@ RenderingDeviceDriverVulkan::Pipeline *RenderingDeviceDriverVulkan::create_graph
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
             /* pNext */ nextptr,
             /* flags */ no_flag_bits,
-            /* vertexBindingDescriptionCount */ bind_count,
-            /* pVertexBindingDescriptions */ p_bind,
-            /* vertexAttributeDescriptionCount */ attribute_count,
-            /* pVertexAttributeDescriptions */ p_attribute,
+            /* vertexBindingDescriptionCount */ p_shader_info->bind_count,
+            /* pVertexBindingDescriptions */ p_shader_info->binds,
+            /* vertexAttributeDescriptionCount */ p_shader_info->attribute_count,
+            /* pVertexAttributeDescriptions */ p_shader_info->attributes,
     };
 
     VkPipelineInputAssemblyStateCreateInfo input_assembly = {

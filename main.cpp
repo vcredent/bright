@@ -79,9 +79,6 @@ int main(int argc, char **argv)
         printf("glfw resize event exec time: %ldms\n", end - start);
     });
 
-    const char *vertex = "../shader/vertex.glsl.spv";
-    const char *fragment = "../shader/fragment.glsl.spv";
-
     VkVertexInputBindingDescription binds[] = {
             { 0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX  }
     };
@@ -92,6 +89,33 @@ int main(int argc, char **argv)
             { 2, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, texCoord) },
     };
 
+    VkDescriptorSetLayoutBinding descriptor_layout_binds[] = {
+            { 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, VK_NULL_HANDLE },
+    };
+
+    RenderingDeviceDriverVulkan::Buffer *mvp_matrix_buffer;
+    mvp_matrix_buffer = rd->create_buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(MVPMatrix));
+
+    VkDescriptorSetLayout descriptor_layout;
+    rd->create_descriptor_set_layout(ARRAY_SIZE(descriptor_layout_binds), descriptor_layout_binds, &descriptor_layout);
+
+    VkDescriptorSet mvp_descriptor;
+    rd->allocate_descriptor(descriptor_layout, &mvp_descriptor);
+
+    RenderingDeviceDriverVulkan::ShaderInfo shader_info = {
+            /* vertex= */ "../shader/vertex.glsl.spv",
+            /* fragment= */ "../shader/fragment.glsl.spv",
+            /* attribute_count= */ ARRAY_SIZE(attributes),
+            /* attributes= */ attributes,
+            /* bind_count= */ ARRAY_SIZE(binds),
+            /* binds= */ binds,
+            /* descriptor_count= */ 1,
+            /* descriptor_layouts= */ &descriptor_layout,
+    };
+
+    RenderingDeviceDriverVulkan::Pipeline *pipeline;
+    pipeline = rd->create_graph_pipeline(&shader_info);
+
     RenderingDeviceDriverVulkan::Buffer *vertex_buffer;
     size_t vertices_buf_size = std::size(vertices) * sizeof(Vertex);
     vertex_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, vertices_buf_size);
@@ -101,25 +125,6 @@ int main(int argc, char **argv)
     size_t index_buffer_size = std::size(indices) * sizeof(uint32_t);
     index_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, index_buffer_size);
     rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
-
-    VkDescriptorSetLayoutBinding descriptor_layout_binds[] = {
-            { 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, VK_NULL_HANDLE },
-    };
-
-    RenderingDeviceDriverVulkan::Buffer *mvp_matrix_buffer;
-    mvp_matrix_buffer = rd->create_buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(MVPMatrix));
-
-    VkDescriptorSetLayout descriptor_set_layout;
-    rd->create_descriptor_set_layout(ARRAY_SIZE(descriptor_layout_binds), descriptor_layout_binds, &descriptor_set_layout);
-
-    VkDescriptorSet mvp_descriptor_set;
-    rd->allocate_descriptor_set(descriptor_set_layout, &mvp_descriptor_set);
-
-    RenderingDeviceDriverVulkan::Pipeline *pipeline =
-            rd->create_graph_pipeline(vertex, fragment,
-                                      ARRAY_SIZE(binds), binds,
-                                      ARRAY_SIZE(attributes), attributes,
-                                      1, &descriptor_set_layout);
 
     uint32_t index = 0;
     VkRenderPass render_pass;
@@ -155,8 +160,8 @@ int main(int argc, char **argv)
                 rd->write_buffer(mvp_matrix_buffer, 0, sizeof(MVPMatrix), &mvp);
 
                 rd->command_bind_graph_pipeline(graph_command_buffer, pipeline);
-                rd->command_bind_descriptor(graph_command_buffer, pipeline, mvp_descriptor_set);
-                rd->write_descriptor(mvp_matrix_buffer, mvp_descriptor_set);
+                rd->command_bind_descriptor(graph_command_buffer, pipeline, mvp_descriptor);
+                rd->write_descriptor_set(mvp_matrix_buffer, mvp_descriptor);
 
                 VkDeviceSize offset = 0;
                 vkCmdBindVertexBuffers(graph_command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
@@ -176,8 +181,8 @@ int main(int argc, char **argv)
     rd->destroy_buffer(index_buffer);
     rd->destroy_buffer(vertex_buffer);
     rd->destroy_pipeline(pipeline);
-    rd->free_descriptor_set(mvp_descriptor_set);
-    rd->destroy_descriptor_set_layout(descriptor_set_layout);
+    rd->free_descriptor(mvp_descriptor);
+    rd->destroy_descriptor_set_layout(descriptor_layout);
     rc->destroy_render_device(rd);
     glfwDestroyWindow(window);
     glfwTerminate();

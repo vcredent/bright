@@ -31,11 +31,23 @@ public:
     RenderingDeviceDriverVulkan(RenderingContextDriverVulkan *driver_context);
     ~RenderingDeviceDriverVulkan();
 
+public:
     struct Buffer {
         VkBuffer vk_buffer;
         VkDeviceSize size;
         VmaAllocation allocation;
         VmaAllocationInfo allocation_info;
+    };
+
+    struct ShaderInfo {
+        const char *vertex;
+        const char *fragment;
+        uint32_t attribute_count;
+        VkVertexInputAttributeDescription *attributes;
+        uint32_t bind_count;
+        VkVertexInputBindingDescription *binds;
+        uint32_t descriptor_count;
+        VkDescriptorSetLayout *descriptor_set_layouts;
     };
 
     struct Pipeline {
@@ -44,6 +56,7 @@ public:
         VkPipelineBindPoint bind_point;
     };
 
+public:
     Buffer *create_buffer(VkBufferUsageFlags usage, VkDeviceSize size);
     void destroy_buffer(Buffer *p_buffer);
     void write_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
@@ -51,10 +64,11 @@ public:
 
     void create_descriptor_set_layout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout);
     void destroy_descriptor_set_layout(VkDescriptorSetLayout descriptor_set_layout);
-    void allocate_descriptor_set(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor);
-    void free_descriptor_set(VkDescriptorSet descriptor);
-    void write_descriptor(Buffer *p_buffer, VkDescriptorSet descriptor_set);
-    Pipeline *create_graph_pipeline(const char *vertex_shader, const char *fragment_shader, uint32_t bind_count, VkVertexInputBindingDescription *p_bind, uint32_t attribute_count, VkVertexInputAttributeDescription *p_attribute, uint32_t layout_count, VkDescriptorSetLayout *p_descriptor_set_layout);
+    void allocate_descriptor(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor);
+    void free_descriptor(VkDescriptorSet descriptor);
+    void write_descriptor_set(Buffer *p_buffer, VkDescriptorSet descriptor_set);
+
+    Pipeline *create_graph_pipeline(ShaderInfo *p_shader_attribute);
     void destroy_pipeline(Pipeline *p_pipeline);
 
     void command_buffer_begin(VkCommandBuffer *p_command_buffer);
