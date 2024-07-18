@@ -39,7 +39,8 @@ public:
 
     Buffer *create_buffer(VkDeviceSize size);
     void destroy_buffer(Buffer *p_buffer);
-    void write_buffer(Buffer *buffer, VkDeviceSize offset, void *bytecode, VkDeviceSize size);
+    void write_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
+    void read_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
 
     void create_graph_pipeline(const char *vertex_shader, const char *fragment_shader,
                                uint32_t bind_count,

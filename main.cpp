@@ -79,19 +79,21 @@ int main(int argc, char **argv)
             { 0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, texCoord) },
     };
 
+    RenderingDeviceDriverVulkan::Buffer *vertex_buffer;
+    size_t vertices_buf_size = std::size(vertices) * sizeof(Vertex);
+    vertex_buffer = rd->create_buffer(vertices_buf_size);
+    rd->write_buffer(vertex_buffer, 0, vertices_buf_size, (void *) std::data(vertices));
+
+    RenderingDeviceDriverVulkan::Buffer *index_buffer;
+    size_t index_buffer_size = std::size(indices) * sizeof(uint32_t);
+    index_buffer = rd->create_buffer(index_buffer_size);
+    rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
+
     VkPipeline pipeline = VK_NULL_HANDLE;
     rd->create_graph_pipeline(vertex, fragment,
                               0, nullptr,
                               ARRAY_SIZE(attribute), attribute,
                               &pipeline);
-
-    RenderingDeviceDriverVulkan::Buffer *vertex_buffer;
-    vertex_buffer = rd->create_buffer(std::size(vertices));
-    rd->write_buffer(vertex_buffer, 0, (void *) std::data(vertices), std::size(vertices));
-
-    RenderingDeviceDriverVulkan::Buffer *index_buffer;
-    index_buffer = rd->create_buffer(std::size(indices));
-    rd->write_buffer(index_buffer, 0, (void *) std::data(indices), std::size(indices));
 
     VkCommandBuffer graph_command_buffer;
     while (!glfwWindowShouldClose(window)) {

@@ -64,11 +64,20 @@ void RenderingDeviceDriverVulkan::destroy_buffer(Buffer *p_buffer)
     free(p_buffer);
 }
 
-void RenderingDeviceDriverVulkan::write_buffer(Buffer *buffer, VkDeviceSize offset, void *bytecode, VkDeviceSize size)
+void RenderingDeviceDriverVulkan::write_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf)
 {
-    void **tmp;
-    vmaMapMemory(allocator, buffer->allocation, tmp);
-    memcpy((tmp + offset), bytecode, size);
+    char *tmp;
+    vmaMapMemory(allocator, buffer->allocation, (void **) &tmp);
+    memcpy((tmp + offset), buf, size);
+    vmaUnmapMemory(allocator, buffer->allocation);
+}
+
+void
+RenderingDeviceDriverVulkan::read_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf)
+{
+    char *tmp;
+    vmaMapMemory(allocator, buffer->allocation, (void **) &tmp);
+    memcpy(buf, (tmp + offset), size);
     vmaUnmapMemory(allocator, buffer->allocation);
 }
 
