@@ -49,8 +49,10 @@ public:
                                VkVertexInputAttributeDescription *p_attribute,
                                VkPipeline *p_pipeline);
 
-    void begin_graph_command_buffer(VkCommandBuffer *p_command_buffer);
-    void end_graph_command_buffer(VkCommandBuffer command_buffer);
+    void command_buffer_begin(VkCommandBuffer *p_command_buffer);
+    void command_buffer_end(VkCommandBuffer command_buffer);
+    void command_begin_render_pass(VkCommandBuffer command_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect);
+    void command_end_render_pass(VkCommandBuffer command_buffer);
     void command_bind_vertex_buffer(Buffer *p_buffer);
     void command_bind_graph_pipeline(VkCommandBuffer command_buffer, VkPipeline pipeline);
 

@@ -129,6 +129,14 @@ void RenderingContextDriverVulkan::allocate_command_buffer(VkCommandBufferLevel 
     assert(!err);
 }
 
+void
+RenderingContextDriverVulkan::acquire_next_framebuffer(VkCommandBuffer *p_command_buffer, uint32_t index, VkRenderPass *p_render_pass, VkFramebuffer *p_framebuffer)
+{
+    *p_command_buffer = window->swap_chain_resources[index].command_buffer;
+    *p_render_pass = window->render_pass;
+    *p_framebuffer = window->swap_chain_resources[index].framebuffer;
+}
+
 void RenderingContextDriverVulkan::free_command_buffer(VkCommandBuffer command_buffer)
 {
     vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);

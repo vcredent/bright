@@ -51,14 +51,14 @@ int main(int argc, char **argv)
     GLFWwindow *window = glfwCreateWindow(800, 600, "CopilotEngine", nullptr, nullptr);
     assert(window != nullptr);
 
-    auto render_context = std::make_unique<RenderingContextDriverVulkanWin32>(window);
+    auto rc = std::make_unique<RenderingContextDriverVulkanWin32>(window);
     // initialize
-    render_context->initialize();
+    rc->initialize();
 
     RenderingDeviceDriverVulkan *rd;
-    rd = render_context->load_render_device();
+    rd = rc->load_render_device();
 
-    glfwSetWindowUserPointer(window, render_context.get());
+    glfwSetWindowUserPointer(window, rc.get());
     glfwSetWindowSizeCallback(window, [] (GLFWwindow *window, int w, int h) {
         clock_t start, end;
 
@@ -73,10 +73,14 @@ int main(int argc, char **argv)
     const char *vertex = "../shader/vertex.glsl.spv";
     const char *fragment = "../shader/fragment.glsl.spv";
 
-    VkVertexInputAttributeDescription attribute[] = {
+    VkVertexInputBindingDescription binds[] = {
+            { 0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX  }
+    };
+
+    VkVertexInputAttributeDescription attributes[] = {
             { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) },
-            { 0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color) },
-            { 0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, texCoord) },
+            { 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color) },
+            { 2, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, texCoord) },
     };
 
     RenderingDeviceDriverVulkan::Buffer *vertex_buffer;
@@ -91,27 +95,40 @@ int main(int argc, char **argv)
 
     VkPipeline pipeline = VK_NULL_HANDLE;
     rd->create_graph_pipeline(vertex, fragment,
-                              0, nullptr,
-                              ARRAY_SIZE(attribute), attribute,
+                              ARRAY_SIZE(binds), binds,
+                              ARRAY_SIZE(attributes), attributes,
                               &pipeline);
 
+    uint32_t index = 0;
     VkCommandBuffer graph_command_buffer;
+    VkRenderPass render_pass;
+    VkFramebuffer framebuffer;
+
     while (!glfwWindowShouldClose(window)) {
-        rd->begin_graph_command_buffer(&graph_command_buffer);
+        index = index >= 3 ? 0 : index;
+        rc->acquire_next_framebuffer(&graph_command_buffer, index, &render_pass, &framebuffer);
+        rd->command_buffer_begin(&graph_command_buffer);
         {
-            VkDeviceSize offset = 0;
-            vkCmdBindVertexBuffers(graph_command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
-            vkCmdBindIndexBuffer(graph_command_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
-            rd->command_bind_graph_pipeline(graph_command_buffer, pipeline);
-            vkCmdDrawIndexed(graph_command_buffer, std::size(indices), 1, 0, 0, 0);
+            VkRect2D rect = {};
+            rect.extent = { rc->get_width(), rc->get_height() };
+            rd->command_begin_render_pass(graph_command_buffer, render_pass, framebuffer, &rect);
+            {
+                VkDeviceSize offset = 0;
+                vkCmdBindVertexBuffers(graph_command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
+                vkCmdBindIndexBuffer(graph_command_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
+                rd->command_bind_graph_pipeline(graph_command_buffer, pipeline);
+                vkCmdDrawIndexed(graph_command_buffer, std::size(indices), 1, 0, 0, 0);
+            }
+            rd->command_end_render_pass(graph_command_buffer);
         }
-        rd->end_graph_command_buffer(graph_command_buffer);
+        rd->command_buffer_end(graph_command_buffer);
         glfwPollEvents();
+        index++;
     }
 
     rd->destroy_buffer(index_buffer);
     rd->destroy_buffer(vertex_buffer);
-    render_context->destroy_render_device(rd);
+    rc->destroy_render_device(rd);
     glfwDestroyWindow(window);
     glfwTerminate();
 

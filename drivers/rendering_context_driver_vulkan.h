@@ -57,6 +57,7 @@ public:
     uint32_t get_height() { return window->capabilities.currentExtent.height; }
     VkRenderPass get_render_pass() { return window->render_pass; }
 
+    void acquire_next_framebuffer(VkCommandBuffer *p_command_buffer, uint32_t index, VkRenderPass *p_render_pass, VkFramebuffer *p_framebuffer);
     void allocate_command_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_command_buffer);
     void free_command_buffer(VkCommandBuffer command_buffer);
 

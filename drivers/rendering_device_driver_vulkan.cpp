@@ -277,7 +277,7 @@ void RenderingDeviceDriverVulkan::_initialize_descriptor_pool()
     assert(!err);
 }
 
-void RenderingDeviceDriverVulkan::begin_graph_command_buffer(VkCommandBuffer *p_command_buffer)
+void RenderingDeviceDriverVulkan::command_buffer_begin(VkCommandBuffer *p_command_buffer)
 {
     VkCommandBufferBeginInfo command_buffer_begin_info = {
             /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -289,9 +289,33 @@ void RenderingDeviceDriverVulkan::begin_graph_command_buffer(VkCommandBuffer *p_
     *p_command_buffer = graph_command_buffer;
 }
 
-void RenderingDeviceDriverVulkan::end_graph_command_buffer(VkCommandBuffer command_buffer)
+void RenderingDeviceDriverVulkan::command_buffer_end(VkCommandBuffer command_buffer)
 {
     vkEndCommandBuffer(command_buffer);
+}
+
+void RenderingDeviceDriverVulkan::command_begin_render_pass(VkCommandBuffer command_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect)
+{
+    VkClearValue clear_color = {
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    VkRenderPassBeginInfo render_pass_begin_info = {
+            /* sType */ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+            /* pNext */ nextptr,
+            /* renderPass */ render_pass,
+            /* framebuffer */ framebuffer,
+            /* renderArea */ *p_rect,
+            /* clearValueCount */ 1,
+            /* pClearValues */ &clear_color,
+    };
+
+    vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+}
+
+void RenderingDeviceDriverVulkan::command_end_render_pass(VkCommandBuffer command_buffer)
+{
+    vkCmdEndRenderPass(command_buffer);
 }
 
 void RenderingDeviceDriverVulkan::command_bind_graph_pipeline(VkCommandBuffer command_buffer, VkPipeline pipeline)
