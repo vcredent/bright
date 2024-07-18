@@ -137,19 +137,20 @@ RenderDeviceContext::get_window_semaphore(VkSemaphore *p_available_semaphore, Vk
     *p_finished_semaphore = window->render_finished_semaphore;
 }
 
-void RenderDeviceContext::acquire_next_image(VkSemaphore wait_semaphore, uint32_t *p_index)
+void RenderDeviceContext::acquire_next_image(RenderDeviceContext::AcquiredNext *p_acquired_next)
 {
-    VkResult U_ASSERT_ONLY err;
-    err = vkAcquireNextImageKHR(device, window->swap_chain, UINT32_MAX, wait_semaphore, VK_NULL_HANDLE, p_index);
-    assert(!err);
-}
+    p_acquired_next->swap_chain = window->swap_chain;
+    p_acquired_next->wait_semaphore = window->image_available_semaphore;
+    p_acquired_next->render_pass = window->render_pass;
 
-void
-RenderDeviceContext::acquire_next_framebuffer(VkCommandBuffer *p_command_buffer, uint32_t index, VkRenderPass *p_render_pass, VkFramebuffer *p_framebuffer)
-{
-    *p_command_buffer = window->swap_chain_resources[index].command_buffer;
-    *p_render_pass = window->render_pass;
-    *p_framebuffer = window->swap_chain_resources[index].framebuffer;
+    VkResult U_ASSERT_ONLY err;
+    err = vkAcquireNextImageKHR(device, window->swap_chain, UINT32_MAX, p_acquired_next->wait_semaphore, VK_NULL_HANDLE, &p_acquired_next->index);
+    assert(!err);
+
+    p_acquired_next->command_buffer = window->swap_chain_resources[p_acquired_next->index].command_buffer;
+    p_acquired_next->framebuffer = window->swap_chain_resources[p_acquired_next->index].framebuffer;
+    p_acquired_next->width = window->capabilities.currentExtent.width;
+    p_acquired_next->height = window->capabilities.currentExtent.height;
 }
 
 void RenderDeviceContext::free_command_buffer(VkCommandBuffer command_buffer)

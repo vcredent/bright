@@ -27,7 +27,6 @@ RenderDevice::RenderDevice(RenderDeviceContext *driver_context)
 {
     vk_device = vk_driver_context->get_device();
     allocator = vk_driver_context->get_allocator();
-    vk_driver_context->allocate_command_buffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, &graph_command_buffer);
 
     _initialize_descriptor_pool();
 }
@@ -351,7 +350,7 @@ void RenderDevice::destroy_pipeline(Pipeline *p_pipeline)
     vkDestroyPipeline(vk_device, p_pipeline->pipeline, allocation_callbacks);
 }
 
-void RenderDevice::command_buffer_begin(VkCommandBuffer *p_command_buffer)
+void RenderDevice::command_buffer_begin(VkCommandBuffer command_buffer)
 {
     VkCommandBufferBeginInfo command_buffer_begin_info = {
             /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -359,8 +358,7 @@ void RenderDevice::command_buffer_begin(VkCommandBuffer *p_command_buffer)
             /* flags */ VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT,
             /* pInheritanceInfo */ nullptr,
     };
-    vkBeginCommandBuffer(graph_command_buffer, &command_buffer_begin_info);
-    *p_command_buffer = graph_command_buffer;
+    vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info);
 }
 
 void RenderDevice::command_buffer_end(VkCommandBuffer command_buffer)

@@ -25,7 +25,6 @@
 #include <time.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <chrono>
 
@@ -60,14 +59,14 @@ int main(int argc, char **argv)
     GLFWwindow *window = glfwCreateWindow(800, 600, "CopilotEngine", nullptr, nullptr);
     assert(window != nullptr);
 
-    auto rc = std::make_unique<RenderDeviceContextWin32>(window);
+    auto rdc = std::make_unique<RenderDeviceContextWin32>(window);
     // initialize
-    rc->initialize();
+    rdc->initialize();
 
     RenderDevice *rd;
-    rd = rc->load_render_device();
+    rd = rdc->load_render_device();
 
-    glfwSetWindowUserPointer(window, rc.get());
+    glfwSetWindowUserPointer(window, rdc.get());
     glfwSetWindowSizeCallback(window, [] (GLFWwindow *window, int w, int h) {
         clock_t start, end;
 
@@ -126,28 +125,23 @@ int main(int argc, char **argv)
     index_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, index_buffer_size);
     rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
 
-    uint32_t index = 0;
-    VkRenderPass render_pass;
-    VkFramebuffer framebuffer;
-    VkSwapchainKHR swap_chain;
-    VkCommandBuffer graph_command_buffer;
-
     VkQueue graph_queue;
     VkSemaphore image_available_semaphore, render_finished_semaphore;
-    rc->get_window_semaphore(&image_available_semaphore, &render_finished_semaphore);
-    rc->get_graph_queue(&graph_queue);
-    rc->get_swap_chain(&swap_chain);
+    rdc->get_window_semaphore(&image_available_semaphore, &render_finished_semaphore);
+    rdc->get_graph_queue(&graph_queue);
 
     float speed = 1.0f;
 
+    RenderDeviceContext::AcquiredNext *acquired_next;
+    acquired_next = (RenderDeviceContext::AcquiredNext *) imalloc(sizeof(RenderDeviceContext::AcquiredNext));
+
     while (!glfwWindowShouldClose(window)) {
-        rc->acquire_next_image(image_available_semaphore, &index);
-        rc->acquire_next_framebuffer(&graph_command_buffer, index, &render_pass, &framebuffer);
-        rd->command_buffer_begin(&graph_command_buffer);
+        rdc->acquire_next_image(acquired_next);
+        rd->command_buffer_begin(acquired_next->command_buffer);
         {
             VkRect2D rect = {};
-            rect.extent = { rc->get_width(), rc->get_height() };
-            rd->command_begin_render_pass(graph_command_buffer, render_pass, framebuffer, &rect);
+            rect.extent = { rdc->get_width(), rdc->get_height() };
+            rd->command_begin_render_pass(acquired_next->command_buffer, acquired_next->render_pass, acquired_next->framebuffer, &rect);
             {
                 static auto startTime = std::chrono::high_resolution_clock::now();
                 auto currentTime = std::chrono::high_resolution_clock::now();
@@ -155,35 +149,36 @@ int main(int argc, char **argv)
                 MVPMatrix mvp = {};
                 mvp.m = glm::rotate(glm::mat4(1.0f), time * glm::radians(speed), glm::vec3(1.0f, 0.5f, 2.0f));
                 mvp.v = glm::lookAt(glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-                mvp.p = glm::perspective(glm::radians(45.0f), rc->get_width() / (float) rc->get_height(), 0.1f, 10.0f);
+                mvp.p = glm::perspective(glm::radians(45.0f), rdc->get_width() / (float) rdc->get_height(), 0.1f, 10.0f);
                 mvp.p[1][1] *= -1;
                 rd->write_buffer(mvp_matrix_buffer, 0, sizeof(MVPMatrix), &mvp);
 
-                rd->command_bind_graph_pipeline(graph_command_buffer, pipeline);
-                rd->command_bind_descriptor(graph_command_buffer, pipeline, mvp_descriptor);
+                rd->command_bind_graph_pipeline(acquired_next->command_buffer, pipeline);
+                rd->command_bind_descriptor(acquired_next->command_buffer, pipeline, mvp_descriptor);
                 rd->write_descriptor_set(mvp_matrix_buffer, mvp_descriptor);
 
                 VkDeviceSize offset = 0;
-                vkCmdBindVertexBuffers(graph_command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
-                vkCmdBindIndexBuffer(graph_command_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
-                vkCmdDrawIndexed(graph_command_buffer, std::size(indices), 1, 0, 0, 0);
+                vkCmdBindVertexBuffers(acquired_next->command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
+                vkCmdBindIndexBuffer(acquired_next->command_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
+                vkCmdDrawIndexed(acquired_next->command_buffer, std::size(indices), 1, 0, 0, 0);
             }
-            rd->command_end_render_pass(graph_command_buffer);
+            rd->command_end_render_pass(acquired_next->command_buffer);
         }
-        rd->command_buffer_end(graph_command_buffer);
+        rd->command_buffer_end(acquired_next->command_buffer);
         VkPipelineStageFlags mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        rd->command_buffer_submit(graph_command_buffer, 1, &image_available_semaphore, 1, &render_finished_semaphore, &mask, graph_queue, VK_NULL_HANDLE);
-        rd->present(graph_queue, swap_chain, index, render_finished_semaphore);
+        rd->command_buffer_submit(acquired_next->command_buffer, 1, &image_available_semaphore, 1, &render_finished_semaphore, &mask, graph_queue, VK_NULL_HANDLE);
+        rd->present(graph_queue, acquired_next->swap_chain, acquired_next->index, render_finished_semaphore);
         glfwPollEvents();
     }
 
+    free(acquired_next);
     rd->destroy_buffer(mvp_matrix_buffer);
     rd->destroy_buffer(index_buffer);
     rd->destroy_buffer(vertex_buffer);
     rd->destroy_pipeline(pipeline);
     rd->free_descriptor(mvp_descriptor);
     rd->destroy_descriptor_set_layout(descriptor_layout);
-    rc->destroy_render_device(rd);
+    rdc->destroy_render_device(rd);
     glfwDestroyWindow(window);
     glfwTerminate();
 

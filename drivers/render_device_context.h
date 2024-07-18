@@ -60,8 +60,18 @@ public:
     void get_graph_queue(VkQueue *p_queue) { *p_queue = graph_queue; };
     void get_swap_chain(VkSwapchainKHR *p_swap_chain) { *p_swap_chain = window->swap_chain; }
 
-    void acquire_next_image(VkSemaphore wait_semaphore, uint32_t *p_index);
-    void acquire_next_framebuffer(VkCommandBuffer *p_command_buffer, uint32_t index, VkRenderPass *p_render_pass, VkFramebuffer *p_framebuffer);
+    struct AcquiredNext {
+        VkSwapchainKHR swap_chain;
+        VkSemaphore wait_semaphore;
+        VkRenderPass render_pass;
+        VkCommandBuffer command_buffer;
+        VkFramebuffer framebuffer;
+        uint32_t index;
+        uint32_t width;
+        uint32_t height;
+    };
+
+    void acquire_next_image(AcquiredNext *p_acquire_next);
     void allocate_command_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_command_buffer);
     void free_command_buffer(VkCommandBuffer command_buffer);
 

@@ -71,7 +71,7 @@ public:
     Pipeline *create_graph_pipeline(ShaderInfo *p_shader_attribute);
     void destroy_pipeline(Pipeline *p_pipeline);
 
-    void command_buffer_begin(VkCommandBuffer *p_command_buffer);
+    void command_buffer_begin(VkCommandBuffer command_buffer);
     void command_buffer_end(VkCommandBuffer command_buffer);
     void command_begin_render_pass(VkCommandBuffer command_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect);
     void command_end_render_pass(VkCommandBuffer command_buffer);
@@ -88,7 +88,6 @@ private:
     VkDevice vk_device;
     VmaAllocator allocator;
     VkDescriptorPool descriptor_pool;
-    VkCommandBuffer graph_command_buffer;
 };
 
 #endif /* _RENDERING_DEVICE_DRIVER_VULKAN_H */
