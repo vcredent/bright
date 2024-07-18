@@ -24,12 +24,21 @@
 #include <memory>
 #include <time.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <vector>
+#include <chrono>
 
 struct Vertex {
     glm::vec3 position;
     glm::vec3 color;
     glm::vec2 texCoord;
+};
+
+struct MVPMatrix {
+    glm::mat4 m;
+    glm::mat4 v;
+    glm::mat4 p;
 };
 
 const std::vector<Vertex> vertices = {
@@ -85,18 +94,32 @@ int main(int argc, char **argv)
 
     RenderingDeviceDriverVulkan::Buffer *vertex_buffer;
     size_t vertices_buf_size = std::size(vertices) * sizeof(Vertex);
-    vertex_buffer = rd->create_buffer(vertices_buf_size);
+    vertex_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, vertices_buf_size);
     rd->write_buffer(vertex_buffer, 0, vertices_buf_size, (void *) std::data(vertices));
 
     RenderingDeviceDriverVulkan::Buffer *index_buffer;
     size_t index_buffer_size = std::size(indices) * sizeof(uint32_t);
-    index_buffer = rd->create_buffer(index_buffer_size);
+    index_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, index_buffer_size);
     rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
+
+    VkDescriptorSetLayoutBinding descriptor_layout_binds[] = {
+            { 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, VK_NULL_HANDLE },
+    };
+
+    RenderingDeviceDriverVulkan::Buffer *mvp_matrix_buffer;
+    mvp_matrix_buffer = rd->create_buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(MVPMatrix));
+
+    VkDescriptorSetLayout descriptor_set_layout;
+    rd->create_descriptor_set_layout(ARRAY_SIZE(descriptor_layout_binds), descriptor_layout_binds, &descriptor_set_layout);
+
+    VkDescriptorSet mvp_descriptor_set;
+    rd->allocate_descriptor_set(descriptor_set_layout, &mvp_descriptor_set);
 
     RenderingDeviceDriverVulkan::Pipeline *pipeline =
             rd->create_graph_pipeline(vertex, fragment,
                                       ARRAY_SIZE(binds), binds,
-                                      ARRAY_SIZE(attributes), attributes);
+                                      ARRAY_SIZE(attributes), attributes,
+                                      1, &descriptor_set_layout);
 
     uint32_t index = 0;
     VkRenderPass render_pass;
@@ -110,6 +133,8 @@ int main(int argc, char **argv)
     rc->get_graph_queue(&graph_queue);
     rc->get_swap_chain(&swap_chain);
 
+    float speed = 1.0f;
+
     while (!glfwWindowShouldClose(window)) {
         rc->acquire_next_image(image_available_semaphore, &index);
         rc->acquire_next_framebuffer(&graph_command_buffer, index, &render_pass, &framebuffer);
@@ -119,7 +144,20 @@ int main(int argc, char **argv)
             rect.extent = { rc->get_width(), rc->get_height() };
             rd->command_begin_render_pass(graph_command_buffer, render_pass, framebuffer, &rect);
             {
+                static auto startTime = std::chrono::high_resolution_clock::now();
+                auto currentTime = std::chrono::high_resolution_clock::now();
+                float time = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count() / 1000.0f;
+                MVPMatrix mvp = {};
+                mvp.m = glm::rotate(glm::mat4(1.0f), time * glm::radians(speed), glm::vec3(1.0f, 0.5f, 2.0f));
+                mvp.v = glm::lookAt(glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+                mvp.p = glm::perspective(glm::radians(45.0f), rc->get_width() / (float) rc->get_height(), 0.1f, 10.0f);
+                mvp.p[1][1] *= -1;
+                rd->write_buffer(mvp_matrix_buffer, 0, sizeof(MVPMatrix), &mvp);
+
                 rd->command_bind_graph_pipeline(graph_command_buffer, pipeline);
+                rd->command_bind_descriptor(graph_command_buffer, pipeline, mvp_descriptor_set);
+                rd->write_descriptor(mvp_matrix_buffer, mvp_descriptor_set);
+
                 VkDeviceSize offset = 0;
                 vkCmdBindVertexBuffers(graph_command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
                 vkCmdBindIndexBuffer(graph_command_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
@@ -134,9 +172,12 @@ int main(int argc, char **argv)
         glfwPollEvents();
     }
 
+    rd->destroy_buffer(mvp_matrix_buffer);
     rd->destroy_buffer(index_buffer);
     rd->destroy_buffer(vertex_buffer);
     rd->destroy_pipeline(pipeline);
+    rd->free_descriptor_set(mvp_descriptor_set);
+    rd->destroy_descriptor_set_layout(descriptor_set_layout);
     rc->destroy_render_device(rd);
     glfwDestroyWindow(window);
     glfwTerminate();
