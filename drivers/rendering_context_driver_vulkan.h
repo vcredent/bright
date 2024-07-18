@@ -56,7 +56,11 @@ public:
     uint32_t get_width() { return window->capabilities.currentExtent.width; }
     uint32_t get_height() { return window->capabilities.currentExtent.height; }
     VkRenderPass get_render_pass() { return window->render_pass; }
+    void get_window_semaphore(VkSemaphore *p_available_semaphore, VkSemaphore *p_finished_semaphore);
+    void get_graph_queue(VkQueue *p_queue) { *p_queue = graph_queue; };
+    void get_swap_chain(VkSwapchainKHR *p_swap_chain) { *p_swap_chain = window->swap_chain; }
 
+    void acquire_next_image(VkSemaphore wait_semaphore, uint32_t *p_index);
     void acquire_next_framebuffer(VkCommandBuffer *p_command_buffer, uint32_t index, VkRenderPass *p_render_pass, VkFramebuffer *p_framebuffer);
     void allocate_command_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_command_buffer);
     void free_command_buffer(VkCommandBuffer command_buffer);
@@ -82,6 +86,8 @@ protected:
         VkRenderPass render_pass = VK_NULL_HANDLE;
         VkSwapchainKHR swap_chain = VK_NULL_HANDLE;
         SwapchainResource *swap_chain_resources;
+        VkSemaphore image_available_semaphore;
+        VkSemaphore render_finished_semaphore;
     };
 
     void _initialize_window(VkSurfaceKHR surface);
@@ -90,6 +96,7 @@ private:
     void _clean_up_window();
 
     void _create_device();
+    void _initialize_window_semaphore();
     void _create_command_pool();
     void _create_vma_allocator();
     void _create_swap_chain();

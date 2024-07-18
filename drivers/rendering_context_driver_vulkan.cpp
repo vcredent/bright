@@ -106,6 +106,7 @@ RenderingContextDriverVulkan::~RenderingContextDriverVulkan()
 Error RenderingContextDriverVulkan::initialize()
 {
     _create_device();
+    _initialize_window_semaphore();
     _create_command_pool();
     _create_vma_allocator();
     _create_swap_chain();
@@ -126,6 +127,20 @@ void RenderingContextDriverVulkan::allocate_command_buffer(VkCommandBufferLevel 
     };
 
     err = vkAllocateCommandBuffers(device, &allocate_info, p_command_buffer);
+    assert(!err);
+}
+
+void
+RenderingContextDriverVulkan::get_window_semaphore(VkSemaphore *p_available_semaphore, VkSemaphore *p_finished_semaphore)
+{
+    *p_available_semaphore = window->image_available_semaphore;
+    *p_finished_semaphore = window->render_finished_semaphore;
+}
+
+void RenderingContextDriverVulkan::acquire_next_image(VkSemaphore wait_semaphore, uint32_t *p_index)
+{
+    VkResult U_ASSERT_ONLY err;
+    err = vkAcquireNextImageKHR(device, window->swap_chain, UINT32_MAX, wait_semaphore, VK_NULL_HANDLE, p_index);
     assert(!err);
 }
 
@@ -184,6 +199,8 @@ void RenderingContextDriverVulkan::_initialize_window(VkSurfaceKHR surface)
 
 void RenderingContextDriverVulkan::_clean_up_window()
 {
+    vkDestroySemaphore(device, window->image_available_semaphore, allocation_callbacks);
+    vkDestroySemaphore(device, window->render_finished_semaphore, allocation_callbacks);
     vkDestroySwapchainKHR(device, window->swap_chain, allocation_callbacks);
     vkDestroyRenderPass(device, window->render_pass, allocation_callbacks);
     _clean_up_swap_chain();
@@ -248,6 +265,20 @@ void RenderingContextDriverVulkan::_create_device()
     vkGetDeviceQueue(device, graph_queue_family, 0, &graph_queue);
 }
 
+void RenderingContextDriverVulkan::_initialize_window_semaphore()
+{
+    VkResult U_ASSERT_ONLY err;
+
+    VkSemaphoreCreateInfo semaphore_create_info = {};
+    semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    err = vkCreateSemaphore(device, &semaphore_create_info, allocation_callbacks, &window->image_available_semaphore);
+    assert(!err);
+
+    err = vkCreateSemaphore(device, &semaphore_create_info, allocation_callbacks, &window->render_finished_semaphore);
+    assert(!err);
+}
+
 void RenderingContextDriverVulkan::_create_command_pool()
 {
     VkResult U_ASSERT_ONLY err;
@@ -293,7 +324,7 @@ void RenderingContextDriverVulkan::_create_swap_chain()
         attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
         attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-                attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
@@ -341,20 +372,13 @@ void RenderingContextDriverVulkan::_create_swap_chain()
             /* oldSwapchain */ old_swap_chain,
     };
 
-    clock_t start, end;
-
-    start = clock();
     err = vkCreateSwapchainKHR(device, &swap_chain_create_info, allocation_callbacks, &window->swap_chain);
-    end = clock();
     assert(!err);
-
-    printf("update swap chain exec time: %ldms\n", end - start);
 
     if (old_swap_chain)
         vkDestroySwapchainKHR(device, old_swap_chain, allocation_callbacks);
 
     /* initialize swap chain resources */
-    start = clock();
     window->swap_chain_resources = (SwapchainResource *) imalloc(sizeof(SwapchainResource) * window->image_buffer_count);
 
     VkImage swap_chain_images[window->image_buffer_count];
@@ -362,8 +386,7 @@ void RenderingContextDriverVulkan::_create_swap_chain()
     assert(!err);
 
     for (uint32_t i = 0; i < window->image_buffer_count; i++) {
-        SwapchainResource *resource = &window->swap_chain_resources[i];
-        resource->image = swap_chain_images[i];
+        window->swap_chain_resources[i].image = swap_chain_images[i];
 
         VkCommandBufferAllocateInfo command_allocate_info = {
                 /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -373,13 +396,13 @@ void RenderingContextDriverVulkan::_create_swap_chain()
                 /* commandBufferCount */ 1
         };
 
-        vkAllocateCommandBuffers(device, &command_allocate_info, &resource->command_buffer);
+        vkAllocateCommandBuffers(device, &command_allocate_info, &(window->swap_chain_resources[i].command_buffer));
 
         VkImageViewCreateInfo image_view_create_info = {
                 /* sType */ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
                 /* pNext */ nextptr,
                 /* flags */ no_flag_bits,
-                /* image */ resource->image,
+                /* image */ window->swap_chain_resources[i].image,
                 /* viewType */ VK_IMAGE_VIEW_TYPE_2D,
                 /* format */ window->format,
                 /* components */
@@ -399,7 +422,7 @@ void RenderingContextDriverVulkan::_create_swap_chain()
                     },
         };
 
-        err = vkCreateImageView(device, &image_view_create_info, allocation_callbacks, &resource->image_view);
+        err = vkCreateImageView(device, &image_view_create_info, allocation_callbacks, &(window->swap_chain_resources[i].image_view));
         assert(!err);
 
         VkImageView framebuffer_attachments[] = { window->swap_chain_resources[i].image_view };
@@ -419,9 +442,6 @@ void RenderingContextDriverVulkan::_create_swap_chain()
         err = vkCreateFramebuffer(device, &framebuffer_create_info, allocation_callbacks, &(window->swap_chain_resources[i].framebuffer));
         assert(!err);
     }
-
-    end = clock();
-    printf("initialize swap chain resources exec time: %ldms\n", end - start);
 }
 
 void RenderingContextDriverVulkan::_clean_up_swap_chain()

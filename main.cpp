@@ -99,12 +99,19 @@ int main(int argc, char **argv)
                                       ARRAY_SIZE(attributes), attributes);
 
     uint32_t index = 0;
-    VkCommandBuffer graph_command_buffer;
     VkRenderPass render_pass;
     VkFramebuffer framebuffer;
+    VkSwapchainKHR swap_chain;
+    VkCommandBuffer graph_command_buffer;
+
+    VkQueue graph_queue;
+    VkSemaphore image_available_semaphore, render_finished_semaphore;
+    rc->get_window_semaphore(&image_available_semaphore, &render_finished_semaphore);
+    rc->get_graph_queue(&graph_queue);
+    rc->get_swap_chain(&swap_chain);
 
     while (!glfwWindowShouldClose(window)) {
-        index = index >= 3 ? 0 : index;
+        rc->acquire_next_image(image_available_semaphore, &index);
         rc->acquire_next_framebuffer(&graph_command_buffer, index, &render_pass, &framebuffer);
         rd->command_buffer_begin(&graph_command_buffer);
         {
@@ -112,17 +119,19 @@ int main(int argc, char **argv)
             rect.extent = { rc->get_width(), rc->get_height() };
             rd->command_begin_render_pass(graph_command_buffer, render_pass, framebuffer, &rect);
             {
+                rd->command_bind_graph_pipeline(graph_command_buffer, pipeline);
                 VkDeviceSize offset = 0;
                 vkCmdBindVertexBuffers(graph_command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
                 vkCmdBindIndexBuffer(graph_command_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
-                rd->command_bind_graph_pipeline(graph_command_buffer, pipeline);
                 vkCmdDrawIndexed(graph_command_buffer, std::size(indices), 1, 0, 0, 0);
             }
             rd->command_end_render_pass(graph_command_buffer);
         }
         rd->command_buffer_end(graph_command_buffer);
+        VkPipelineStageFlags mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        rd->command_buffer_submit(graph_command_buffer, 1, &image_available_semaphore, 1, &render_finished_semaphore, &mask, graph_queue, VK_NULL_HANDLE);
+        rd->present(graph_queue, swap_chain, index, render_finished_semaphore);
         glfwPollEvents();
-        index++;
     }
 
     rd->destroy_buffer(index_buffer);

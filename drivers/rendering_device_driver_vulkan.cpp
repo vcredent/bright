@@ -81,11 +81,7 @@ RenderingDeviceDriverVulkan::read_buffer(Buffer *buffer, VkDeviceSize offset, Vk
     vmaUnmapMemory(allocator, buffer->allocation);
 }
 
-RenderingDeviceDriverVulkan::Pipeline *RenderingDeviceDriverVulkan::create_graph_pipeline(const char *vertex_shader, const char *fragment_shader,
-                                                        uint32_t bind_count,
-                                                        VkVertexInputBindingDescription *p_bind,
-                                                        uint32_t attribute_count,
-                                                        VkVertexInputAttributeDescription *p_attribute)
+RenderingDeviceDriverVulkan::Pipeline *RenderingDeviceDriverVulkan::create_graph_pipeline(const char *vertex_shader, const char *fragment_shader, uint32_t bind_count, VkVertexInputBindingDescription *p_bind, uint32_t attribute_count, VkVertexInputAttributeDescription *p_attribute)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -333,4 +329,45 @@ void RenderingDeviceDriverVulkan::command_end_render_pass(VkCommandBuffer comman
 void RenderingDeviceDriverVulkan::command_bind_graph_pipeline(VkCommandBuffer command_buffer, Pipeline *p_pipeline)
 {
     vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, p_pipeline->pipeline);
+}
+
+void RenderingDeviceDriverVulkan::command_buffer_submit(VkCommandBuffer command_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence)
+{
+    VkResult U_ASSERT_ONLY err;
+
+    uint32_t command_buffer_count;
+    VkCommandBuffer command_buffers[] = { command_buffer };
+    command_buffer_count = command_buffer ? ARRAY_SIZE(command_buffers) : 0;
+
+    VkSubmitInfo submit_info = {
+            /* sType */ VK_STRUCTURE_TYPE_SUBMIT_INFO,
+            /* pNext */ nextptr,
+            /* waitSemaphoreCount */ wait_semaphore_count,
+            /* pWaitSemaphores */ p_wait_semaphore,
+            /* pWaitDstStageMask */ p_mask,
+            /* commandBufferCount */ command_buffer_count,
+            /* pCommandBuffers */ command_buffers,
+            /* signalSemaphoreCount */ signal_semaphore_count,
+            /* pSignalSemaphores */ p_signal_semaphore,
+    };
+
+    err = vkQueueSubmit(queue, 1, &submit_info, fence);
+    assert(!err);
+}
+
+void RenderingDeviceDriverVulkan::present(VkQueue queue, VkSwapchainKHR swap_chain, uint32_t index, VkSemaphore wait_semaphore)
+{
+    VkPresentInfoKHR present_info = {
+            /* sType */ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+            /* pNext */ nextptr,
+            /* waitSemaphoreCount */ 1,
+            /* pWaitSemaphores */ &wait_semaphore,
+            /* swapchainCount */ 1,
+            /* pSwapchains */ &swap_chain,
+            /* pImageIndices */ &index,
+            /* pResults */ VK_NULL_HANDLE,
+    };
+
+    vkQueuePresentKHR(queue, &present_info);
+    vkQueueWaitIdle(queue);
 }

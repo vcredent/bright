@@ -24,6 +24,7 @@
 #define _RENDERING_DEVICE_DRIVER_VULKAN_H
 
 #include "rendering_context_driver_vulkan.h"
+#include <vector>
 
 class RenderingDeviceDriverVulkan {
 public:
@@ -47,11 +48,7 @@ public:
     void write_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
     void read_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
 
-    Pipeline *create_graph_pipeline(const char *vertex_shader, const char *fragment_shader,
-                                    uint32_t bind_count,
-                                    VkVertexInputBindingDescription *p_bind,
-                                    uint32_t attribute_count,
-                                    VkVertexInputAttributeDescription *p_attribute);
+    Pipeline *create_graph_pipeline(const char *vertex_shader, const char *fragment_shader, uint32_t bind_count, VkVertexInputBindingDescription *p_bind, uint32_t attribute_count, VkVertexInputAttributeDescription *p_attribute);
     void destroy_pipeline(Pipeline *p_pipeline);
 
     void command_buffer_begin(VkCommandBuffer *p_command_buffer);
@@ -60,6 +57,8 @@ public:
     void command_end_render_pass(VkCommandBuffer command_buffer);
     void command_bind_vertex_buffer(Buffer *p_buffer);
     void command_bind_graph_pipeline(VkCommandBuffer command_buffer, Pipeline *p_pipeline);
+    void command_buffer_submit(VkCommandBuffer command_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence);
+    void present(VkQueue queue, VkSwapchainKHR swap_chain, uint32_t index, VkSemaphore wait_semaphore);
 
 private:
     void _initialize_descriptor_pool();
