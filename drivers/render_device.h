@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* rendering_device_driver_vulkan.h                                         */
+/* render_device.h                                                          */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -23,13 +23,13 @@
 #ifndef _RENDERING_DEVICE_DRIVER_VULKAN_H
 #define _RENDERING_DEVICE_DRIVER_VULKAN_H
 
-#include "rendering_context_driver_vulkan.h"
+#include "render_device_context.h"
 #include <vector>
 
-class RenderingDeviceDriverVulkan {
+class RenderDevice {
 public:
-    RenderingDeviceDriverVulkan(RenderingContextDriverVulkan *driver_context);
-    ~RenderingDeviceDriverVulkan();
+    RenderDevice(RenderDeviceContext *driver_context);
+    ~RenderDevice();
 
 public:
     struct Buffer {
@@ -84,7 +84,7 @@ public:
 private:
     void _initialize_descriptor_pool();
 
-    RenderingContextDriverVulkan *vk_driver_context;
+    RenderDeviceContext *vk_driver_context;
     VkDevice vk_device;
     VmaAllocator allocator;
     VkDescriptorPool descriptor_pool;

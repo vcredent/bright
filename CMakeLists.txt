@@ -40,9 +40,9 @@ link_directories(
 
 add_executable(${PROGRAM_NAME}
     main.cpp
-    drivers/rendering_context_driver_vulkan.cpp
-    drivers/rendering_device_driver_vulkan.cpp
-    platform/win32/rendering_context_driver_vulkan_win32.cpp
+    drivers/render_device_context.cpp
+    drivers/render_device.cpp
+    platform/win32/render_device_context_win32.cpp
     # ============================ #
     #        implementation        #
     # ============================ #

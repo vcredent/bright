@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* rendering_context_driver_vulkan.h                                        */
+/* render_device_context.h                                                  */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -42,10 +42,10 @@
 #include "vulkan_utils.h"
 
 // Render context driver of vulkan
-class RenderingContextDriverVulkan {
+class RenderDeviceContext {
 public:
-    RenderingContextDriverVulkan();
-    ~RenderingContextDriverVulkan();
+    RenderDeviceContext();
+    ~RenderDeviceContext();
 
     Error initialize();
     VkInstance get_instance() { return instance; }

@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* rendering_context_driver_vulkan.cpp                                      */
+/* render_device_context.cpp                                                */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 *
@@ -20,10 +20,10 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "rendering_context_driver_vulkan.h"
+#include "render_device_context.h"
 #include <algorithm>
 
-RenderingContextDriverVulkan::RenderingContextDriverVulkan()
+RenderDeviceContext::RenderDeviceContext()
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -94,7 +94,7 @@ RenderingContextDriverVulkan::RenderingContextDriverVulkan()
     vkGetPhysicalDeviceFeatures(physical_device, &physical_device_features);
 }
 
-RenderingContextDriverVulkan::~RenderingContextDriverVulkan()
+RenderDeviceContext::~RenderDeviceContext()
 {
     _clean_up_window();
     vmaDestroyAllocator(allocator);
@@ -103,7 +103,7 @@ RenderingContextDriverVulkan::~RenderingContextDriverVulkan()
     vkDestroyInstance(instance, allocation_callbacks);
 }
 
-Error RenderingContextDriverVulkan::initialize()
+Error RenderDeviceContext::initialize()
 {
     _create_device();
     _initialize_window_semaphore();
@@ -114,7 +114,7 @@ Error RenderingContextDriverVulkan::initialize()
     return OK;
 }
 
-void RenderingContextDriverVulkan::allocate_command_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_command_buffer)
+void RenderDeviceContext::allocate_command_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_command_buffer)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -131,13 +131,13 @@ void RenderingContextDriverVulkan::allocate_command_buffer(VkCommandBufferLevel 
 }
 
 void
-RenderingContextDriverVulkan::get_window_semaphore(VkSemaphore *p_available_semaphore, VkSemaphore *p_finished_semaphore)
+RenderDeviceContext::get_window_semaphore(VkSemaphore *p_available_semaphore, VkSemaphore *p_finished_semaphore)
 {
     *p_available_semaphore = window->image_available_semaphore;
     *p_finished_semaphore = window->render_finished_semaphore;
 }
 
-void RenderingContextDriverVulkan::acquire_next_image(VkSemaphore wait_semaphore, uint32_t *p_index)
+void RenderDeviceContext::acquire_next_image(VkSemaphore wait_semaphore, uint32_t *p_index)
 {
     VkResult U_ASSERT_ONLY err;
     err = vkAcquireNextImageKHR(device, window->swap_chain, UINT32_MAX, wait_semaphore, VK_NULL_HANDLE, p_index);
@@ -145,24 +145,24 @@ void RenderingContextDriverVulkan::acquire_next_image(VkSemaphore wait_semaphore
 }
 
 void
-RenderingContextDriverVulkan::acquire_next_framebuffer(VkCommandBuffer *p_command_buffer, uint32_t index, VkRenderPass *p_render_pass, VkFramebuffer *p_framebuffer)
+RenderDeviceContext::acquire_next_framebuffer(VkCommandBuffer *p_command_buffer, uint32_t index, VkRenderPass *p_render_pass, VkFramebuffer *p_framebuffer)
 {
     *p_command_buffer = window->swap_chain_resources[index].command_buffer;
     *p_render_pass = window->render_pass;
     *p_framebuffer = window->swap_chain_resources[index].framebuffer;
 }
 
-void RenderingContextDriverVulkan::free_command_buffer(VkCommandBuffer command_buffer)
+void RenderDeviceContext::free_command_buffer(VkCommandBuffer command_buffer)
 {
     vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
 }
 
-void RenderingContextDriverVulkan::update_window()
+void RenderDeviceContext::update_window()
 {
     _update_swap_chain();
 }
 
-void RenderingContextDriverVulkan::_initialize_window(VkSurfaceKHR surface)
+void RenderDeviceContext::_initialize_window(VkSurfaceKHR surface)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -197,7 +197,7 @@ void RenderingContextDriverVulkan::_initialize_window(VkSurfaceKHR surface)
     window->present_mode = VK_PRESENT_MODE_FIFO_KHR;
 }
 
-void RenderingContextDriverVulkan::_clean_up_window()
+void RenderDeviceContext::_clean_up_window()
 {
     vkDestroySemaphore(device, window->image_available_semaphore, allocation_callbacks);
     vkDestroySemaphore(device, window->render_finished_semaphore, allocation_callbacks);
@@ -208,7 +208,7 @@ void RenderingContextDriverVulkan::_clean_up_window()
     free(window);
 }
 
-void RenderingContextDriverVulkan::_create_device()
+void RenderDeviceContext::_create_device()
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -265,7 +265,7 @@ void RenderingContextDriverVulkan::_create_device()
     vkGetDeviceQueue(device, graph_queue_family, 0, &graph_queue);
 }
 
-void RenderingContextDriverVulkan::_initialize_window_semaphore()
+void RenderDeviceContext::_initialize_window_semaphore()
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -279,7 +279,7 @@ void RenderingContextDriverVulkan::_initialize_window_semaphore()
     assert(!err);
 }
 
-void RenderingContextDriverVulkan::_create_command_pool()
+void RenderDeviceContext::_create_command_pool()
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -294,7 +294,7 @@ void RenderingContextDriverVulkan::_create_command_pool()
     assert(!err);
 }
 
-void RenderingContextDriverVulkan::_create_vma_allocator()
+void RenderDeviceContext::_create_vma_allocator()
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -307,7 +307,7 @@ void RenderingContextDriverVulkan::_create_vma_allocator()
     assert(!err);
 }
 
-void RenderingContextDriverVulkan::_create_swap_chain()
+void RenderDeviceContext::_create_swap_chain()
 {
     VkResult U_ASSERT_ONLY err;
     VkSwapchainKHR old_swap_chain;
@@ -444,7 +444,7 @@ void RenderingContextDriverVulkan::_create_swap_chain()
     }
 }
 
-void RenderingContextDriverVulkan::_clean_up_swap_chain()
+void RenderDeviceContext::_clean_up_swap_chain()
 {
     for (uint32_t i = 0; i < window->image_buffer_count; i++) {
         vkFreeCommandBuffers(device, command_pool, 1, &window->swap_chain_resources[i].command_buffer);
@@ -455,7 +455,7 @@ void RenderingContextDriverVulkan::_clean_up_swap_chain()
     free(window->swap_chain_resources);
 }
 
-void RenderingContextDriverVulkan::_update_swap_chain()
+void RenderDeviceContext::_update_swap_chain()
 {
     vkDeviceWaitIdle(device);
     _clean_up_swap_chain();

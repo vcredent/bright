@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* rendering_context_driver_vulkan_win32.cpp                                */
+/* render_device_context_win32.cpp                                          */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,26 +20,26 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "rendering_context_driver_vulkan_win32.h"
+#include "render_device_context_win32.h"
 
-RenderingContextDriverVulkanWin32::RenderingContextDriverVulkanWin32(GLFWwindow *window)
+RenderDeviceContextWin32::RenderDeviceContextWin32(GLFWwindow *window)
 {
     VkSurfaceKHR surface;
     glfwCreateWindowSurface(get_instance(), window, allocation_callbacks, &surface);
     _initialize_window(surface);
 }
 
-RenderingContextDriverVulkanWin32::~RenderingContextDriverVulkanWin32()
+RenderDeviceContextWin32::~RenderDeviceContextWin32()
 {
     /* do nothing in here... */
 }
 
-RenderingDeviceDriverVulkan *RenderingContextDriverVulkanWin32::load_render_device()
+RenderDevice *RenderDeviceContextWin32::load_render_device()
 {
-    return memnew(RenderingDeviceDriverVulkan, this);
+    return memnew(RenderDevice, this);
 }
 
-void RenderingContextDriverVulkanWin32::destroy_render_device(RenderingDeviceDriverVulkan *p_render_device)
+void RenderDeviceContextWin32::destroy_render_device(RenderDevice *p_render_device)
 {
     memdel(p_render_device);
 }

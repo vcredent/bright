@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* rendering_device_driver_vulkan.cpp                                       */
+/* render_device.cpp                                                        */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,9 +20,9 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "rendering_device_driver_vulkan.h"
+#include "render_device.h"
 
-RenderingDeviceDriverVulkan::RenderingDeviceDriverVulkan(RenderingContextDriverVulkan *driver_context)
+RenderDevice::RenderDevice(RenderDeviceContext *driver_context)
     : vk_driver_context(driver_context)
 {
     vk_device = vk_driver_context->get_device();
@@ -32,12 +32,12 @@ RenderingDeviceDriverVulkan::RenderingDeviceDriverVulkan(RenderingContextDriverV
     _initialize_descriptor_pool();
 }
 
-RenderingDeviceDriverVulkan::~RenderingDeviceDriverVulkan()
+RenderDevice::~RenderDevice()
 {
     vkDestroyDescriptorPool(vk_device, descriptor_pool, allocation_callbacks);
 }
 
-RenderingDeviceDriverVulkan::Buffer *RenderingDeviceDriverVulkan::create_buffer(VkBufferUsageFlags usage, VkDeviceSize size)
+RenderDevice::Buffer *RenderDevice::create_buffer(VkBufferUsageFlags usage, VkDeviceSize size)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -58,13 +58,13 @@ RenderingDeviceDriverVulkan::Buffer *RenderingDeviceDriverVulkan::create_buffer(
     return buffer;
 }
 
-void RenderingDeviceDriverVulkan::destroy_buffer(Buffer *p_buffer)
+void RenderDevice::destroy_buffer(Buffer *p_buffer)
 {
     vmaDestroyBuffer(allocator, p_buffer->vk_buffer, p_buffer->allocation);
     free(p_buffer);
 }
 
-void RenderingDeviceDriverVulkan::write_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf)
+void RenderDevice::write_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf)
 {
     char *tmp;
     vmaMapMemory(allocator, buffer->allocation, (void **) &tmp);
@@ -73,7 +73,7 @@ void RenderingDeviceDriverVulkan::write_buffer(Buffer *buffer, VkDeviceSize offs
 }
 
 void
-RenderingDeviceDriverVulkan::read_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf)
+RenderDevice::read_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf)
 {
     char *tmp;
     vmaMapMemory(allocator, buffer->allocation, (void **) &tmp);
@@ -82,7 +82,7 @@ RenderingDeviceDriverVulkan::read_buffer(Buffer *buffer, VkDeviceSize offset, Vk
 }
 
 void
-RenderingDeviceDriverVulkan::create_descriptor_set_layout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout)
+RenderDevice::create_descriptor_set_layout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -98,13 +98,13 @@ RenderingDeviceDriverVulkan::create_descriptor_set_layout(uint32_t bind_count, V
     assert(!err);
 }
 
-void RenderingDeviceDriverVulkan::destroy_descriptor_set_layout(VkDescriptorSetLayout descriptor_set_layout)
+void RenderDevice::destroy_descriptor_set_layout(VkDescriptorSetLayout descriptor_set_layout)
 {
     vkDestroyDescriptorSetLayout(vk_device, descriptor_set_layout, allocation_callbacks);
 }
 
 void
-RenderingDeviceDriverVulkan::allocate_descriptor(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor)
+RenderDevice::allocate_descriptor(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor)
 {
     VkDescriptorSetAllocateInfo descriptor_allocate_info = {
             /* sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -117,12 +117,12 @@ RenderingDeviceDriverVulkan::allocate_descriptor(VkDescriptorSetLayout descripto
     vkAllocateDescriptorSets(vk_device, &descriptor_allocate_info, p_descriptor);
 }
 
-void RenderingDeviceDriverVulkan::free_descriptor(VkDescriptorSet descriptor)
+void RenderDevice::free_descriptor(VkDescriptorSet descriptor)
 {
     vkFreeDescriptorSets(vk_device, descriptor_pool, 1, &descriptor);
 }
 
-void RenderingDeviceDriverVulkan::write_descriptor_set(Buffer *p_buffer, VkDescriptorSet descriptor_set)
+void RenderDevice::write_descriptor_set(Buffer *p_buffer, VkDescriptorSet descriptor_set)
 {
     VkDescriptorBufferInfo buffer_info = {
             /* buffer */ p_buffer->vk_buffer,
@@ -146,7 +146,7 @@ void RenderingDeviceDriverVulkan::write_descriptor_set(Buffer *p_buffer, VkDescr
     vkUpdateDescriptorSets(vk_device, 1, &write_info, 0, nullptr);
 }
 
-RenderingDeviceDriverVulkan::Pipeline *RenderingDeviceDriverVulkan::create_graph_pipeline(ShaderInfo *p_shader_info)
+RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(ShaderInfo *p_shader_info)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -314,7 +314,7 @@ RenderingDeviceDriverVulkan::Pipeline *RenderingDeviceDriverVulkan::create_graph
     return p_pipeline;
 }
 
-void RenderingDeviceDriverVulkan::_initialize_descriptor_pool()
+void RenderDevice::_initialize_descriptor_pool()
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -345,13 +345,13 @@ void RenderingDeviceDriverVulkan::_initialize_descriptor_pool()
     assert(!err);
 }
 
-void RenderingDeviceDriverVulkan::destroy_pipeline(Pipeline *p_pipeline)
+void RenderDevice::destroy_pipeline(Pipeline *p_pipeline)
 {
     vkDestroyPipelineLayout(vk_device, p_pipeline->layout, allocation_callbacks);
     vkDestroyPipeline(vk_device, p_pipeline->pipeline, allocation_callbacks);
 }
 
-void RenderingDeviceDriverVulkan::command_buffer_begin(VkCommandBuffer *p_command_buffer)
+void RenderDevice::command_buffer_begin(VkCommandBuffer *p_command_buffer)
 {
     VkCommandBufferBeginInfo command_buffer_begin_info = {
             /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -363,12 +363,12 @@ void RenderingDeviceDriverVulkan::command_buffer_begin(VkCommandBuffer *p_comman
     *p_command_buffer = graph_command_buffer;
 }
 
-void RenderingDeviceDriverVulkan::command_buffer_end(VkCommandBuffer command_buffer)
+void RenderDevice::command_buffer_end(VkCommandBuffer command_buffer)
 {
     vkEndCommandBuffer(command_buffer);
 }
 
-void RenderingDeviceDriverVulkan::command_begin_render_pass(VkCommandBuffer command_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect)
+void RenderDevice::command_begin_render_pass(VkCommandBuffer command_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect)
 {
     VkClearValue clear_color = {
         0.0f, 0.0f, 0.0f, 1.0f
@@ -387,17 +387,17 @@ void RenderingDeviceDriverVulkan::command_begin_render_pass(VkCommandBuffer comm
     vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 }
 
-void RenderingDeviceDriverVulkan::command_end_render_pass(VkCommandBuffer command_buffer)
+void RenderDevice::command_end_render_pass(VkCommandBuffer command_buffer)
 {
     vkCmdEndRenderPass(command_buffer);
 }
 
-void RenderingDeviceDriverVulkan::command_bind_graph_pipeline(VkCommandBuffer command_buffer, Pipeline *p_pipeline)
+void RenderDevice::command_bind_graph_pipeline(VkCommandBuffer command_buffer, Pipeline *p_pipeline)
 {
     vkCmdBindPipeline(command_buffer, p_pipeline->bind_point, p_pipeline->pipeline);
 }
 
-void RenderingDeviceDriverVulkan::command_buffer_submit(VkCommandBuffer command_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence)
+void RenderDevice::command_buffer_submit(VkCommandBuffer command_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -421,12 +421,12 @@ void RenderingDeviceDriverVulkan::command_buffer_submit(VkCommandBuffer command_
     assert(!err);
 }
 
-void RenderingDeviceDriverVulkan::command_bind_descriptor(VkCommandBuffer command_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor)
+void RenderDevice::command_bind_descriptor(VkCommandBuffer command_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor)
 {
     vkCmdBindDescriptorSets(command_buffer, p_pipeline->bind_point, p_pipeline->layout, 0, 1, &descriptor, 0, VK_NULL_HANDLE);
 }
 
-void RenderingDeviceDriverVulkan::present(VkQueue queue, VkSwapchainKHR swap_chain, uint32_t index, VkSemaphore wait_semaphore)
+void RenderDevice::present(VkQueue queue, VkSwapchainKHR swap_chain, uint32_t index, VkSemaphore wait_semaphore)
 {
     VkPresentInfoKHR present_info = {
             /* sType */ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,

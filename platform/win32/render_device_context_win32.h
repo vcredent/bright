@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* rendering_context_driver_vulkan_win32.h                                  */
+/* render_device_context_win32.h                                            */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -23,17 +23,17 @@
 #ifndef _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H
 #define _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H
 
-#include "drivers/rendering_device_driver_vulkan.h"
+#include "drivers/render_device.h"
 #include <GLFW/glfw3.h>
 
 // Render driver context for vulkan
-class RenderingContextDriverVulkanWin32 : public RenderingContextDriverVulkan {
+class RenderDeviceContextWin32 : public RenderDeviceContext {
 public:
-    RenderingContextDriverVulkanWin32(GLFWwindow *window);
-    ~RenderingContextDriverVulkanWin32();
+    RenderDeviceContextWin32(GLFWwindow *window);
+    ~RenderDeviceContextWin32();
 
-    RenderingDeviceDriverVulkan *load_render_device();
-    void destroy_render_device(RenderingDeviceDriverVulkan *p_render_device);
+    RenderDevice *load_render_device();
+    void destroy_render_device(RenderDevice *p_render_device);
 };
 
 #endif /* _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H */

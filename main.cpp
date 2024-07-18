@@ -20,7 +20,7 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "platform/win32/rendering_context_driver_vulkan_win32.h"
+#include "platform/win32/render_device_context_win32.h"
 #include <memory>
 #include <time.h>
 #include <glm/glm.hpp>
@@ -60,11 +60,11 @@ int main(int argc, char **argv)
     GLFWwindow *window = glfwCreateWindow(800, 600, "CopilotEngine", nullptr, nullptr);
     assert(window != nullptr);
 
-    auto rc = std::make_unique<RenderingContextDriverVulkanWin32>(window);
+    auto rc = std::make_unique<RenderDeviceContextWin32>(window);
     // initialize
     rc->initialize();
 
-    RenderingDeviceDriverVulkan *rd;
+    RenderDevice *rd;
     rd = rc->load_render_device();
 
     glfwSetWindowUserPointer(window, rc.get());
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
         clock_t start, end;
 
         start = clock();
-        auto *driver = (RenderingContextDriverVulkanWin32 *) glfwGetWindowUserPointer(window);
+        auto *driver = (RenderDeviceContextWin32 *) glfwGetWindowUserPointer(window);
         driver->update_window();
         end = clock();
 
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
             { 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, VK_NULL_HANDLE },
     };
 
-    RenderingDeviceDriverVulkan::Buffer *mvp_matrix_buffer;
+    RenderDevice::Buffer *mvp_matrix_buffer;
     mvp_matrix_buffer = rd->create_buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(MVPMatrix));
 
     VkDescriptorSetLayout descriptor_layout;
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
     VkDescriptorSet mvp_descriptor;
     rd->allocate_descriptor(descriptor_layout, &mvp_descriptor);
 
-    RenderingDeviceDriverVulkan::ShaderInfo shader_info = {
+    RenderDevice::ShaderInfo shader_info = {
             /* vertex= */ "../shader/vertex.glsl.spv",
             /* fragment= */ "../shader/fragment.glsl.spv",
             /* attribute_count= */ ARRAY_SIZE(attributes),
@@ -113,15 +113,15 @@ int main(int argc, char **argv)
             /* descriptor_layouts= */ &descriptor_layout,
     };
 
-    RenderingDeviceDriverVulkan::Pipeline *pipeline;
+    RenderDevice::Pipeline *pipeline;
     pipeline = rd->create_graph_pipeline(&shader_info);
 
-    RenderingDeviceDriverVulkan::Buffer *vertex_buffer;
+    RenderDevice::Buffer *vertex_buffer;
     size_t vertices_buf_size = std::size(vertices) * sizeof(Vertex);
     vertex_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, vertices_buf_size);
     rd->write_buffer(vertex_buffer, 0, vertices_buf_size, (void *) std::data(vertices));
 
-    RenderingDeviceDriverVulkan::Buffer *index_buffer;
+    RenderDevice::Buffer *index_buffer;
     size_t index_buffer_size = std::size(indices) * sizeof(uint32_t);
     index_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, index_buffer_size);
     rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
