@@ -27,6 +27,20 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 class Camera {
+public:
+    virtual glm::mat4 look_at() = 0;
+    virtual glm::mat4 perspective() = 0;
+
+    void set_camera_position(float x, float y, float z) { position = glm::vec3(x, y, z); }
+    void set_camera_right(float x, float y, float z) { right = glm::vec3(x, y, z); }
+    void set_camera_up(float x, float y, float z) { up = glm::vec3(x, y, z); }
+
+protected:
+    /* the local_* variable is camera self local coordinate system */
+    glm::vec3 position;
+    glm::vec3 right;
+    glm::vec3 up;
+    glm::vec3 front; /* front = up x right */
 };
 
 #endif /* _CAMERA_H_ */

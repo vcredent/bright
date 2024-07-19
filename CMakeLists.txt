@@ -43,6 +43,7 @@ add_executable(${PROGRAM_NAME}
     drivers/render_device_context.cpp
     drivers/render_device.cpp
     platform/win32/render_device_context_win32.cpp
+    render/camera/game_play_camera.cpp
     # ============================ #
     #        implementation        #
     # ============================ #

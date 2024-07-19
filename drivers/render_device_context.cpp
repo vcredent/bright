@@ -320,6 +320,7 @@ void RenderDeviceContext::_create_swap_chain()
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, window->surface, &capabilities);
     window->width = capabilities.currentExtent.width;
     window->height = capabilities.currentExtent.height;
+    window->aspect_ratio = window->width / window->height;
 
     if (!old_swap_chain) {
         // attachment

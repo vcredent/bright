@@ -23,10 +23,9 @@
 #include "platform/win32/render_device_context_win32.h"
 #include <memory>
 #include <time.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include <chrono>
+#include "render/camera/game_play_camera.h"
 
 struct Vertex {
     glm::vec3 position;
@@ -124,10 +123,10 @@ int main(int argc, char **argv)
     rdc->get_window_semaphore(&image_available_semaphore, &render_finished_semaphore);
     rdc->get_graph_queue(&graph_queue);
 
-    float speed = 1.0f;
-
     RenderDeviceContext::AcquiredNext *acquired_next;
     acquired_next = (RenderDeviceContext::AcquiredNext *) imalloc(sizeof(RenderDeviceContext::AcquiredNext));
+
+    GamePlayCamera game_play_camera(45.0f, 0.0f, 0.01, 45.0f);
 
     while (!glfwWindowShouldClose(window)) {
         /* poll events */
@@ -144,9 +143,10 @@ int main(int argc, char **argv)
                 auto currentTime = std::chrono::high_resolution_clock::now();
                 float time = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count() / 1000.0f;
                 MVPMatrix mvp = {};
-                mvp.m = glm::rotate(glm::mat4(1.0f), time * glm::radians(speed), glm::vec3(1.0f, 0.5f, 2.0f));
-                mvp.v = glm::lookAt(glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-                mvp.p = glm::perspective(glm::radians(45.0f), rdc->get_width() / (float) rdc->get_height(), 0.1f, 10.0f);
+                mvp.m = glm::rotate(glm::mat4(1.0f), time * glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 2.0f));
+                mvp.v = game_play_camera.look_at();
+                game_play_camera.set_aspect_ratio(rdc->get_aspect_ratio());
+                mvp.p = game_play_camera.perspective();
                 mvp.p[1][1] *= -1;
                 rd->write_buffer(mvp_matrix_buffer, 0, sizeof(MVPMatrix), &mvp);
 

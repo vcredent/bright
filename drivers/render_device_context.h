@@ -59,6 +59,7 @@ public:
     void get_window_semaphore(VkSemaphore *p_available_semaphore, VkSemaphore *p_finished_semaphore);
     void get_graph_queue(VkQueue *p_queue) { *p_queue = graph_queue; };
     void get_swap_chain(VkSwapchainKHR *p_swap_chain) { *p_swap_chain = window->swap_chain; }
+    float get_aspect_ratio() { return window->aspect_ratio; }
 
     struct AcquiredNext {
         VkSwapchainKHR swap_chain;
@@ -99,6 +100,7 @@ protected:
         VkSemaphore render_finished_semaphore;
         uint32_t width;
         uint32_t height;
+        float aspect_ratio;
     };
 
     void _initialize_window(VkSurfaceKHR surface);
