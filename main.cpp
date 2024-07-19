@@ -68,14 +68,8 @@ int main(int argc, char **argv)
 
     glfwSetWindowUserPointer(window, rdc.get());
     glfwSetWindowSizeCallback(window, [] (GLFWwindow *window, int w, int h) {
-        clock_t start, end;
-
-        start = clock();
-        auto *driver = (RenderDeviceContextWin32 *) glfwGetWindowUserPointer(window);
-        driver->update_window();
-        end = clock();
-
-        printf("glfw resize event exec time: %ldms\n", end - start);
+        RenderDeviceContextWin32 *rdc = (RenderDeviceContextWin32 *) glfwGetWindowUserPointer(window);
+        rdc->update_window();
     });
 
     VkVertexInputBindingDescription binds[] = {
@@ -136,6 +130,9 @@ int main(int argc, char **argv)
     acquired_next = (RenderDeviceContext::AcquiredNext *) imalloc(sizeof(RenderDeviceContext::AcquiredNext));
 
     while (!glfwWindowShouldClose(window)) {
+        /* poll events */
+        glfwPollEvents();
+
         rdc->acquire_next_image(acquired_next);
         rd->command_buffer_begin(acquired_next->command_buffer);
         {
@@ -169,7 +166,6 @@ int main(int argc, char **argv)
         VkPipelineStageFlags mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         rd->command_buffer_submit(acquired_next->command_buffer, 1, &image_available_semaphore, 1, &render_finished_semaphore, &mask, graph_queue, VK_NULL_HANDLE);
         rd->present(graph_queue, acquired_next->swap_chain, acquired_next->index, render_finished_semaphore);
-        glfwPollEvents();
     }
 
     free(acquired_next);

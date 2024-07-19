@@ -53,8 +53,8 @@ public:
     const char *get_device_name() { return physical_device_properties.deviceName; }
     VkDevice get_device() { return device; }
     VmaAllocator get_allocator() { return allocator; }
-    uint32_t get_width() { return window->capabilities.currentExtent.width; }
-    uint32_t get_height() { return window->capabilities.currentExtent.height; }
+    uint32_t get_width() { return window->width; }
+    uint32_t get_height() { return window->height; }
     VkRenderPass get_render_pass() { return window->render_pass; }
     void get_window_semaphore(VkSemaphore *p_available_semaphore, VkSemaphore *p_finished_semaphore);
     void get_graph_queue(VkQueue *p_queue) { *p_queue = graph_queue; };
@@ -87,7 +87,6 @@ protected:
 
     struct Window {
         VkSurfaceKHR surface = VK_NULL_HANDLE;
-        VkSurfaceCapabilitiesKHR capabilities;
         VkFormat format;
         VkColorSpaceKHR color_space;
         uint32_t image_buffer_count;
@@ -98,6 +97,8 @@ protected:
         SwapchainResource *swap_chain_resources;
         VkSemaphore image_available_semaphore;
         VkSemaphore render_finished_semaphore;
+        uint32_t width;
+        uint32_t height;
     };
 
     void _initialize_window(VkSurfaceKHR surface);

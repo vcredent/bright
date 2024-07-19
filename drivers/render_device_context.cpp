@@ -149,8 +149,8 @@ void RenderDeviceContext::acquire_next_image(RenderDeviceContext::AcquiredNext *
 
     p_acquired_next->command_buffer = window->swap_chain_resources[p_acquired_next->index].command_buffer;
     p_acquired_next->framebuffer = window->swap_chain_resources[p_acquired_next->index].framebuffer;
-    p_acquired_next->width = window->capabilities.currentExtent.width;
-    p_acquired_next->height = window->capabilities.currentExtent.height;
+    p_acquired_next->width = window->width;
+    p_acquired_next->height = window->height;
 }
 
 void RenderDeviceContext::free_command_buffer(VkCommandBuffer command_buffer)
@@ -171,7 +171,8 @@ void RenderDeviceContext::_initialize_window(VkSurfaceKHR surface)
     window = (Window *) imalloc(sizeof(Window));
     window->surface = surface;
 
-    err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, window->surface, &window->capabilities);
+    VkSurfaceCapabilitiesKHR capabilities;
+    err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, window->surface, &capabilities);
     assert(!err);
 
     /* pick surface format */
@@ -191,7 +192,7 @@ void RenderDeviceContext::_initialize_window(VkSurfaceKHR surface)
 
     /* image buffer count */
     uint32_t desired_buffer_count = 3;
-    desired_buffer_count = std::clamp(desired_buffer_count, window->capabilities.minImageCount, window->capabilities.maxImageCount);
+    desired_buffer_count = std::clamp(desired_buffer_count, capabilities.minImageCount, capabilities.maxImageCount);
     window->image_buffer_count = desired_buffer_count;
 
     window->composite_alpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
@@ -315,8 +316,10 @@ void RenderDeviceContext::_create_swap_chain()
 
     old_swap_chain = window->swap_chain;
 
-    // update capabilities, update window extent
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, window->surface, &window->capabilities);
+    VkSurfaceCapabilitiesKHR capabilities;
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, window->surface, &capabilities);
+    window->width = capabilities.currentExtent.width;
+    window->height = capabilities.currentExtent.height;
 
     if (!old_swap_chain) {
         // attachment
@@ -360,13 +363,13 @@ void RenderDeviceContext::_create_swap_chain()
             /* minImageCount */ window->image_buffer_count,
             /* imageFormat */ window->format,
             /* imageColorSpace */ window->color_space,
-            /* imageExtent */ window->capabilities.currentExtent,
+            /* imageExtent */ capabilities.currentExtent,
             /* imageArrayLayers */ 1,
             /* imageUsage */ VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
             /* imageSharingMode */ VK_SHARING_MODE_EXCLUSIVE,
             /* queueFamilyIndexCount */ 1,
             /* pQueueFamilyIndices */ &graph_queue_family,
-            /* preTransform */ window->capabilities.currentTransform,
+            /* preTransform */ capabilities.currentTransform,
             /* compositeAlpha */ window->composite_alpha,
             /* presentMode */ window->present_mode,
             /* clipped */ VK_TRUE,
@@ -435,8 +438,8 @@ void RenderDeviceContext::_create_swap_chain()
                 /* renderPass */ window->render_pass,
                 /* attachmentCount */ ARRAY_SIZE(framebuffer_attachments),
                 /* pAttachments */ framebuffer_attachments,
-                /* width */ window->capabilities.currentExtent.width,
-                /* height */ window->capabilities.currentExtent.height,
+                /* width */ window->width,
+                /* height */ window->height,
                 /* layers */ 1,
         };
 
