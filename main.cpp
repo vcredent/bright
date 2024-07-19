@@ -156,6 +156,7 @@ int main(int argc, char **argv)
                 rd->command_bind_graph_pipeline(acquired_next->command_buffer, pipeline);
                 rd->command_bind_descriptor(acquired_next->command_buffer, pipeline, mvp_descriptor);
                 rd->write_descriptor_set(mvp_matrix_buffer, mvp_descriptor);
+                rd->command_setval_viewport(acquired_next->command_buffer, rdc->get_width(), rdc->get_height());
 
                 VkDeviceSize offset = 0;
                 vkCmdBindVertexBuffers(acquired_next->command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);

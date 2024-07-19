@@ -276,6 +276,19 @@ RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(ShaderInfo *p_shader
     color_blend_state_create_info.blendConstants[2] = 0.0f;
     color_blend_state_create_info.blendConstants[3] = 0.0f;
 
+    VkDynamicState dynamic_state[] = {
+            VK_DYNAMIC_STATE_VIEWPORT,
+            VK_DYNAMIC_STATE_SCISSOR
+    };
+
+    VkPipelineDynamicStateCreateInfo dynamic_state_crate_info = {
+            /* sType= */ VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+            /* pNext= */ nextptr,
+            /* flags= */ no_flag_bits,
+            /* dynamicStateCount= */ ARRAY_SIZE(dynamic_state),
+            /* pDynamicStates= */ dynamic_state,
+    };
+
     VkGraphicsPipelineCreateInfo pipeline_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
             /* pNext */ nextptr,
@@ -290,7 +303,7 @@ RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(ShaderInfo *p_shader
             /* pMultisampleState */ &multisample_state_create_info,
             /* pDepthStencilState */ nullptr,
             /* pColorBlendState */ &color_blend_state_create_info,
-            /* pDynamicState */ nullptr,
+            /* pDynamicState */ &dynamic_state_crate_info,
             /* layout */ vk_pipeline_layout,
             /* renderPass */ vk_driver_context->get_render_pass(),
             /* subpass */ 0,
@@ -422,6 +435,23 @@ void RenderDevice::command_buffer_submit(VkCommandBuffer command_buffer, uint32_
 void RenderDevice::command_bind_descriptor(VkCommandBuffer command_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor)
 {
     vkCmdBindDescriptorSets(command_buffer, p_pipeline->bind_point, p_pipeline->layout, 0, 1, &descriptor, 0, VK_NULL_HANDLE);
+}
+
+void RenderDevice::command_setval_viewport(VkCommandBuffer command_buffer, uint32_t w, uint32_t h)
+{
+    VkViewport viewport = {};
+    viewport.x = 0;
+    viewport.y = 0;
+    viewport.width = w;
+    viewport.height = h;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    vkCmdSetViewport(command_buffer, 0, 1, &viewport);
+
+    VkRect2D scissor = {};
+    scissor.offset = { 0, 0 };
+    scissor.extent = { w, h };
+    vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 }
 
 void RenderDevice::present(VkQueue queue, VkSwapchainKHR swap_chain, uint32_t index, VkSemaphore wait_semaphore)

@@ -79,6 +79,7 @@ public:
     void command_bind_graph_pipeline(VkCommandBuffer command_buffer, Pipeline *p_pipeline);
     void command_buffer_submit(VkCommandBuffer command_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence);
     void command_bind_descriptor(VkCommandBuffer command_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor);
+    void command_setval_viewport(VkCommandBuffer command_buffer , uint32_t w, uint32_t h);
     void present(VkQueue queue, VkSwapchainKHR swap_chain, uint32_t index, VkSemaphore wait_semaphore);
 
 private:
