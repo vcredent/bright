@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* camera.h                                                                 */
+/* track_ball_camera_controller.h                                           */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,29 +20,17 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _CAMERA_H_
-#define _CAMERA_H_
+#ifndef _TRACK_BALL_CAMERA_CONTROLLER_H_
+#define _TRACK_BALL_CAMERA_CONTROLLER_H_
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "controller.h"
 
-class Camera {
+class TrackBallCameraController : public CameraController {
 public:
-    virtual glm::mat4 look_at() = 0;
-    virtual glm::mat4 perspective() = 0;
+    TrackBallCameraController();
+    ~TrackBallCameraController();
 
-    glm::vec3 get_camera_position() { return position; }
-
-    void set_camera_position(float x, float y, float z) { position = glm::vec3(x, y, z); }
-    void set_camera_right(float x, float y, float z) { right = glm::vec3(x, y, z); }
-    void set_camera_up(float x, float y, float z) { up = glm::vec3(x, y, z); }
-
-protected:
-    /* the local_* variable is camera self local coordinate system */
-    glm::vec3 position;
-    glm::vec3 right;
-    glm::vec3 up;
-    glm::vec3 front; /* front = up x right */
+    virtual void on_update() override final;
 };
 
-#endif /* _CAMERA_H_ */
+#endif /* _TRACK_BALL_CAMERA_CONTROLLER_H_ */

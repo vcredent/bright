@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* camera.h                                                                 */
+/* camera_controller.h                                                      */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,29 +20,40 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _CAMERA_H_
-#define _CAMERA_H_
+#ifndef _CAMERA_CONTROLLER_H_
+#define _CAMERA_CONTROLLER_H_
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <GLFW/glfw3.h>
+#include <unordered_map>
+#include "camera.h"
 
-class Camera {
+class CameraController {
 public:
-    virtual glm::mat4 look_at() = 0;
-    virtual glm::mat4 perspective() = 0;
+    struct KeyEvent {
+        int key;
+        bool action;
+        int modes;
+    };
 
-    glm::vec3 get_camera_position() { return position; }
+    virtual void on_update();
+    virtual void on_event_mouse(int button, int action, double x, double y);
+    virtual void on_event_cursor(float x, float y);
+    virtual void on_event_key(int key, bool action, int modes);
 
-    void set_camera_position(float x, float y, float z) { position = glm::vec3(x, y, z); }
-    void set_camera_right(float x, float y, float z) { right = glm::vec3(x, y, z); }
-    void set_camera_up(float x, float y, float z) { up = glm::vec3(x, y, z); }
+    void set_control_camera(Camera *p_camera) { p_control_camera = p_camera; }
 
 protected:
-    /* the local_* variable is camera self local coordinate system */
-    glm::vec3 position;
-    glm::vec3 right;
-    glm::vec3 up;
-    glm::vec3 front; /* front = up x right */
+    bool mouse_left_key;
+    bool mouse_right_key;
+    float mouse_position_x;
+    float mouse_position_y;
+    Camera *p_control_camera = nullptr;
+
+    /* get key event */
+    KeyEvent *getkey(int key);
+
+private:
+    std::unordered_map<int, KeyEvent> key_events;
 };
 
-#endif /* _CAMERA_H_ */
+#endif /* _CAMERA_CONTROLLER_H_ */

@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* camera.h                                                                 */
+/* perspective_camera.cpp                                                   */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,29 +20,28 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _CAMERA_H_
-#define _CAMERA_H_
+#include "perspective_camera.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+PerspectiveCamera::PerspectiveCamera(float fov, float aspect, float near, float far)
+    : fov(fov), aspect_ratio(aspect), near(near), far(far)
+{
+    position = glm::vec3(0.0f, 0.0f, 3.0f);
+    right = glm::vec3(1.0f, 0.0f, 0.0f);
+    up = glm::vec3(0.0f, 1.0f, 0.0f);
+}
 
-class Camera {
-public:
-    virtual glm::mat4 look_at() = 0;
-    virtual glm::mat4 perspective() = 0;
+PerspectiveCamera::~PerspectiveCamera()
+{
+    /* do nothing... */
+}
 
-    glm::vec3 get_camera_position() { return position; }
+glm::mat4 PerspectiveCamera::look_at()
+{
+    front = glm::cross(up, right);
+    return glm::lookAt(position, position + front, up);
+}
 
-    void set_camera_position(float x, float y, float z) { position = glm::vec3(x, y, z); }
-    void set_camera_right(float x, float y, float z) { right = glm::vec3(x, y, z); }
-    void set_camera_up(float x, float y, float z) { up = glm::vec3(x, y, z); }
-
-protected:
-    /* the local_* variable is camera self local coordinate system */
-    glm::vec3 position;
-    glm::vec3 right;
-    glm::vec3 up;
-    glm::vec3 front; /* front = up x right */
-};
-
-#endif /* _CAMERA_H_ */
+glm::mat4 PerspectiveCamera::perspective()
+{
+    return glm::perspective(glm::radians(fov), aspect_ratio, near, far);
+}

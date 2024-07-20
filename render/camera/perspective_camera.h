@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* game_play_camera.cpp                                                     */
+/* perspective_camera.h                                                     */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,28 +20,33 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "game_play_camera.h"
+#ifndef _GAME_PLAY_CAMERA_H_
+#define _GAME_PLAY_CAMERA_H_
 
-GamePlayCamera::GamePlayCamera(float fov, float aspect, float near, float far)
-    : fov(fov), aspect_ratio(aspect), near(near), far(far)
-{
-    position = glm::vec3(0.0f, 0.0f, 3.0f);
-    right = glm::vec3(1.0f, 0.0f, 0.0f);
-    up = glm::vec3(0.0f, 1.0f, 0.0f);
-}
+#include "camera.h"
 
-GamePlayCamera::~GamePlayCamera()
-{
-    /* do nothing... */
-}
+class PerspectiveCamera : public Camera {
+public:
+    PerspectiveCamera(float fov, float aspect, float near, float far);
+   ~PerspectiveCamera();
 
-glm::mat4 GamePlayCamera::look_at()
-{
-    front = glm::cross(up, right);
-    return glm::lookAt(position, position + front, up);
-}
+    virtual glm::mat4 look_at() override final;
+    virtual glm::mat4 perspective() override final;
 
-glm::mat4 GamePlayCamera::perspective()
-{
-    return glm::perspective(glm::radians(fov), aspect_ratio, near, far);
-}
+    void get_perspective_far() { this->far; }
+    void get_perspective_near() { this->near; }
+    void get_perspective_fov() { this->fov; }
+
+    void set_aspect_ratio(float aspect) { this->aspect_ratio = aspect; }
+    void set_perspective_far(float far) { this->far = far; }
+    void set_perspective_near(float near) { this->near = near; }
+    void set_perspective_fov(float fov) { this->fov = fov; }
+
+private:
+    float aspect_ratio;
+    float far;
+    float near;
+    float fov;
+};
+
+#endif /* _GAME_PLAY_CAMERA_H_ */

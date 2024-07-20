@@ -25,7 +25,8 @@
 #include <time.h>
 #include <vector>
 #include <chrono>
-#include "render/camera/game_play_camera.h"
+#include "render/camera/track_ball_camera_controller.h"
+#include "render/camera/perspective_camera.h"
 
 struct Vertex {
     glm::vec3 position;
@@ -49,6 +50,8 @@ const std::vector<Vertex> vertices = {
 const std::vector<uint32_t> indices = {
         0, 1, 2, 2, 3, 0
 };
+
+static TrackBallCameraController controller;
 
 int main(int argc, char **argv)
 {
@@ -126,12 +129,22 @@ int main(int argc, char **argv)
     RenderDeviceContext::AcquiredNext *acquired_next;
     acquired_next = (RenderDeviceContext::AcquiredNext *) imalloc(sizeof(RenderDeviceContext::AcquiredNext));
 
-    GamePlayCamera game_play_camera(45.0f, 0.0f, 0.01, 45.0f);
+    PerspectiveCamera camera(45.0f, 0.0f, 0.01, 45.0f);
+    controller.set_control_camera(&camera);
+
+    glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
+        controller.on_event_mouse(button, action, 0.0f, 0.0f);
+    });
+
+    glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
+        controller.on_event_cursor((float) xpos, (float) ypos);
+    });
 
     while (!glfwWindowShouldClose(window)) {
         /* poll events */
         glfwPollEvents();
 
+        controller.on_update();
         rdc->acquire_next_image(acquired_next);
         rd->command_buffer_begin(acquired_next->command_buffer);
         {
@@ -144,9 +157,9 @@ int main(int argc, char **argv)
                 float time = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count() / 1000.0f;
                 MVPMatrix mvp = {};
                 mvp.m = glm::rotate(glm::mat4(1.0f), time * glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 2.0f));
-                mvp.v = game_play_camera.look_at();
-                game_play_camera.set_aspect_ratio(rdc->get_aspect_ratio());
-                mvp.p = game_play_camera.perspective();
+                mvp.v = camera.look_at();
+                camera.set_aspect_ratio(rdc->get_aspect_ratio());
+                mvp.p = camera.perspective();
                 mvp.p[1][1] *= -1;
                 rd->write_buffer(mvp_matrix_buffer, 0, sizeof(MVPMatrix), &mvp);
 

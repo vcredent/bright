@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* camera.h                                                                 */
+/* camera_controller.cpp                                                    */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,29 +20,52 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _CAMERA_H_
-#define _CAMERA_H_
+#include "controller.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+void CameraController::on_update()
+{
+    /* do nothing... */
+}
 
-class Camera {
-public:
-    virtual glm::mat4 look_at() = 0;
-    virtual glm::mat4 perspective() = 0;
+void CameraController::on_event_mouse(int button, int action, double x, double y)
+{
+    switch (button) {
+        case GLFW_MOUSE_BUTTON_LEFT:
+            mouse_left_key = action;
+            break;
+        case GLFW_MOUSE_BUTTON_RIGHT:
+            mouse_left_key = action;
+            break;
+        default:
+            return;
+    }
+}
 
-    glm::vec3 get_camera_position() { return position; }
+void CameraController::on_event_cursor(float x, float y)
+{
+    this->mouse_position_x = x;
+    this->mouse_position_y = y;
+}
 
-    void set_camera_position(float x, float y, float z) { position = glm::vec3(x, y, z); }
-    void set_camera_right(float x, float y, float z) { right = glm::vec3(x, y, z); }
-    void set_camera_up(float x, float y, float z) { up = glm::vec3(x, y, z); }
+void CameraController::on_event_key(int key, bool action, int modes)
+{
+    if (key_events.count(key)) {
+        key_events[key].action = action;
+        key_events[key].modes = modes;
+        return;
+    }
 
-protected:
-    /* the local_* variable is camera self local coordinate system */
-    glm::vec3 position;
-    glm::vec3 right;
-    glm::vec3 up;
-    glm::vec3 front; /* front = up x right */
-};
+    KeyEvent event = {
+         /* key= */ key,
+         /* action= */ action,
+         /* modes= */ modes,
+    };
 
-#endif /* _CAMERA_H_ */
+    /* save key */
+    key_events.insert(std::pair<int, KeyEvent>(key, event));
+}
+
+CameraController::KeyEvent *CameraController::getkey(int key)
+{
+    return &key_events[key];
+}

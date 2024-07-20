@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* game_play_camera.h                                                       */
+/* track_ball_camera_controller.cpp                                         */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,29 +20,18 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _GAME_PLAY_CAMERA_H_
-#define _GAME_PLAY_CAMERA_H_
+#include "track_ball_camera_controller.h"
 
-#include "camera.h"
+TrackBallCameraController::TrackBallCameraController()
+{
+    /* do nothing... */
+}
 
-class GamePlayCamera : public Camera {
-public:
-    GamePlayCamera(float fov, float aspect, float near, float far);
-   ~GamePlayCamera();
+TrackBallCameraController::~TrackBallCameraController()
+{
+    /* do nothing... */
+}
 
-    virtual glm::mat4 look_at() override final;
-    virtual glm::mat4 perspective() override final;
-
-    void set_aspect_ratio(float aspect) { this->aspect_ratio = aspect; }
-    void set_perspective_far(float far) { this->far = far; }
-    void set_perspective_near(float near) { this->near = near; }
-    void set_perspective_fov(float fov) { this->fov = fov; }
-
-private:
-    float aspect_ratio;
-    float far;
-    float near;
-    float fov;
-};
-
-#endif /* _GAME_PLAY_CAMERA_H_ */
+void TrackBallCameraController::on_update()
+{
+}
