@@ -144,6 +144,11 @@ void Editor::cmd_end_viewport()
     ImGui::PopStyleVar();
 }
 
+void Editor::cmd_same_line128()
+{
+    ImGui::SameLine(128.0f);
+}
+
 void Editor::cmd_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
 {
     ImVec2 size = ImGui::GetContentRegionAvail();
@@ -151,6 +156,40 @@ void Editor::cmd_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *
     *p_height = size.y;
     ImGui::Image(texture, ImVec2(*p_width, *p_height));
 }
+
+void Editor::cmd_drag_float(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+{
+    ImGui::Text(label);
+    cmd_same_line128();
+    ImGui::PushID(label);
+    ImGui::DragFloat("", v, v_speed, v_min, v_max, format);
+    ImGui::PopID();
+}
+
+void Editor::cmd_drag_float2(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+{
+    ImGui::PushID(label);
+    ImGui::Text(label);
+    cmd_same_line128();
+    ImGui::DragFloat2("", v, v_speed, v_min, v_max, format);
+    ImGui::PopID();
+}
+
+void Editor::cmd_drag_float3(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+{
+    ImGui::PushID(label);
+    ImGui::Text(label);
+    cmd_same_line128();
+    ImGui::DragFloat3("", v, v_speed, v_min, v_max, format);
+    ImGui::PopID();}
+
+void Editor::cmd_drag_float4(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+{
+    ImGui::PushID(label);
+    ImGui::Text(label);
+    cmd_same_line128();
+    ImGui::DragFloat4("", v, v_speed, v_min, v_max, format);
+    ImGui::PopID();}
 
 void Editor::_set_theme_embrace_the_darkness()
 {

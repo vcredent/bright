@@ -46,6 +46,7 @@ public:
     void cmd_begin_viewport(const char *title);
     void cmd_end_viewport();
 
+    void cmd_same_line128();
     void cmd_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height);
     void cmd_drag_float(const char *label, float *v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
     void cmd_drag_float2(const char *label, float v[2], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");

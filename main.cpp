@@ -192,21 +192,15 @@ int main(int argc, char **argv)
                 editor->cmd_begin_window("摄像机参数");
                 {
                     float fov = camera.get_fov();
-                    ImGui::Text("fov: ");
-                    ImGui::SameLine();
-                    ImGui::DragFloat("##fov", &fov, 0.01f);
+                    editor->cmd_drag_float("景深: ", &fov, 0.01f);
                     camera.set_fov(fov);
 
                     float near = camera.get_near();
-                    ImGui::Text("near: ");
-                    ImGui::SameLine();
-                    ImGui::DragFloat("##near", &near, 0.01f);
+                    editor->cmd_drag_float("近点: ", &near, 0.01f);
                     camera.set_near(near);
 
                     float far = camera.get_far();
-                    ImGui::Text("far: ");
-                    ImGui::SameLine();
-                    ImGui::DragFloat("##far", &far, 0.01f);
+                    editor->cmd_drag_float("远点: ", &far, 0.01f);
                     camera.set_far(far);
                 }
                 editor->cmd_end_window();
