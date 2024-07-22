@@ -55,18 +55,18 @@ public:
     VmaAllocator get_allocator() { return allocator; }
     uint32_t get_graph_queue_family() { return graph_queue_family; }
     VkQueue get_graph_queue() { return graph_queue; };
-    VkCommandPool get_command_pool() { return command_pool; }
+    VkCommandPool get_cmd_pool() { return cmd_pool; }
     VkFormat get_window_format() { return format; }
 
-    void allocate_command_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_command_buffer);
-    void free_command_buffer(VkCommandBuffer command_buffer);
+    void allocate_cmd_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_cmd_buffer);
+    void free_cmd_buffer(VkCommandBuffer cmd_buffer);
 
 protected:
     void _initialize_window_arguments(VkSurfaceKHR surface);
 
 private:
     void _create_device();
-    void _create_command_pool();
+    void _create_cmd_pool();
     void _create_vma_allocator();
     void _create_swap_chain();
 
@@ -77,7 +77,7 @@ private:
     VkDevice device = VK_NULL_HANDLE;
     uint32_t graph_queue_family;
     VkQueue graph_queue = VK_NULL_HANDLE;
-    VkCommandPool command_pool = VK_NULL_HANDLE;
+    VkCommandPool cmd_pool = VK_NULL_HANDLE;
     VmaAllocator allocator = VK_NULL_HANDLE;
     VkSurfaceCapabilitiesKHR capabilities;
     VkFormat format;

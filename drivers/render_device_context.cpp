@@ -97,7 +97,7 @@ RenderDeviceContext::RenderDeviceContext()
 RenderDeviceContext::~RenderDeviceContext()
 {
     vmaDestroyAllocator(allocator);
-    vkDestroyCommandPool(device, command_pool, allocation_callbacks);
+    vkDestroyCommandPool(device, cmd_pool, allocation_callbacks);
     vkDestroyDevice(device, allocation_callbacks);
     vkDestroyInstance(instance, allocation_callbacks);
 }
@@ -105,31 +105,31 @@ RenderDeviceContext::~RenderDeviceContext()
 Error RenderDeviceContext::initialize()
 {
     _create_device();
-    _create_command_pool();
+    _create_cmd_pool();
     _create_vma_allocator();
 
     return OK;
 }
 
-void RenderDeviceContext::allocate_command_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_command_buffer)
+void RenderDeviceContext::allocate_cmd_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_cmd_buffer)
 {
     VkResult U_ASSERT_ONLY err;
 
     VkCommandBufferAllocateInfo allocate_info = {
             /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
             /* pNext */ nextptr,
-            /* commandPool */ command_pool,
+            /* commandPool */ cmd_pool,
             /* level */ level,
             /* commandBufferCount */ 1
     };
 
-    err = vkAllocateCommandBuffers(device, &allocate_info, p_command_buffer);
+    err = vkAllocateCommandBuffers(device, &allocate_info, p_cmd_buffer);
     assert(!err);
 }
 
-void RenderDeviceContext::free_command_buffer(VkCommandBuffer command_buffer)
+void RenderDeviceContext::free_cmd_buffer(VkCommandBuffer cmd_buffer)
 {
-    vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
+    vkFreeCommandBuffers(device, cmd_pool, 1, &cmd_buffer);
 }
 
 void RenderDeviceContext::_initialize_window_arguments(VkSurfaceKHR surface)
@@ -209,18 +209,18 @@ void RenderDeviceContext::_create_device()
     vkGetDeviceQueue(device, graph_queue_family, 0, &graph_queue);
 }
 
-void RenderDeviceContext::_create_command_pool()
+void RenderDeviceContext::_create_cmd_pool()
 {
     VkResult U_ASSERT_ONLY err;
 
-    VkCommandPoolCreateInfo command_pool_create_info = {
+    VkCommandPoolCreateInfo cmd_pool_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
             /* pNext */ nextptr,
             /* flags */ VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
             /* queueFamilyIndex */ graph_queue_family
     };
 
-    err = vkCreateCommandPool(device, &command_pool_create_info, allocation_callbacks, &command_pool);
+    err = vkCreateCommandPool(device, &cmd_pool_create_info, allocation_callbacks, &cmd_pool);
     assert(!err);
 }
 

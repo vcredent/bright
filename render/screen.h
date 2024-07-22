@@ -36,12 +36,12 @@ public:
     uint32_t get_image_buffer_count() { return window->image_buffer_count; }
 
     void initialize(GLFWwindow *p_hwind);
-    VkCommandBuffer command_begin_window_render();
-    void command_end_window_render(VkCommandBuffer command_buffer);
+    VkCommandBuffer cmd_begin_window_render();
+    void cmd_end_window_render(VkCommandBuffer cmd_buffer);
 
 private:
     struct SwapchainResource {
-        VkCommandBuffer command_buffer;
+        VkCommandBuffer cmd_buffer;
         VkImage image;
         VkImageView image_view;
         VkFramebuffer framebuffer;
@@ -73,7 +73,7 @@ private:
     VkPhysicalDevice vk_physical_device = VK_NULL_HANDLE;
     VkDevice vk_device = VK_NULL_HANDLE;\
     uint32_t vk_graph_queue_family = 0;
-    VkCommandPool vk_command_pool = VK_NULL_HANDLE;
+    VkCommandPool vk_cmd_pool = VK_NULL_HANDLE;
     Window *window = VK_NULL_HANDLE;
     VkQueue vk_graph_queue = VK_NULL_HANDLE;
 

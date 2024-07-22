@@ -87,17 +87,17 @@ void Editor::initialize(Screen *p_screen)
     ImGui_ImplVulkan_Init(&init_info, screen->get_render_pass());
 }
 
-ImTextureID Editor::create_texture_id(RenderDevice::Texture2D *p_texture)
+ImTextureID Editor::create_texture(RenderDevice::Texture2D *p_texture)
 {
     return (ImTextureID) ImGui_ImplVulkan_AddTexture(p_texture->sampler, p_texture->image_view, p_texture->image_layout);
 }
 
-void Editor::destroy_texture_id(ImTextureID texture_id)
+void Editor::destroy_texture(ImTextureID texture_id)
 {
     ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet) texture_id);
 }
 
-void Editor::command_begin_editor_render(VkCommandBuffer command_buffer)
+void Editor::cmd_begin_editor_render(VkCommandBuffer cmd_buffer)
 {
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -106,14 +106,14 @@ void Editor::command_begin_editor_render(VkCommandBuffer command_buffer)
     ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 }
 
-void Editor::command_end_editor_render(VkCommandBuffer command_buffer)
+void Editor::cmd_end_editor_render(VkCommandBuffer cmd_buffer)
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     // Rendering
     ImGui::Render();
     ImDrawData* main_draw_data = ImGui::GetDrawData();
-    ImGui_ImplVulkan_RenderDrawData(main_draw_data, command_buffer);
+    ImGui_ImplVulkan_RenderDrawData(main_draw_data, cmd_buffer);
 
     // Update and Render additional Platform Windows
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
@@ -122,29 +122,29 @@ void Editor::command_end_editor_render(VkCommandBuffer command_buffer)
     }
 }
 
-void Editor::command_begin_window(const char *title)
+void Editor::cmd_begin_window(const char *title)
 {
     ImGui::Begin(title);
 }
 
-void Editor::command_end_window()
+void Editor::cmd_end_window()
 {
     ImGui::End();
 }
 
-void Editor::command_begin_viewport(const char *title)
+void Editor::cmd_begin_viewport(const char *title)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::Begin(title);
 }
 
-void Editor::command_end_viewport()
+void Editor::cmd_end_viewport()
 {
     ImGui::End();
     ImGui::PopStyleVar();
 }
 
-void Editor::command_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
+void Editor::cmd_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
 {
     ImVec2 size = ImGui::GetContentRegionAvail();
     *p_width = size.x;

@@ -34,18 +34,23 @@ public:
 
     void initialize(Screen *p_render_window);
 
-    ImTextureID create_texture_id(RenderDevice::Texture2D *p_texture);
-    void destroy_texture_id(ImTextureID texture_id);
+    ImTextureID create_texture(RenderDevice::Texture2D *p_texture);
+    void destroy_texture(ImTextureID texture_id);
 
     /* begin new gui frame */
-    void command_begin_editor_render(VkCommandBuffer command_buffer);
-    void command_end_editor_render(VkCommandBuffer command_buffer);
+    void cmd_begin_editor_render(VkCommandBuffer cmd_buffer);
+    void cmd_end_editor_render(VkCommandBuffer cmd_buffer);
 
-    void command_begin_window(const char *title);
-    void command_end_window();
-    void command_begin_viewport(const char *title);
-    void command_end_viewport();
-    void command_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height);
+    void cmd_begin_window(const char *title);
+    void cmd_end_window();
+    void cmd_begin_viewport(const char *title);
+    void cmd_end_viewport();
+
+    void cmd_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height);
+    void cmd_drag_float(const char *label, float *v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
+    void cmd_drag_float2(const char *label, float v[2], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
+    void cmd_drag_float3(const char *label, float v[3], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
+    void cmd_drag_float4(const char *label, float v[4], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
 
 private:
     void _set_theme_embrace_the_darkness();

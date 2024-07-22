@@ -147,8 +147,8 @@ int main(int argc, char **argv)
         glfwPollEvents();
 
         /* render to canvas */
-        VkCommandBuffer canvas_command_buffer;
-        canvas->command_begin_canvas_render(&canvas_command_buffer, viewport_width, viewport_height);
+        VkCommandBuffer canvas_cmd_buffer;
+        canvas->cmd_begin_canvas_render(&canvas_cmd_buffer, viewport_width, viewport_height);
         {
             static auto startTime = std::chrono::high_resolution_clock::now();
             auto currentTime = std::chrono::high_resolution_clock::now();
@@ -161,35 +161,35 @@ int main(int argc, char **argv)
             mvp.p[1][1] *= -1;
             rd->write_buffer(mvp_matrix_buffer, 0, sizeof(MVPMatrix), &mvp);
 
-            rd->command_bind_graph_pipeline(canvas_command_buffer, pipeline);
-            rd->command_bind_descriptor_set(canvas_command_buffer, pipeline, mvp_descriptor);
+            rd->cmd_bind_graph_pipeline(canvas_cmd_buffer, pipeline);
+            rd->cmd_bind_descriptor_set(canvas_cmd_buffer, pipeline, mvp_descriptor);
             rd->write_descriptor_set(mvp_matrix_buffer, mvp_descriptor);
-            rd->command_setval_viewport(canvas_command_buffer, viewport_width, viewport_height);
+            rd->cmd_setval_viewport(canvas_cmd_buffer, viewport_width, viewport_height);
 
             VkDeviceSize offset = 0;
-            vkCmdBindVertexBuffers(canvas_command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
-            vkCmdBindIndexBuffer(canvas_command_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
-            vkCmdDrawIndexed(canvas_command_buffer, std::size(indices), 1, 0, 0, 0);
+            vkCmdBindVertexBuffers(canvas_cmd_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
+            vkCmdBindIndexBuffer(canvas_cmd_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
+            vkCmdDrawIndexed(canvas_cmd_buffer, std::size(indices), 1, 0, 0, 0);
         }
-        RenderDevice::Texture2D *canvas_texture = canvas->command_end_canvas_render();
+        RenderDevice::Texture2D *canvas_texture = canvas->cmd_end_canvas_render();
 
         /* render to window */
         controller.on_update();
-        ImTextureID imtex;
-        VkCommandBuffer window_command_buffer = screen->command_begin_window_render();
+        ImTextureID im_texture;
+        VkCommandBuffer window_cmd_buffer = screen->cmd_begin_window_render();
         {
             /* ImGui */
-            editor->command_begin_editor_render(window_command_buffer);
+            editor->cmd_begin_editor_render(window_cmd_buffer);
             {
                 ImGui::ShowDemoWindow(&show_demo_flag);
-                editor->command_begin_viewport("视口");
+                editor->cmd_begin_viewport("视口");
                 {
-                    imtex = editor->create_texture_id(canvas_texture);
-                    editor->command_draw_texture(imtex, &viewport_width, &viewport_height);
+                    im_texture = editor->create_texture(canvas_texture);
+                    editor->cmd_draw_texture(im_texture, &viewport_width, &viewport_height);
                 }
-                editor->command_end_viewport();
+                editor->cmd_end_viewport();
 
-                editor->command_begin_window("摄像机参数");
+                editor->cmd_begin_window("摄像机参数");
                 {
                     float fov = camera.get_fov();
                     ImGui::Text("fov: ");
@@ -209,12 +209,12 @@ int main(int argc, char **argv)
                     ImGui::DragFloat("##far", &far, 0.01f);
                     camera.set_far(far);
                 }
-                editor->command_end_window();
+                editor->cmd_end_window();
             }
-            editor->command_end_editor_render(window_command_buffer);
+            editor->cmd_end_editor_render(window_cmd_buffer);
         }
-        screen->command_end_window_render(window_command_buffer);
-        editor->destroy_texture_id(imtex);
+        screen->cmd_end_window_render(window_cmd_buffer);
+        editor->destroy_texture(im_texture);
     }
 
     memdel(screen);

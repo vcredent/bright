@@ -32,8 +32,8 @@ public:
 
     void initialize();
 
-    void command_begin_canvas_render(VkCommandBuffer *p_command_buffer, uint32_t width, uint32_t height);
-    RenderDevice::Texture2D *command_end_canvas_render();
+    void cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer, uint32_t width, uint32_t height);
+    RenderDevice::Texture2D *cmd_end_canvas_render();
 
 private:
     void _create_canvas_texture(uint32_t width, uint32_t height);
@@ -44,7 +44,7 @@ private:
     RenderDevice::Texture2D *texture;
     VkFramebuffer framebuffer;
     VkSampler sampler;
-    VkCommandBuffer canvas_command_buffer;
+    VkCommandBuffer canvas_cmd_buffer;
 
     VkQueue graph_queue;
 };

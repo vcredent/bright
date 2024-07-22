@@ -33,7 +33,7 @@ Canvas::~Canvas()
     _clean_up_canvas_texture();
     rd->destroy_sampler(sampler);
     rd->destroy_render_pass(render_pass);
-    rd->free_command_buffer(canvas_command_buffer);
+    rd->free_cmd_buffer(canvas_cmd_buffer);
 }
 
 void Canvas::initialize()
@@ -74,35 +74,35 @@ void Canvas::initialize()
 
     rd->create_render_pass(1, &color_attachment, 1, &subpass, 1, &subpass_dependency, &render_pass);
     rd->create_sampler(&sampler);
-    rd->allocate_command_buffer(&canvas_command_buffer);
+    rd->allocate_cmd_buffer(&canvas_cmd_buffer);
 
     _create_canvas_texture(32, 32);
 }
 
-void Canvas::command_begin_canvas_render(VkCommandBuffer *p_command_buffer, uint32_t width, uint32_t height)
+void Canvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer, uint32_t width, uint32_t height)
 {
     if (texture->width != width || texture->height != height) {
         _clean_up_canvas_texture();
         _create_canvas_texture(width, height);
     }
 
-    rd->command_buffer_begin(canvas_command_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
+    rd->cmd_buffer_begin(canvas_cmd_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
 
     VkRect2D rect = {};
     rect.offset = { 0, 0 };
     rect.extent = { texture->width, texture->height };
-    rd->command_begin_render_pass(canvas_command_buffer, render_pass, framebuffer, &rect);
+    rd->cmd_begin_render_pass(canvas_cmd_buffer, render_pass, framebuffer, &rect);
 
-    *p_command_buffer = canvas_command_buffer;
+    *p_cmd_buffer = canvas_cmd_buffer;
 }
 
-RenderDevice::Texture2D *Canvas::command_end_canvas_render()
+RenderDevice::Texture2D *Canvas::cmd_end_canvas_render()
 {
-    rd->command_end_render_pass(canvas_command_buffer);
-    rd->command_buffer_end(canvas_command_buffer);
+    rd->cmd_end_render_pass(canvas_cmd_buffer);
+    rd->cmd_buffer_end(canvas_cmd_buffer);
 
     // submit
-    rd->command_buffer_submit(canvas_command_buffer,
+    rd->cmd_buffer_submit(canvas_cmd_buffer,
                               0, nullptr,
                               0, nullptr,
                               nullptr,

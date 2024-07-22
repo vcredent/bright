@@ -80,8 +80,8 @@ public:
     void read_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
     void create_render_pass(uint32_t attachment_count, VkAttachmentDescription *p_attachments, uint32_t subpass_count, VkSubpassDescription *p_subpass, uint32_t dependency_count, VkSubpassDependency *p_dependencies, VkRenderPass *p_render_pass);
     void destroy_render_pass(VkRenderPass render_pass);
-    void allocate_command_buffer(VkCommandBuffer *p_command_buffer);
-    void free_command_buffer(VkCommandBuffer command_buffer);
+    void allocate_cmd_buffer(VkCommandBuffer *p_cmd_buffer);
+    void free_cmd_buffer(VkCommandBuffer cmd_buffer);
     Texture2D *create_texture(uint32_t width, uint32_t height, VkSampler sampler, VkFormat format, VkImageUsageFlags usage);
     void destroy_texture(Texture2D *p_texture);
     void create_framebuffer(uint32_t width, uint32_t height, uint32_t image_view_count, VkImageView *p_image_view, VkRenderPass render_pass, VkFramebuffer *p_framebuffer);
@@ -99,15 +99,15 @@ public:
     Pipeline *create_graph_pipeline(VkRenderPass render_pass, ShaderInfo *p_shader_attribute);
     void destroy_pipeline(Pipeline *p_pipeline);
 
-    void command_buffer_begin(VkCommandBuffer command_buffer, VkCommandBufferUsageFlags usage);
-    void command_buffer_end(VkCommandBuffer command_buffer);
-    void command_begin_render_pass(VkCommandBuffer command_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect);
-    void command_end_render_pass(VkCommandBuffer command_buffer);
-    void command_bind_vertex_buffer(Buffer *p_buffer);
-    void command_bind_graph_pipeline(VkCommandBuffer command_buffer, Pipeline *p_pipeline);
-    void command_buffer_submit(VkCommandBuffer command_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence);
-    void command_bind_descriptor_set(VkCommandBuffer command_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor);
-    void command_setval_viewport(VkCommandBuffer command_buffer , uint32_t w, uint32_t h);
+    void cmd_buffer_begin(VkCommandBuffer cmd_buffer, VkCommandBufferUsageFlags usage);
+    void cmd_buffer_end(VkCommandBuffer cmd_buffer);
+    void cmd_begin_render_pass(VkCommandBuffer cmd_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect);
+    void cmd_end_render_pass(VkCommandBuffer cmd_buffer);
+    void cmd_bind_vertex_buffer(Buffer *p_buffer);
+    void cmd_bind_graph_pipeline(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline);
+    void cmd_buffer_submit(VkCommandBuffer cmd_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence);
+    void cmd_bind_descriptor_set(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor);
+    void cmd_setval_viewport(VkCommandBuffer cmd_buffer , uint32_t w, uint32_t h);
     void present(VkQueue queue, VkSwapchainKHR swap_chain, uint32_t index, VkSemaphore wait_semaphore);
 
 private:

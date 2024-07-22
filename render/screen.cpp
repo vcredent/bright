@@ -30,7 +30,7 @@ Screen::Screen(RenderDevice *p_render_device)
     vk_physical_device = rd->get_device_context()->get_physical_device();
     vk_device = rd->get_device_context()->get_device();
     vk_graph_queue_family = rd->get_device_context()->get_graph_queue_family();
-    vk_command_pool = rd->get_device_context()->get_command_pool();
+    vk_cmd_pool = rd->get_device_context()->get_cmd_pool();
     vk_graph_queue = rd->get_device_context()->get_graph_queue();
 }
 
@@ -94,29 +94,29 @@ void Screen::initialize(GLFWwindow *p_hwind)
     _create_swap_chain();
 }
 
-VkCommandBuffer Screen::command_begin_window_render()
+VkCommandBuffer Screen::cmd_begin_window_render()
 {
     _update_swap_chain();
     vkAcquireNextImageKHR(vk_device, window->swap_chain, UINT64_MAX, window->image_available_semaphore, nullptr, &acquire_next_index);
 
-    VkCommandBuffer command_buffer;
-    command_buffer = window->swap_chain_resources[acquire_next_index].command_buffer;
-    rd->command_buffer_begin(command_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
+    VkCommandBuffer cmd_buffer;
+    cmd_buffer = window->swap_chain_resources[acquire_next_index].cmd_buffer;
+    rd->cmd_buffer_begin(cmd_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
 
     VkRect2D rect = {};
     rect.extent = { window->width, window->height };
-    rd->command_begin_render_pass(command_buffer, window->render_pass, window->swap_chain_resources[acquire_next_index].framebuffer, &rect);
+    rd->cmd_begin_render_pass(cmd_buffer, window->render_pass, window->swap_chain_resources[acquire_next_index].framebuffer, &rect);
 
-    return command_buffer;
+    return cmd_buffer;
 }
 
-void Screen::command_end_window_render(VkCommandBuffer command_buffer)
+void Screen::cmd_end_window_render(VkCommandBuffer cmd_buffer)
 {
-    rd->command_end_render_pass(command_buffer);
-    rd->command_buffer_end(command_buffer);
+    rd->cmd_end_render_pass(cmd_buffer);
+    rd->cmd_buffer_end(cmd_buffer);
 
     VkPipelineStageFlags mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    rd->command_buffer_submit(command_buffer, 1, &window->image_available_semaphore, 1, &window->render_finished_semaphore, &mask, vk_graph_queue, VK_NULL_HANDLE);
+    rd->cmd_buffer_submit(cmd_buffer, 1, &window->image_available_semaphore, 1, &window->render_finished_semaphore, &mask, vk_graph_queue, VK_NULL_HANDLE);
     rd->present(vk_graph_queue, window->swap_chain, acquire_next_index, window->render_finished_semaphore);
 }
 
@@ -215,15 +215,15 @@ void Screen::_create_swap_chain()
     for (uint32_t i = 0; i < window->image_buffer_count; i++) {
         window->swap_chain_resources[i].image = swap_chain_images[i];
 
-        VkCommandBufferAllocateInfo command_allocate_info = {
+        VkCommandBufferAllocateInfo cmd_allocate_info = {
                 /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
                 /* pNext */ nextptr,
-                /* commandPool */ vk_command_pool,
+                /* commandPool */ vk_cmd_pool,
                 /* level */ VK_COMMAND_BUFFER_LEVEL_PRIMARY,
                 /* commandBufferCount */ 1
         };
 
-        vkAllocateCommandBuffers(vk_device, &command_allocate_info, &(window->swap_chain_resources[i].command_buffer));
+        vkAllocateCommandBuffers(vk_device, &cmd_allocate_info, &(window->swap_chain_resources[i].cmd_buffer));
 
         VkImageViewCreateInfo image_view_create_info = {
                 /* sType */ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -274,7 +274,7 @@ void Screen::_create_swap_chain()
 void Screen::_clean_up_swap_chain()
 {
     for (uint32_t i = 0; i < window->image_buffer_count; i++) {
-        vkFreeCommandBuffers(vk_device, vk_command_pool, 1, &window->swap_chain_resources[i].command_buffer);
+        vkFreeCommandBuffers(vk_device, vk_cmd_pool, 1, &window->swap_chain_resources[i].cmd_buffer);
         vkDestroyFramebuffer(vk_device, window->swap_chain_resources[i].framebuffer, allocation_callbacks);
         vkDestroyImageView(vk_device, window->swap_chain_resources[i].image_view, allocation_callbacks);
     }
