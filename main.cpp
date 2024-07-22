@@ -179,7 +179,7 @@ int main(int argc, char **argv)
         VkCommandBuffer window_command_buffer = screen->command_begin_window_render();
         {
             /* ImGui */
-            editor->command_begin_new_frame(window_command_buffer);
+            editor->command_begin_editor_render(window_command_buffer);
             {
                 ImGui::ShowDemoWindow(&show_demo_flag);
                 editor->command_begin_viewport("视口");
@@ -211,7 +211,7 @@ int main(int argc, char **argv)
                 }
                 editor->command_end_window();
             }
-            editor->command_end_new_frame(window_command_buffer);
+            editor->command_end_editor_render(window_command_buffer);
         }
         screen->command_end_window_render(window_command_buffer);
         editor->destroy_texture_id(imtex);

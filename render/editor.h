@@ -38,8 +38,8 @@ public:
     void destroy_texture_id(ImTextureID texture_id);
 
     /* begin new gui frame */
-    void command_begin_new_frame(VkCommandBuffer command_buffer);
-    void command_end_new_frame(VkCommandBuffer command_buffer);
+    void command_begin_editor_render(VkCommandBuffer command_buffer);
+    void command_end_editor_render(VkCommandBuffer command_buffer);
 
     void command_begin_window(const char *title);
     void command_end_window();
@@ -51,7 +51,7 @@ private:
     void _set_theme_embrace_the_darkness();
 
     RenderDevice *rd;
-    Screen *window;
+    Screen *screen;
 };
 
 #endif /* _EDITOR_H_ */

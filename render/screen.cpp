@@ -131,7 +131,6 @@ void Screen::_create_swap_chain()
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk_physical_device, window->vk_surface, &capabilities);
     window->width = capabilities.currentExtent.width;
     window->height = capabilities.currentExtent.height;
-    window->aspect_ratio = window->width / window->height;
 
     if (!old_swap_chain) {
         // attachment

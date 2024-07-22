@@ -38,9 +38,9 @@ Editor::~Editor()
     ImGui_ImplVulkan_Shutdown();
 }
 
-void Editor::initialize(RenderWindow *p_render_window)
+void Editor::initialize(Screen *p_screen)
 {
-    window = p_render_window;
+    screen = p_screen;
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -68,7 +68,7 @@ void Editor::initialize(RenderWindow *p_render_window)
 
     // Setup Platform/Renderer backends
     auto rdc = rd->get_device_context();
-    ImGui_ImplGlfw_InitForVulkan((GLFWwindow *) window->get_native_window(), true);
+    ImGui_ImplGlfw_InitForVulkan((GLFWwindow *) screen->get_native_window(), true);
 
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = rdc->get_instance();
@@ -79,12 +79,12 @@ void Editor::initialize(RenderWindow *p_render_window)
     init_info.PipelineCache = VK_NULL_HANDLE;
     init_info.DescriptorPool = rd->get_descriptor_pool();
     init_info.Subpass = 0;
-    init_info.MinImageCount = window->get_image_buffer_count();
-    init_info.ImageCount = window->get_image_buffer_count();
+    init_info.MinImageCount = screen->get_image_buffer_count();
+    init_info.ImageCount = screen->get_image_buffer_count();
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
     init_info.Allocator = VK_NULL_HANDLE;
     init_info.CheckVkResultFn = VK_NULL_HANDLE;
-    ImGui_ImplVulkan_Init(&init_info, window->get_render_pass());
+    ImGui_ImplVulkan_Init(&init_info, screen->get_render_pass());
 }
 
 ImTextureID Editor::create_texture_id(RenderDevice::Texture2D *p_texture)
@@ -97,7 +97,7 @@ void Editor::destroy_texture_id(ImTextureID texture_id)
     ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet) texture_id);
 }
 
-void Editor::command_begin_new_frame(VkCommandBuffer command_buffer)
+void Editor::command_begin_editor_render(VkCommandBuffer command_buffer)
 {
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -106,7 +106,7 @@ void Editor::command_begin_new_frame(VkCommandBuffer command_buffer)
     ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 }
 
-void Editor::command_end_new_frame(VkCommandBuffer command_buffer)
+void Editor::command_end_editor_render(VkCommandBuffer command_buffer)
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
