@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-    GLFWwindow *hwindow = glfwCreateWindow(800, 600, "CopilotEngine", nullptr, nullptr);
+    GLFWwindow *hwindow = glfwCreateWindow(1920, 1080, "CopilotEngine", nullptr, nullptr);
     assert(hwindow != nullptr);
 
     auto rdc = std::make_unique<RenderDeviceContextWin32>(hwindow);
