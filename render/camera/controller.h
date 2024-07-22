@@ -40,14 +40,14 @@ public:
     virtual void on_event_cursor(float x, float y);
     virtual void on_event_key(int key, bool action, int modes);
 
-    void set_control_camera(Camera *p_camera) { p_control_camera = p_camera; }
+    void make_current_camera(Camera *camera) { this->camera = camera; }
 
 protected:
     bool mouse_left_key;
     bool mouse_right_key;
     float mouse_position_x;
     float mouse_position_y;
-    Camera *p_control_camera = nullptr;
+    Camera *camera = nullptr;
 
     /* get key event */
     KeyEvent *getkey(int key);

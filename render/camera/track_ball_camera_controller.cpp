@@ -34,4 +34,5 @@ TrackBallCameraController::~TrackBallCameraController()
 
 void TrackBallCameraController::on_update()
 {
+
 }

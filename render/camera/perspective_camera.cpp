@@ -37,8 +37,8 @@ PerspectiveCamera::~PerspectiveCamera()
 
 glm::mat4 PerspectiveCamera::look_at()
 {
-    front = glm::cross(up, right);
-    return glm::lookAt(position, position + front, up);
+    direction = glm::cross(up, right);
+    return glm::lookAt(position, position + direction, up);
 }
 
 glm::mat4 PerspectiveCamera::perspective()

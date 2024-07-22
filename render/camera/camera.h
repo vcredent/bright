@@ -28,21 +28,32 @@
 
 class Camera {
 public:
-    virtual glm::mat4 look_at() = 0;
-    virtual glm::mat4 perspective() = 0;
+    virtual glm::mat4 look_at() = 0; /* calculation view matrix */
+    virtual glm::mat4 perspective() = 0; /* calculation projection matrix */
 
-    glm::vec3 get_camera_position() { return position; }
+    glm::vec3 get_position() { return this->position; }
+    glm::vec3 get_right() { return this->right; }
+    glm::vec3 get_up() { return this->up; }
+    float get_yaw() { return this->yaw; }
+    float get_pitch() { return this->pitch; }
+    float get_roll() { return this->roll; }
 
-    void set_camera_position(float x, float y, float z) { position = glm::vec3(x, y, z); }
-    void set_camera_right(float x, float y, float z) { right = glm::vec3(x, y, z); }
-    void set_camera_up(float x, float y, float z) { up = glm::vec3(x, y, z); }
+    void set_position(glm::vec3 &position) { this->position = position; }
+    void set_right(glm::vec3 &right) { this->right = right; }
+    void set_up(glm::vec3 &up) { this->up = up; }
+    void set_yaw(float yaw) { this->yaw = yaw; }
+    void set_pitch(float pitch) { this->pitch = pitch; }
+    void set_roll(float roll) { this->roll = roll; }
 
 protected:
     /* the local_* variable is camera self local coordinate system */
     glm::vec3 position;
     glm::vec3 right;
     glm::vec3 up;
-    glm::vec3 front; /* front = up x right */
+    glm::vec3 direction;
+    float yaw;
+    float pitch;
+    float roll;
 };
 
 #endif /* _CAMERA_H_ */
