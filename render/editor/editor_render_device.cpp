@@ -119,6 +119,16 @@ void EditorRenderDevice::command_end_new_frame(VkCommandBuffer command_buffer)
     }
 }
 
+void EditorRenderDevice::command_begin_window(const char *title)
+{
+    ImGui::Begin(title);
+}
+
+void EditorRenderDevice::command_end_window()
+{
+    ImGui::End();
+}
+
 void EditorRenderDevice::command_begin_viewport(const char *title)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));

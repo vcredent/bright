@@ -40,6 +40,8 @@ public:
     void command_begin_new_frame(VkCommandBuffer command_buffer);
     void command_end_new_frame(VkCommandBuffer command_buffer);
 
+    void command_begin_window(const char *title);
+    void command_end_window();
     void command_begin_viewport(const char *title);
     void command_end_viewport();
     void command_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height);

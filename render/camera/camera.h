@@ -31,15 +31,15 @@ public:
     virtual glm::mat4 look_at() = 0; /* calculation view matrix */
     virtual glm::mat4 perspective() = 0; /* calculation projection matrix */
 
-    glm::vec3 get_position() { return this->position; }
-    glm::vec3 get_right() { return this->right; }
-    glm::vec3 get_up() { return this->up; }
-    float get_yaw() { return this->yaw; }
-    float get_pitch() { return this->pitch; }
-    float get_roll() { return this->roll; }
-    void get_far() { this->far; }
-    void get_near() { this->near; }
-    void get_fov() { this->fov; }
+    glm::vec3 get_position() { return position; }
+    glm::vec3 get_right() { return right; }
+    glm::vec3 get_up() { return up; }
+    float get_yaw() { return yaw; }
+    float get_pitch() { return pitch; }
+    float get_roll() { return roll; }
+    float get_far() { return far; }
+    float get_near() { return near; }
+    float get_fov() { return fov; }
 
     void set_position(glm::vec3 &position) { this->position = position; }
     void set_right(glm::vec3 &right) { this->right = right; }
@@ -47,7 +47,7 @@ public:
     void set_yaw(float yaw) { this->yaw = yaw; }
     void set_pitch(float pitch) { this->pitch = pitch; }
     void set_roll(float roll) { this->roll = roll; }
-    void set_aspect_ratio(float aspect) { this->aspect_ratio = aspect; }
+    void set_aspect_ratio(float aspect) { aspect_ratio = aspect; }
     void set_far(float far) { this->far = far; }
     void set_near(float near) { this->near = near; }
     void set_fov(float fov) { this->fov = fov; }

@@ -200,6 +200,28 @@ int main(int argc, char **argv)
                         editor->command_draw_texture(imtex, &viewport_width, &viewport_height);
                     }
                     editor->command_end_viewport();
+
+                    editor->command_begin_window("摄像机参数");
+                    {
+                        float fov = camera.get_fov();
+                        ImGui::Text("fov: ");
+                        ImGui::SameLine();
+                        ImGui::DragFloat("##fov", &fov, 0.01f);
+                        camera.set_fov(fov);
+
+                        float near = camera.get_near();
+                        ImGui::Text("near: ");
+                        ImGui::SameLine();
+                        ImGui::DragFloat("##near", &near, 0.01f);
+                        camera.set_near(near);
+
+                        float far = camera.get_far();
+                        ImGui::Text("far: ");
+                        ImGui::SameLine();
+                        ImGui::DragFloat("##far", &far, 0.01f);
+                        camera.set_far(far);
+                    }
+                    editor->command_end_window();
                 }
                 editor->command_end_new_frame(acquired_next->command_buffer);
             }
