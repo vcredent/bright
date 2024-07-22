@@ -34,7 +34,8 @@ RenderEditor::RenderEditor(RenderDevice *p_device)
 
 RenderEditor::~RenderEditor()
 {
-    /* do nothing... */
+    ImGui_ImplGlfw_Shutdown();
+    ImGui_ImplVulkan_Shutdown();
 }
 
 void RenderEditor::initialize()

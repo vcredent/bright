@@ -21,8 +21,6 @@
 /*                                                                          */
 /* ======================================================================== */
 #include "platform/win32/render_device_context_win32.h"
-#include <memory>
-#include <time.h>
 #include <vector>
 #include <chrono>
 #include "render/camera/track_ball_camera_controller.h"
@@ -139,10 +137,10 @@ int main(int argc, char **argv)
         controller.on_event_cursor((float) xpos, (float) ypos);
     });
 
-    std::unique_ptr<RenderCanvas> canvas = std::make_unique<RenderCanvas>(rd);
+    RenderCanvas *canvas = memnew(RenderCanvas, rd);
     canvas->initialize();
 
-    std::unique_ptr<RenderEditor> editor = std::make_unique<RenderEditor>(rd);
+    RenderEditor *editor = memnew(RenderEditor, rd);
     editor->initialize();
 
     uint32_t viewport_width = 32;
@@ -234,6 +232,8 @@ int main(int argc, char **argv)
         editor->destroy_texture_id(imtex);
     }
 
+    memdel(canvas);
+    memdel(editor);
     rd->destroy_buffer(mvp_matrix_buffer);
     rd->destroy_buffer(index_buffer);
     rd->destroy_buffer(vertex_buffer);
