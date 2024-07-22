@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 
             rd->cmd_bind_graph_pipeline(canvas_cmd_buffer, pipeline);
             rd->cmd_bind_descriptor_set(canvas_cmd_buffer, pipeline, mvp_descriptor);
-            rd->write_descriptor_set(mvp_matrix_buffer, mvp_descriptor);
+            rd->write_descriptor_set_buffer(mvp_matrix_buffer, mvp_descriptor);
             rd->cmd_setval_viewport(canvas_cmd_buffer, viewport_width, viewport_height);
 
             VkDeviceSize offset = 0;

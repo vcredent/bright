@@ -336,7 +336,7 @@ void RenderDevice::free_descriptor_set(VkDescriptorSet descriptor_set)
     vkFreeDescriptorSets(vk_device, descriptor_pool, 1, &descriptor_set);
 }
 
-void RenderDevice::write_descriptor_set(Buffer *p_buffer, VkDescriptorSet descriptor_set)
+void RenderDevice::write_descriptor_set_buffer(Buffer *p_buffer, VkDescriptorSet descriptor_set)
 {
     VkDescriptorBufferInfo buffer_info = {
             /* buffer */ p_buffer->vk_buffer,

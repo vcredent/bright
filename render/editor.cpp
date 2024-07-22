@@ -51,7 +51,7 @@ void Editor::initialize(Screen *p_screen)
     io.ConfigViewportsNoTaskBarIcon = true;
 
     // set default font.
-    io.Fonts->AddFontFromFileTTF("../resource/fonts/smiley-sans-v1.1.1/SmileySans-Oblique.ttf", 21.0f,
+    io.Fonts->AddFontFromFileTTF("../resource/fonts/smiley-sans-v1.1.1/SmileySans-Oblique.ttf", 24.0f,
                                  nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
     io.FontDefault = io.Fonts->Fonts.back();
 

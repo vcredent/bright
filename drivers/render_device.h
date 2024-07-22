@@ -94,7 +94,7 @@ public:
     void destroy_descriptor_set_layout(VkDescriptorSetLayout descriptor_set_layout);
     void allocate_descriptor_set(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor_set);
     void free_descriptor_set(VkDescriptorSet descriptor_set);
-    void write_descriptor_set(Buffer *p_buffer, VkDescriptorSet descriptor_set);
+    void write_descriptor_set_buffer(Buffer *p_buffer, VkDescriptorSet descriptor_set);
 
     Pipeline *create_graph_pipeline(VkRenderPass render_pass, ShaderInfo *p_shader_attribute);
     void destroy_pipeline(Pipeline *p_pipeline);
