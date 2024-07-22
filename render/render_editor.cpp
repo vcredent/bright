@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* editor_render_device.cpp                                                 */
+/* render_editor.cpp                                                        */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,11 +20,11 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "editor_render_device.h"
+#include "render_editor.h"
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 
-EditorRenderDevice::EditorRenderDevice(RenderDevice *p_device)
+RenderEditor::RenderEditor(RenderDevice *p_device)
     : rd(p_device)
 {
     // Setup Dear ImGui context
@@ -32,12 +32,12 @@ EditorRenderDevice::EditorRenderDevice(RenderDevice *p_device)
     ImGui::CreateContext();
 }
 
-EditorRenderDevice::~EditorRenderDevice()
+RenderEditor::~RenderEditor()
 {
     /* do nothing... */
 }
 
-void EditorRenderDevice::initialize()
+void RenderEditor::initialize()
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -84,17 +84,17 @@ void EditorRenderDevice::initialize()
     ImGui_ImplVulkan_Init(&init_info, rdc->get_render_pass());
 }
 
-ImTextureID EditorRenderDevice::create_texture_id(RenderDevice::Texture2D *p_texture)
+ImTextureID RenderEditor::create_texture_id(RenderDevice::Texture2D *p_texture)
 {
     return (ImTextureID) ImGui_ImplVulkan_AddTexture(p_texture->sampler, p_texture->image_view, p_texture->image_layout);
 }
 
-void EditorRenderDevice::destroy_texture_id(ImTextureID texture_id)
+void RenderEditor::destroy_texture_id(ImTextureID texture_id)
 {
     ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet) texture_id);
 }
 
-void EditorRenderDevice::command_begin_new_frame(VkCommandBuffer command_buffer)
+void RenderEditor::command_begin_new_frame(VkCommandBuffer command_buffer)
 {
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -103,7 +103,7 @@ void EditorRenderDevice::command_begin_new_frame(VkCommandBuffer command_buffer)
     ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 }
 
-void EditorRenderDevice::command_end_new_frame(VkCommandBuffer command_buffer)
+void RenderEditor::command_end_new_frame(VkCommandBuffer command_buffer)
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
@@ -119,29 +119,29 @@ void EditorRenderDevice::command_end_new_frame(VkCommandBuffer command_buffer)
     }
 }
 
-void EditorRenderDevice::command_begin_window(const char *title)
+void RenderEditor::command_begin_window(const char *title)
 {
     ImGui::Begin(title);
 }
 
-void EditorRenderDevice::command_end_window()
+void RenderEditor::command_end_window()
 {
     ImGui::End();
 }
 
-void EditorRenderDevice::command_begin_viewport(const char *title)
+void RenderEditor::command_begin_viewport(const char *title)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::Begin(title);
 }
 
-void EditorRenderDevice::command_end_viewport()
+void RenderEditor::command_end_viewport()
 {
     ImGui::End();
     ImGui::PopStyleVar();
 }
 
-void EditorRenderDevice::command_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
+void RenderEditor::command_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
 {
     ImVec2 size = ImGui::GetContentRegionAvail();
     *p_width = size.x;
@@ -149,7 +149,7 @@ void EditorRenderDevice::command_draw_texture(ImTextureID texture, uint32_t *p_w
     ImGui::Image(texture, ImVec2(*p_width, *p_height));
 }
 
-void EditorRenderDevice::_set_theme_embrace_the_darkness()
+void RenderEditor::_set_theme_embrace_the_darkness()
 {
     ImVec4* colors = ImGui::GetStyle().Colors;
     colors[ImGuiCol_Text]                   = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);

@@ -27,7 +27,7 @@
 #include <chrono>
 #include "render/camera/track_ball_camera_controller.h"
 #include "render/camera/perspective_camera.h"
-#include "render/editor/editor_render_device.h"
+#include "render/render_editor.h"
 #include "render/render_canvas.h"
 
 struct Vertex {
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
     std::unique_ptr<RenderCanvas> canvas = std::make_unique<RenderCanvas>(rd);
     canvas->initialize();
 
-    std::unique_ptr<EditorRenderDevice> editor = std::make_unique<EditorRenderDevice>(rd);
+    std::unique_ptr<RenderEditor> editor = std::make_unique<RenderEditor>(rd);
     editor->initialize();
 
     uint32_t viewport_width = 32;

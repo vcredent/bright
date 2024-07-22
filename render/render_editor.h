@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* editor_render_device.h                                                   */
+/* render_editor.h                                                          */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,16 +20,16 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _IMGUI_CONTEXT_H_
-#define _IMGUI_CONTEXT_H_
+#ifndef _RENDER_EDITOR_H_
+#define _RENDER_EDITOR_H_
 
 #include <imgui.h>
 #include "drivers/render_device.h"
 
-class EditorRenderDevice {
+class RenderEditor {
 public:
-    EditorRenderDevice(RenderDevice *p_device);
-    ~EditorRenderDevice();
+    RenderEditor(RenderDevice *p_device);
+    ~RenderEditor();
 
     void initialize();
 
@@ -52,4 +52,4 @@ private:
     RenderDevice *rd;
 };
 
-#endif /* _IMGUI_CONTEXT_H_ */
+#endif /* _RENDER_EDITOR_H_ */
