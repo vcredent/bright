@@ -26,7 +26,8 @@ RenderDeviceContextWin32::RenderDeviceContextWin32(GLFWwindow *window)
 {
     VkSurfaceKHR surface;
     glfwCreateWindowSurface(get_instance(), window, allocation_callbacks, &surface);
-    _initialize_window(window, surface);
+    _initialize_window_arguments(surface);
+    vkDestroySurfaceKHR(get_instance(), surface, allocation_callbacks);
 }
 
 RenderDeviceContextWin32::~RenderDeviceContextWin32()

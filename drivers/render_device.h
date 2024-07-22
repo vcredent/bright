@@ -72,7 +72,7 @@ public:
 public:
     RenderDeviceContext *get_device_context() { return vk_rdc; }
     VkDescriptorPool get_descriptor_pool() { return descriptor_pool; }
-    VkFormat get_surface_format() { return vk_rdc->get_surface_format(); }
+    VkFormat get_surface_format() { return vk_rdc->get_window_format(); }
 
     Buffer *create_buffer(VkBufferUsageFlags usage, VkDeviceSize size);
     void destroy_buffer(Buffer *p_buffer);
@@ -96,7 +96,7 @@ public:
     void free_descriptor_set(VkDescriptorSet descriptor_set);
     void write_descriptor_set(Buffer *p_buffer, VkDescriptorSet descriptor_set);
 
-    Pipeline *create_graph_pipeline(ShaderInfo *p_shader_attribute);
+    Pipeline *create_graph_pipeline(VkRenderPass render_pass, ShaderInfo *p_shader_attribute);
     void destroy_pipeline(Pipeline *p_pipeline);
 
     void command_buffer_begin(VkCommandBuffer command_buffer, VkCommandBufferUsageFlags usage);

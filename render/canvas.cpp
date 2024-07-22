@@ -20,15 +20,15 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "render_canvas.h"
+#include "canvas.h"
 
-RenderCanvas::RenderCanvas(RenderDevice *p_device)
+Canvas::Canvas(RenderDevice *p_device)
     : rd(p_device)
 {
     /* do nothing... */
 }
 
-RenderCanvas::~RenderCanvas()
+Canvas::~Canvas()
 {
     _clean_up_canvas_texture();
     rd->destroy_sampler(sampler);
@@ -36,7 +36,7 @@ RenderCanvas::~RenderCanvas()
     rd->free_command_buffer(canvas_command_buffer);
 }
 
-void RenderCanvas::initialize()
+void Canvas::initialize()
 {
     graph_queue = rd->get_device_context()->get_graph_queue();
 
@@ -79,7 +79,7 @@ void RenderCanvas::initialize()
     _create_canvas_texture(32, 32);
 }
 
-void RenderCanvas::command_begin_canvas_render(VkCommandBuffer *p_command_buffer, uint32_t width, uint32_t height)
+void Canvas::command_begin_canvas_render(VkCommandBuffer *p_command_buffer, uint32_t width, uint32_t height)
 {
     if (texture->width != width || texture->height != height) {
         _clean_up_canvas_texture();
@@ -96,7 +96,7 @@ void RenderCanvas::command_begin_canvas_render(VkCommandBuffer *p_command_buffer
     *p_command_buffer = canvas_command_buffer;
 }
 
-RenderDevice::Texture2D *RenderCanvas::command_end_canvas_render()
+RenderDevice::Texture2D *Canvas::command_end_canvas_render()
 {
     rd->command_end_render_pass(canvas_command_buffer);
     rd->command_buffer_end(canvas_command_buffer);
@@ -112,14 +112,14 @@ RenderDevice::Texture2D *RenderCanvas::command_end_canvas_render()
     return texture;
 }
 
-void RenderCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
+void Canvas::_create_canvas_texture(uint32_t width, uint32_t height)
 {
     texture = rd->create_texture(width, height, sampler, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     rd->transition_image_layout(texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     rd->create_framebuffer(texture->width, texture->height, 1, &texture->image_view, render_pass, &framebuffer);
 }
 
-void RenderCanvas::_clean_up_canvas_texture()
+void Canvas::_clean_up_canvas_texture()
 {
     rd->destroy_texture(texture);
     texture = VK_NULL_HANDLE;

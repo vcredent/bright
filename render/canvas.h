@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* render_editor.h                                                          */
+/* render_canvas.h                                                          */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,36 +20,33 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _RENDER_EDITOR_H_
-#define _RENDER_EDITOR_H_
+#ifndef _CONVAS_H_
+#define _CONVAS_H_
 
-#include <imgui.h>
 #include "drivers/render_device.h"
 
-class RenderEditor {
+class Canvas {
 public:
-    RenderEditor(RenderDevice *p_device);
-    ~RenderEditor();
+    Canvas(RenderDevice *p_device);
+   ~Canvas();
 
     void initialize();
 
-    ImTextureID create_texture_id(RenderDevice::Texture2D *p_texture);
-    void destroy_texture_id(ImTextureID texture_id);
-
-    /* begin new gui frame */
-    void command_begin_new_frame(VkCommandBuffer command_buffer);
-    void command_end_new_frame(VkCommandBuffer command_buffer);
-
-    void command_begin_window(const char *title);
-    void command_end_window();
-    void command_begin_viewport(const char *title);
-    void command_end_viewport();
-    void command_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height);
+    void command_begin_canvas_render(VkCommandBuffer *p_command_buffer, uint32_t width, uint32_t height);
+    RenderDevice::Texture2D *command_end_canvas_render();
 
 private:
-    void _set_theme_embrace_the_darkness();
+    void _create_canvas_texture(uint32_t width, uint32_t height);
+    void _clean_up_canvas_texture();
 
     RenderDevice *rd;
+    VkRenderPass render_pass;
+    RenderDevice::Texture2D *texture;
+    VkFramebuffer framebuffer;
+    VkSampler sampler;
+    VkCommandBuffer canvas_command_buffer;
+
+    VkQueue graph_queue;
 };
 
-#endif /* _RENDER_EDITOR_H_ */
+#endif /* _CONVAS_H_ */

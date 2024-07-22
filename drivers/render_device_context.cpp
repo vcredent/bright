@@ -96,7 +96,6 @@ RenderDeviceContext::RenderDeviceContext()
 
 RenderDeviceContext::~RenderDeviceContext()
 {
-    _clean_up_window();
     vmaDestroyAllocator(allocator);
     vkDestroyCommandPool(device, command_pool, allocation_callbacks);
     vkDestroyDevice(device, allocation_callbacks);
@@ -106,10 +105,8 @@ RenderDeviceContext::~RenderDeviceContext()
 Error RenderDeviceContext::initialize()
 {
     _create_device();
-    _initialize_window_semaphore();
     _create_command_pool();
     _create_vma_allocator();
-    _create_swap_chain();
 
     return OK;
 }
@@ -130,95 +127,29 @@ void RenderDeviceContext::allocate_command_buffer(VkCommandBufferLevel level, Vk
     assert(!err);
 }
 
-void
-RenderDeviceContext::get_window_semaphore(VkSemaphore *p_available_semaphore, VkSemaphore *p_finished_semaphore)
-{
-    *p_available_semaphore = window->image_available_semaphore;
-    *p_finished_semaphore = window->render_finished_semaphore;
-}
-
-RenderDeviceContext::AcquiredNext *RenderDeviceContext::acquire_next_image()
-{
-    window->acquired_next->swap_chain = window->swap_chain;
-    window->acquired_next->wait_semaphore = window->image_available_semaphore;
-    window->acquired_next->render_pass = window->render_pass;
-
-    VkResult U_ASSERT_ONLY err;
-    err = vkAcquireNextImageKHR(device, window->swap_chain, UINT32_MAX, window->acquired_next->wait_semaphore, VK_NULL_HANDLE, &window->acquired_next->index);
-    assert(!err);
-
-    window->acquired_next->command_buffer = window->swap_chain_resources[window->acquired_next->index].command_buffer;
-    window->acquired_next->framebuffer = window->swap_chain_resources[window->acquired_next->index].framebuffer;
-    window->acquired_next->width = window->width;
-    window->acquired_next->height = window->height;
-
-    return window->acquired_next;
-}
-
 void RenderDeviceContext::free_command_buffer(VkCommandBuffer command_buffer)
 {
     vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
 }
 
-void RenderDeviceContext::update_window()
-{
-    _update_swap_chain();
-}
-
-void RenderDeviceContext::_initialize_window(void *hwind, VkSurfaceKHR surface)
+void RenderDeviceContext::_initialize_window_arguments(VkSurfaceKHR surface)
 {
     VkResult U_ASSERT_ONLY err;
 
-    /* imalloc display window struct and set surface */
-    window = (Window *) imalloc(sizeof(Window));
-    window->surface = surface;
-    window->hwind = hwind;
-
-    window->acquired_next = (AcquiredNext *) imalloc(sizeof(AcquiredNext));
-
-    VkSurfaceCapabilitiesKHR capabilities;
-    err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, window->surface, &capabilities);
+    err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &capabilities);
     assert(!err);
 
     /* pick surface format */
     uint32_t foramt_count = 0;
-    err = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, window->surface, &foramt_count, nullptr);
+    err = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &foramt_count, nullptr);
     assert(!err);
 
     VkSurfaceFormatKHR *surface_formats_khr = (VkSurfaceFormatKHR *) imalloc(sizeof(VkSurfaceFormatKHR) * foramt_count);
-    err = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, window->surface, &foramt_count, surface_formats_khr);
+    err = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &foramt_count, surface_formats_khr);
     assert(!err);
 
     VkSurfaceFormatKHR surface_format = pick_surface_format(surface_formats_khr, foramt_count);
-    window->format = surface_format.format;
-    window->color_space = surface_format.colorSpace;
-
-    free(surface_formats_khr);
-
-    /* image buffer count */
-    uint32_t desired_buffer_count = 3;
-    desired_buffer_count = std::clamp(desired_buffer_count, capabilities.minImageCount, capabilities.maxImageCount);
-    window->image_buffer_count = desired_buffer_count;
-
-    window->composite_alpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    window->present_mode = VK_PRESENT_MODE_FIFO_KHR;
-}
-
-void RenderDeviceContext::_clean_up_window()
-{
-    vkDestroySemaphore(device, window->image_available_semaphore, allocation_callbacks);
-    vkDestroySemaphore(device, window->render_finished_semaphore, allocation_callbacks);
-    vkDestroySwapchainKHR(device, window->swap_chain, allocation_callbacks);
-    vkDestroyRenderPass(device, window->render_pass, allocation_callbacks);
-    _clean_up_swap_chain();
-    vkDestroySurfaceKHR(instance, window->surface, allocation_callbacks);
-    free(window->acquired_next);
-    free(window);
-}
-
-void RenderDeviceContext::_create_device()
-{
-    VkResult U_ASSERT_ONLY err;
+    format = surface_format.format;
 
     /* add queue create info */
     uint32_t queue_family_count = 0;
@@ -228,9 +159,8 @@ void RenderDeviceContext::_create_device()
 
     for (uint32_t i = 0; i < queue_family_count; i++) {
         VkQueueFamilyProperties properties = queue_family_properties[i];
-
         VkBool32 is_support_present = VK_FALSE;
-        vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, window->surface, &is_support_present);
+        vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, surface, &is_support_present);
         if ((properties.queueFlags & VK_QUEUE_GRAPHICS_BIT) && is_support_present) {
             graph_queue_family = i;
             break;
@@ -238,6 +168,11 @@ void RenderDeviceContext::_create_device()
     }
 
     free(queue_family_properties);
+}
+
+void RenderDeviceContext::_create_device()
+{
+    VkResult U_ASSERT_ONLY err;
 
     float priorities = 1.0f;
     VkDeviceQueueCreateInfo queue_create_info = {
@@ -274,20 +209,6 @@ void RenderDeviceContext::_create_device()
     vkGetDeviceQueue(device, graph_queue_family, 0, &graph_queue);
 }
 
-void RenderDeviceContext::_initialize_window_semaphore()
-{
-    VkResult U_ASSERT_ONLY err;
-
-    VkSemaphoreCreateInfo semaphore_create_info = {};
-    semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-    err = vkCreateSemaphore(device, &semaphore_create_info, allocation_callbacks, &window->image_available_semaphore);
-    assert(!err);
-
-    err = vkCreateSemaphore(device, &semaphore_create_info, allocation_callbacks, &window->render_finished_semaphore);
-    assert(!err);
-}
-
 void RenderDeviceContext::_create_command_pool()
 {
     VkResult U_ASSERT_ONLY err;
@@ -314,174 +235,4 @@ void RenderDeviceContext::_create_vma_allocator()
 
     err = vmaCreateAllocator(&vma_allocator_create_info, &allocator);
     assert(!err);
-}
-
-void RenderDeviceContext::_create_swap_chain()
-{
-    VkResult U_ASSERT_ONLY err;
-    VkSwapchainKHR old_swap_chain;
-
-    old_swap_chain = window->swap_chain;
-
-    VkSurfaceCapabilitiesKHR capabilities;
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, window->surface, &capabilities);
-    window->width = capabilities.currentExtent.width;
-    window->height = capabilities.currentExtent.height;
-    window->aspect_ratio = window->width / window->height;
-
-    if (!old_swap_chain) {
-        // attachment
-        VkAttachmentDescription color_attachment = {
-                /* flags */ no_flag_bits,
-                /* format */ window->format,
-                /* samples */ VK_SAMPLE_COUNT_1_BIT,
-                /* loadOp */VK_ATTACHMENT_LOAD_OP_CLEAR,
-                /* storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
-                /* stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-                /* stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
-                /* initialLayout */ VK_IMAGE_LAYOUT_UNDEFINED,
-                /* finalLayout */ VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-        };
-
-        VkAttachmentReference color_attachment_reference = {};
-        color_attachment_reference.attachment = 0;
-        color_attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkSubpassDescription subpass = {};
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &color_attachment_reference;
-
-        VkSubpassDependency subpass_dependency = {};
-        subpass_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        subpass_dependency.dstSubpass = 0;
-        subpass_dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        subpass_dependency.srcAccessMask = 0;
-        subpass_dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        subpass_dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-        // create render pass
-        VkRenderPassCreateInfo render_pass_create_info = {};
-        render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        render_pass_create_info.attachmentCount = 1;
-        render_pass_create_info.pAttachments = &color_attachment;
-        render_pass_create_info.subpassCount = 1;
-        render_pass_create_info.pSubpasses = &subpass;
-        render_pass_create_info.dependencyCount = 1;
-        render_pass_create_info.pDependencies = &subpass_dependency;
-
-        err = vkCreateRenderPass(device, &render_pass_create_info, allocation_callbacks, &window->render_pass);
-        assert(!err);
-    }
-
-    /* create swap chain */
-    VkSwapchainCreateInfoKHR swap_chain_create_info = {
-            /* sType */ VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
-            /* surface */ window->surface,
-            /* minImageCount */ window->image_buffer_count,
-            /* imageFormat */ window->format,
-            /* imageColorSpace */ window->color_space,
-            /* imageExtent */ capabilities.currentExtent,
-            /* imageArrayLayers */ 1,
-            /* imageUsage */ VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-            /* imageSharingMode */ VK_SHARING_MODE_EXCLUSIVE,
-            /* queueFamilyIndexCount */ 1,
-            /* pQueueFamilyIndices */ &graph_queue_family,
-            /* preTransform */ capabilities.currentTransform,
-            /* compositeAlpha */ window->composite_alpha,
-            /* presentMode */ window->present_mode,
-            /* clipped */ VK_TRUE,
-            /* oldSwapchain */ old_swap_chain,
-    };
-
-    err = vkCreateSwapchainKHR(device, &swap_chain_create_info, allocation_callbacks, &window->swap_chain);
-    assert(!err);
-
-    if (old_swap_chain)
-        vkDestroySwapchainKHR(device, old_swap_chain, allocation_callbacks);
-
-    /* initialize swap chain resources */
-    window->swap_chain_resources = (SwapchainResource *) imalloc(sizeof(SwapchainResource) * window->image_buffer_count);
-
-    VkImage swap_chain_images[window->image_buffer_count];
-    err = vkGetSwapchainImagesKHR(device, window->swap_chain, &window->image_buffer_count, swap_chain_images);
-    assert(!err);
-
-    for (uint32_t i = 0; i < window->image_buffer_count; i++) {
-        window->swap_chain_resources[i].image = swap_chain_images[i];
-
-        VkCommandBufferAllocateInfo command_allocate_info = {
-                /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-                /* pNext */ nextptr,
-                /* commandPool */ command_pool,
-                /* level */ VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-                /* commandBufferCount */ 1
-        };
-
-        vkAllocateCommandBuffers(device, &command_allocate_info, &(window->swap_chain_resources[i].command_buffer));
-
-        VkImageViewCreateInfo image_view_create_info = {
-                /* sType */ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-                /* pNext */ nextptr,
-                /* flags */ no_flag_bits,
-                /* image */ window->swap_chain_resources[i].image,
-                /* viewType */ VK_IMAGE_VIEW_TYPE_2D,
-                /* format */ window->format,
-                /* components */
-                    {
-                        .r = VK_COMPONENT_SWIZZLE_IDENTITY,
-                        .g = VK_COMPONENT_SWIZZLE_IDENTITY,
-                        .b = VK_COMPONENT_SWIZZLE_IDENTITY,
-                        .a = VK_COMPONENT_SWIZZLE_IDENTITY,
-                    },
-                /* subresourceRange */
-                    {
-                        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                        .baseMipLevel = 0,
-                        .levelCount = 1,
-                        .baseArrayLayer = 0,
-                        .layerCount = 1,
-                    },
-        };
-
-        err = vkCreateImageView(device, &image_view_create_info, allocation_callbacks, &(window->swap_chain_resources[i].image_view));
-        assert(!err);
-
-        VkImageView framebuffer_attachments[] = { window->swap_chain_resources[i].image_view };
-
-        VkFramebufferCreateInfo framebuffer_create_info = {
-                /* sType */ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-                /* pNext */ nextptr,
-                /* flags */ no_flag_bits,
-                /* renderPass */ window->render_pass,
-                /* attachmentCount */ ARRAY_SIZE(framebuffer_attachments),
-                /* pAttachments */ framebuffer_attachments,
-                /* width */ window->width,
-                /* height */ window->height,
-                /* layers */ 1,
-        };
-
-        err = vkCreateFramebuffer(device, &framebuffer_create_info, allocation_callbacks, &(window->swap_chain_resources[i].framebuffer));
-        assert(!err);
-    }
-}
-
-void RenderDeviceContext::_clean_up_swap_chain()
-{
-    for (uint32_t i = 0; i < window->image_buffer_count; i++) {
-        vkFreeCommandBuffers(device, command_pool, 1, &window->swap_chain_resources[i].command_buffer);
-        vkDestroyFramebuffer(device, window->swap_chain_resources[i].framebuffer, allocation_callbacks);
-        vkDestroyImageView(device, window->swap_chain_resources[i].image_view, allocation_callbacks);
-    }
-
-    free(window->swap_chain_resources);
-}
-
-void RenderDeviceContext::_update_swap_chain()
-{
-    vkDeviceWaitIdle(device);
-    _clean_up_swap_chain();
-    _create_swap_chain();
 }

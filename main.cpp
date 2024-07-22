@@ -25,8 +25,9 @@
 #include <chrono>
 #include "render/camera/track_ball_camera_controller.h"
 #include "render/camera/perspective_camera.h"
-#include "render/render_editor.h"
-#include "render/render_canvas.h"
+#include "render/editor.h"
+#include "render/canvas.h"
+#include "render/screen.h"
 
 struct Vertex {
     glm::vec3 position;
@@ -58,21 +59,17 @@ int main(int argc, char **argv)
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "CopilotEngine", nullptr, nullptr);
-    assert(window != nullptr);
+    GLFWwindow *hwindow = glfwCreateWindow(800, 600, "CopilotEngine", nullptr, nullptr);
+    assert(hwindow != nullptr);
 
-    auto rdc = std::make_unique<RenderDeviceContextWin32>(window);
+    auto rdc = std::make_unique<RenderDeviceContextWin32>(hwindow);
     // initialize
     rdc->initialize();
 
     RenderDevice *rd;
     rd = rdc->load_render_device();
 
-    glfwSetWindowUserPointer(window, rdc.get());
-    glfwSetWindowSizeCallback(window, [] (GLFWwindow *window, int w, int h) {
-        RenderDeviceContextWin32 *rdc = (RenderDeviceContextWin32 *) glfwGetWindowUserPointer(window);
-        rdc->update_window();
-    });
+    glfwSetWindowUserPointer(hwindow, rdc.get());
 
     VkVertexInputBindingDescription binds[] = {
             { 0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX  }
@@ -97,6 +94,30 @@ int main(int argc, char **argv)
     VkDescriptorSet mvp_descriptor;
     rd->allocate_descriptor_set(descriptor_layout, &mvp_descriptor);
 
+    RenderDevice::Buffer *vertex_buffer;
+    size_t vertices_buf_size = std::size(vertices) * sizeof(Vertex);
+    vertex_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, vertices_buf_size);
+    rd->write_buffer(vertex_buffer, 0, vertices_buf_size, (void *) std::data(vertices));
+
+    RenderDevice::Buffer *index_buffer;
+    size_t index_buffer_size = std::size(indices) * sizeof(uint32_t);
+    index_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, index_buffer_size);
+    rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
+
+    PerspectiveCamera camera(45.0f, 0.0f, 0.01, 45.0f);
+    controller.make_current_camera(&camera);
+
+    glfwSetMouseButtonCallback(hwindow, [](GLFWwindow* window, int button, int action, int mods) {
+        controller.on_event_mouse(button, action, 0.0f, 0.0f);
+    });
+
+    glfwSetCursorPosCallback(hwindow, [](GLFWwindow* window, double xpos, double ypos) {
+        controller.on_event_cursor((float) xpos, (float) ypos);
+    });
+
+    Screen *screen = memnew(Screen, rd);
+    screen->initialize(hwindow);
+
     RenderDevice::ShaderInfo shader_info = {
             /* vertex= */ "../shader/vertex.glsl.spv",
             /* fragment= */ "../shader/fragment.glsl.spv",
@@ -109,45 +130,19 @@ int main(int argc, char **argv)
     };
 
     RenderDevice::Pipeline *pipeline;
-    pipeline = rd->create_graph_pipeline(&shader_info);
+    pipeline = rd->create_graph_pipeline(screen->get_render_pass(), &shader_info);
 
-    RenderDevice::Buffer *vertex_buffer;
-    size_t vertices_buf_size = std::size(vertices) * sizeof(Vertex);
-    vertex_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, vertices_buf_size);
-    rd->write_buffer(vertex_buffer, 0, vertices_buf_size, (void *) std::data(vertices));
-
-    RenderDevice::Buffer *index_buffer;
-    size_t index_buffer_size = std::size(indices) * sizeof(uint32_t);
-    index_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, index_buffer_size);
-    rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
-
-    VkQueue graph_queue;
-    VkSemaphore image_available_semaphore, render_finished_semaphore;
-    rdc->get_window_semaphore(&image_available_semaphore, &render_finished_semaphore);
-    graph_queue = rdc->get_graph_queue();
-
-    PerspectiveCamera camera(45.0f, 0.0f, 0.01, 45.0f);
-    controller.make_current_camera(&camera);
-
-    glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
-        controller.on_event_mouse(button, action, 0.0f, 0.0f);
-    });
-
-    glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
-        controller.on_event_cursor((float) xpos, (float) ypos);
-    });
-
-    RenderCanvas *canvas = memnew(RenderCanvas, rd);
+    Canvas *canvas = memnew(Canvas, rd);
     canvas->initialize();
 
-    RenderEditor *editor = memnew(RenderEditor, rd);
-    editor->initialize();
+    Editor *editor = memnew(Editor, rd);
+    editor->initialize(screen);
 
     uint32_t viewport_width = 32;
     uint32_t viewport_height = 32;
     static bool show_demo_flag = true;
 
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(hwindow)) {
         /* poll events */
         glfwPollEvents();
 
@@ -179,59 +174,50 @@ int main(int argc, char **argv)
         RenderDevice::Texture2D *canvas_texture = canvas->command_end_canvas_render();
 
         /* render to window */
-        RenderDeviceContext::AcquiredNext *acquired_next = rdc->acquire_next_image();
         controller.on_update();
         ImTextureID imtex;
-        rd->command_buffer_begin(acquired_next->command_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
+        VkCommandBuffer window_command_buffer = screen->command_begin_window_render();
         {
-            VkRect2D rect = {};
-            rect.extent = { rdc->get_width(), rdc->get_height() };
-            rd->command_begin_render_pass(acquired_next->command_buffer, acquired_next->render_pass, acquired_next->framebuffer, &rect);
+            /* ImGui */
+            editor->command_begin_new_frame(window_command_buffer);
             {
-                /* ImGui */
-                editor->command_begin_new_frame(acquired_next->command_buffer);
+                ImGui::ShowDemoWindow(&show_demo_flag);
+                editor->command_begin_viewport("视口");
                 {
-                    ImGui::ShowDemoWindow(&show_demo_flag);
-                    editor->command_begin_viewport("视口");
-                    {
-                        imtex = editor->create_texture_id(canvas_texture);
-                        editor->command_draw_texture(imtex, &viewport_width, &viewport_height);
-                    }
-                    editor->command_end_viewport();
-
-                    editor->command_begin_window("摄像机参数");
-                    {
-                        float fov = camera.get_fov();
-                        ImGui::Text("fov: ");
-                        ImGui::SameLine();
-                        ImGui::DragFloat("##fov", &fov, 0.01f);
-                        camera.set_fov(fov);
-
-                        float near = camera.get_near();
-                        ImGui::Text("near: ");
-                        ImGui::SameLine();
-                        ImGui::DragFloat("##near", &near, 0.01f);
-                        camera.set_near(near);
-
-                        float far = camera.get_far();
-                        ImGui::Text("far: ");
-                        ImGui::SameLine();
-                        ImGui::DragFloat("##far", &far, 0.01f);
-                        camera.set_far(far);
-                    }
-                    editor->command_end_window();
+                    imtex = editor->create_texture_id(canvas_texture);
+                    editor->command_draw_texture(imtex, &viewport_width, &viewport_height);
                 }
-                editor->command_end_new_frame(acquired_next->command_buffer);
+                editor->command_end_viewport();
+
+                editor->command_begin_window("摄像机参数");
+                {
+                    float fov = camera.get_fov();
+                    ImGui::Text("fov: ");
+                    ImGui::SameLine();
+                    ImGui::DragFloat("##fov", &fov, 0.01f);
+                    camera.set_fov(fov);
+
+                    float near = camera.get_near();
+                    ImGui::Text("near: ");
+                    ImGui::SameLine();
+                    ImGui::DragFloat("##near", &near, 0.01f);
+                    camera.set_near(near);
+
+                    float far = camera.get_far();
+                    ImGui::Text("far: ");
+                    ImGui::SameLine();
+                    ImGui::DragFloat("##far", &far, 0.01f);
+                    camera.set_far(far);
+                }
+                editor->command_end_window();
             }
-            rd->command_end_render_pass(acquired_next->command_buffer);
+            editor->command_end_new_frame(window_command_buffer);
         }
-        rd->command_buffer_end(acquired_next->command_buffer);
-        VkPipelineStageFlags mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        rd->command_buffer_submit(acquired_next->command_buffer, 1, &image_available_semaphore, 1, &render_finished_semaphore, &mask, graph_queue, VK_NULL_HANDLE);
-        rd->present(graph_queue, acquired_next->swap_chain, acquired_next->index, render_finished_semaphore);
+        screen->command_end_window_render(window_command_buffer);
         editor->destroy_texture_id(imtex);
     }
 
+    memdel(screen);
     memdel(canvas);
     memdel(editor);
     rd->destroy_buffer(mvp_matrix_buffer);
@@ -241,7 +227,7 @@ int main(int argc, char **argv)
     rd->free_descriptor_set(mvp_descriptor);
     rd->destroy_descriptor_set_layout(descriptor_layout);
     rdc->destroy_render_device(rd);
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(hwindow);
     glfwTerminate();
 
     return 0;

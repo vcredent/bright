@@ -53,77 +53,24 @@ public:
     const char *get_device_name() { return physical_device_properties.deviceName; }
     VkDevice get_device() { return device; }
     VmaAllocator get_allocator() { return allocator; }
-    uint32_t get_width() { return window->width; }
-    uint32_t get_height() { return window->height; }
-    VkRenderPass get_render_pass() { return window->render_pass; }
-    void get_window_semaphore(VkSemaphore *p_available_semaphore, VkSemaphore *p_finished_semaphore);
     uint32_t get_graph_queue_family() { return graph_queue_family; }
     VkQueue get_graph_queue() { return graph_queue; };
-    void get_swap_chain(VkSwapchainKHR *p_swap_chain) { *p_swap_chain = window->swap_chain; }
-    float get_aspect_ratio() { return window->aspect_ratio; }
-    void *get_native_hwind() { return window->hwind; }
-    uint32_t get_image_buffer_count() { return window->image_buffer_count; }
-    VkFormat get_surface_format() { return window->format; }
+    VkCommandPool get_command_pool() { return command_pool; }
+    VkFormat get_window_format() { return format; }
 
-    struct AcquiredNext {
-        VkSwapchainKHR swap_chain;
-        VkSemaphore wait_semaphore;
-        VkRenderPass render_pass;
-        VkCommandBuffer command_buffer;
-        VkFramebuffer framebuffer;
-        uint32_t index;
-        uint32_t width;
-        uint32_t height;
-    };
-
-    RenderDeviceContext::AcquiredNext *acquire_next_image();
     void allocate_command_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_command_buffer);
     void free_command_buffer(VkCommandBuffer command_buffer);
 
-    void update_window();
-
 protected:
-    struct SwapchainResource {
-        VkCommandBuffer command_buffer;
-        VkImage image;
-        VkImageView image_view;
-        VkFramebuffer framebuffer;
-    };
-
-    struct Window {
-        VkSurfaceKHR surface = VK_NULL_HANDLE;
-        void *hwind;
-        VkFormat format;
-        VkColorSpaceKHR color_space;
-        uint32_t image_buffer_count;
-        VkCompositeAlphaFlagBitsKHR composite_alpha;
-        VkPresentModeKHR present_mode;
-        VkRenderPass render_pass = VK_NULL_HANDLE;
-        VkSwapchainKHR swap_chain = VK_NULL_HANDLE;
-        SwapchainResource *swap_chain_resources;
-        VkSemaphore image_available_semaphore;
-        VkSemaphore render_finished_semaphore;
-        uint32_t width;
-        uint32_t height;
-        float aspect_ratio;
-        AcquiredNext *acquired_next;
-    };
-
-    void _initialize_window(void *hwind, VkSurfaceKHR surface);
+    void _initialize_window_arguments(VkSurfaceKHR surface);
 
 private:
-    void _clean_up_window();
-
     void _create_device();
-    void _initialize_window_semaphore();
     void _create_command_pool();
     void _create_vma_allocator();
     void _create_swap_chain();
-    void _clean_up_swap_chain();
-    void _update_swap_chain();
 
     VkInstance instance = VK_NULL_HANDLE;
-    Window *window = VK_NULL_HANDLE;
     VkPhysicalDevice physical_device = VK_NULL_HANDLE;
     VkPhysicalDeviceProperties physical_device_properties;
     VkPhysicalDeviceFeatures physical_device_features;
@@ -132,6 +79,8 @@ private:
     VkQueue graph_queue = VK_NULL_HANDLE;
     VkCommandPool command_pool = VK_NULL_HANDLE;
     VmaAllocator allocator = VK_NULL_HANDLE;
+    VkSurfaceCapabilitiesKHR capabilities;
+    VkFormat format;
 };
 
 #endif /* _RENDERING_CONTEXT_DRIVER_VULKAN_H */

@@ -20,11 +20,11 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "render_editor.h"
+#include "editor.h"
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 
-RenderEditor::RenderEditor(RenderDevice *p_device)
+Editor::Editor(RenderDevice *p_device)
     : rd(p_device)
 {
     // Setup Dear ImGui context
@@ -32,14 +32,16 @@ RenderEditor::RenderEditor(RenderDevice *p_device)
     ImGui::CreateContext();
 }
 
-RenderEditor::~RenderEditor()
+Editor::~Editor()
 {
     ImGui_ImplGlfw_Shutdown();
     ImGui_ImplVulkan_Shutdown();
 }
 
-void RenderEditor::initialize()
+void Editor::initialize(RenderWindow *p_render_window)
 {
+    window = p_render_window;
+
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -66,7 +68,7 @@ void RenderEditor::initialize()
 
     // Setup Platform/Renderer backends
     auto rdc = rd->get_device_context();
-    ImGui_ImplGlfw_InitForVulkan((GLFWwindow *) rdc->get_native_hwind(), true);
+    ImGui_ImplGlfw_InitForVulkan((GLFWwindow *) window->get_native_window(), true);
 
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = rdc->get_instance();
@@ -77,25 +79,25 @@ void RenderEditor::initialize()
     init_info.PipelineCache = VK_NULL_HANDLE;
     init_info.DescriptorPool = rd->get_descriptor_pool();
     init_info.Subpass = 0;
-    init_info.MinImageCount = rdc->get_image_buffer_count();
-    init_info.ImageCount = rdc->get_image_buffer_count();
+    init_info.MinImageCount = window->get_image_buffer_count();
+    init_info.ImageCount = window->get_image_buffer_count();
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
     init_info.Allocator = VK_NULL_HANDLE;
     init_info.CheckVkResultFn = VK_NULL_HANDLE;
-    ImGui_ImplVulkan_Init(&init_info, rdc->get_render_pass());
+    ImGui_ImplVulkan_Init(&init_info, window->get_render_pass());
 }
 
-ImTextureID RenderEditor::create_texture_id(RenderDevice::Texture2D *p_texture)
+ImTextureID Editor::create_texture_id(RenderDevice::Texture2D *p_texture)
 {
     return (ImTextureID) ImGui_ImplVulkan_AddTexture(p_texture->sampler, p_texture->image_view, p_texture->image_layout);
 }
 
-void RenderEditor::destroy_texture_id(ImTextureID texture_id)
+void Editor::destroy_texture_id(ImTextureID texture_id)
 {
     ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet) texture_id);
 }
 
-void RenderEditor::command_begin_new_frame(VkCommandBuffer command_buffer)
+void Editor::command_begin_new_frame(VkCommandBuffer command_buffer)
 {
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -104,7 +106,7 @@ void RenderEditor::command_begin_new_frame(VkCommandBuffer command_buffer)
     ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 }
 
-void RenderEditor::command_end_new_frame(VkCommandBuffer command_buffer)
+void Editor::command_end_new_frame(VkCommandBuffer command_buffer)
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
@@ -120,29 +122,29 @@ void RenderEditor::command_end_new_frame(VkCommandBuffer command_buffer)
     }
 }
 
-void RenderEditor::command_begin_window(const char *title)
+void Editor::command_begin_window(const char *title)
 {
     ImGui::Begin(title);
 }
 
-void RenderEditor::command_end_window()
+void Editor::command_end_window()
 {
     ImGui::End();
 }
 
-void RenderEditor::command_begin_viewport(const char *title)
+void Editor::command_begin_viewport(const char *title)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::Begin(title);
 }
 
-void RenderEditor::command_end_viewport()
+void Editor::command_end_viewport()
 {
     ImGui::End();
     ImGui::PopStyleVar();
 }
 
-void RenderEditor::command_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
+void Editor::command_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
 {
     ImVec2 size = ImGui::GetContentRegionAvail();
     *p_width = size.x;
@@ -150,7 +152,7 @@ void RenderEditor::command_draw_texture(ImTextureID texture, uint32_t *p_width, 
     ImGui::Image(texture, ImVec2(*p_width, *p_height));
 }
 
-void RenderEditor::_set_theme_embrace_the_darkness()
+void Editor::_set_theme_embrace_the_darkness()
 {
     ImVec4* colors = ImGui::GetStyle().Colors;
     colors[ImGuiCol_Text]                   = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);

@@ -360,7 +360,7 @@ void RenderDevice::write_descriptor_set(Buffer *p_buffer, VkDescriptorSet descri
     vkUpdateDescriptorSets(vk_device, 1, &write_info, 0, nullptr);
 }
 
-RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(ShaderInfo *p_shader_info)
+RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(VkRenderPass render_pass, ShaderInfo *p_shader_info)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -420,16 +420,16 @@ RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(ShaderInfo *p_shader
     VkViewport viewport = {};
     viewport.x = 0;
     viewport.y = 0;
-    viewport.width = vk_rdc->get_width();
-    viewport.height = vk_rdc->get_height();
+    viewport.width = 32;
+    viewport.height = 32;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor = {};
     scissor.offset.x = 0;
     scissor.offset.y = 0;
-    scissor.extent.width = vk_rdc->get_width();
-    scissor.extent.height = vk_rdc->get_height();
+    scissor.extent.width = 32;
+    scissor.extent.height = 32;
 
     VkPipelineViewportStateCreateInfo viewport_state_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
@@ -520,7 +520,7 @@ RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(ShaderInfo *p_shader
             /* pColorBlendState */ &color_blend_state_create_info,
             /* pDynamicState */ &dynamic_state_crate_info,
             /* layout */ vk_pipeline_layout,
-            /* renderPass */ vk_rdc->get_render_pass(),
+            /* renderPass */ render_pass,
             /* subpass */ 0,
             /* basePipelineHandle */ VK_NULL_HANDLE,
             /* basePipelineIndex */ -1,
