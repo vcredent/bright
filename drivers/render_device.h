@@ -57,6 +57,9 @@ public:
     };
 
 public:
+    RenderDeviceContext *get_device_context() { return vk_rdc; }
+    VkDescriptorPool get_descriptor_pool() { return descriptor_pool; }
+
     Buffer *create_buffer(VkBufferUsageFlags usage, VkDeviceSize size);
     void destroy_buffer(Buffer *p_buffer);
     void write_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
@@ -85,7 +88,7 @@ public:
 private:
     void _initialize_descriptor_pool();
 
-    RenderDeviceContext *vk_driver_context;
+    RenderDeviceContext *vk_rdc;
     VkDevice vk_device;
     VmaAllocator allocator;
     VkDescriptorPool descriptor_pool;

@@ -57,9 +57,12 @@ public:
     uint32_t get_height() { return window->height; }
     VkRenderPass get_render_pass() { return window->render_pass; }
     void get_window_semaphore(VkSemaphore *p_available_semaphore, VkSemaphore *p_finished_semaphore);
-    void get_graph_queue(VkQueue *p_queue) { *p_queue = graph_queue; };
+    uint32_t get_graph_queue_family() { return graph_queue_family; }
+    VkQueue get_graph_queue() { return graph_queue; };
     void get_swap_chain(VkSwapchainKHR *p_swap_chain) { *p_swap_chain = window->swap_chain; }
     float get_aspect_ratio() { return window->aspect_ratio; }
+    void *get_native_hwind() { return window->hwind; }
+    uint32_t get_image_buffer_count() { return window->image_buffer_count; }
 
     struct AcquiredNext {
         VkSwapchainKHR swap_chain;
@@ -88,6 +91,7 @@ protected:
 
     struct Window {
         VkSurfaceKHR surface = VK_NULL_HANDLE;
+        void *hwind;
         VkFormat format;
         VkColorSpaceKHR color_space;
         uint32_t image_buffer_count;
@@ -103,7 +107,7 @@ protected:
         float aspect_ratio;
     };
 
-    void _initialize_window(VkSurfaceKHR surface);
+    void _initialize_window(void *hwind, VkSurfaceKHR surface);
 
 private:
     void _clean_up_window();

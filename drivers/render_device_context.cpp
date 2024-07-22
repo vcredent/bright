@@ -163,13 +163,14 @@ void RenderDeviceContext::update_window()
     _update_swap_chain();
 }
 
-void RenderDeviceContext::_initialize_window(VkSurfaceKHR surface)
+void RenderDeviceContext::_initialize_window(void *hwind, VkSurfaceKHR surface)
 {
     VkResult U_ASSERT_ONLY err;
 
     /* imalloc display window struct and set surface */
     window = (Window *) imalloc(sizeof(Window));
     window->surface = surface;
+    window->hwind = hwind;
 
     VkSurfaceCapabilitiesKHR capabilities;
     err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, window->surface, &capabilities);

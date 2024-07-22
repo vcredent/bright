@@ -23,10 +23,10 @@
 #include "render_device.h"
 
 RenderDevice::RenderDevice(RenderDeviceContext *driver_context)
-    : vk_driver_context(driver_context)
+    : vk_rdc(driver_context)
 {
-    vk_device = vk_driver_context->get_device();
-    allocator = vk_driver_context->get_allocator();
+    vk_device = vk_rdc->get_device();
+    allocator = vk_rdc->get_allocator();
 
     _initialize_descriptor_pool();
 }
@@ -205,16 +205,16 @@ RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(ShaderInfo *p_shader
     VkViewport viewport = {};
     viewport.x = 0;
     viewport.y = 0;
-    viewport.width = vk_driver_context->get_width();
-    viewport.height = vk_driver_context->get_height();
+    viewport.width = vk_rdc->get_width();
+    viewport.height = vk_rdc->get_height();
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor = {};
     scissor.offset.x = 0;
     scissor.offset.y = 0;
-    scissor.extent.width = vk_driver_context->get_width();
-    scissor.extent.height = vk_driver_context->get_height();
+    scissor.extent.width = vk_rdc->get_width();
+    scissor.extent.height = vk_rdc->get_height();
 
     VkPipelineViewportStateCreateInfo viewport_state_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
@@ -305,7 +305,7 @@ RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(ShaderInfo *p_shader
             /* pColorBlendState */ &color_blend_state_create_info,
             /* pDynamicState */ &dynamic_state_crate_info,
             /* layout */ vk_pipeline_layout,
-            /* renderPass */ vk_driver_context->get_render_pass(),
+            /* renderPass */ vk_rdc->get_render_pass(),
             /* subpass */ 0,
             /* basePipelineHandle */ VK_NULL_HANDLE,
             /* basePipelineIndex */ -1,

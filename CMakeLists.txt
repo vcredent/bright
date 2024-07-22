@@ -30,6 +30,7 @@ set(PROGRAM_NAME engine)
 include_directories(${PROJECT_NAME} SYSTEM thirdparty)
 include_directories(${PROJECT_NAME} SYSTEM thirdparty/vulkan/Include)
 include_directories(${PROJECT_NAME} SYSTEM thirdparty/glfw/include)
+include_directories(${PROJECT_NAME} SYSTEM thirdparty/imgui)
 include_directories(${PROJECT_NAME} SYSTEM include)
 include_directories(${PROJECT_NAME} /)
 
@@ -46,10 +47,18 @@ add_executable(${PROGRAM_NAME}
     render/camera/perspective_camera.cpp
     render/camera/controller.cpp
     render/camera/track_ball_camera_controller.cpp
+        render/gui/editor.cpp
     # ============================ #
     #        implementation        #
     # ============================ #
     thirdparty/vma/vk_mem_alloc.cpp
+    thirdparty/imgui/imgui.cpp
+    thirdparty/imgui/imgui_draw.cpp
+    thirdparty/imgui/imgui_demo.cpp
+    thirdparty/imgui/imgui_tables.cpp
+    thirdparty/imgui/imgui_widgets.cpp
+    thirdparty/imgui/backends/imgui_impl_vulkan.cpp
+    thirdparty/imgui/backends/imgui_impl_glfw.cpp
 )
 
 target_link_libraries(${PROGRAM_NAME}

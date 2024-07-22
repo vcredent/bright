@@ -27,6 +27,7 @@
 #include <chrono>
 #include "render/camera/track_ball_camera_controller.h"
 #include "render/camera/perspective_camera.h"
+#include "render/gui/editor.h"
 
 struct Vertex {
     glm::vec3 position;
@@ -124,13 +125,13 @@ int main(int argc, char **argv)
     VkQueue graph_queue;
     VkSemaphore image_available_semaphore, render_finished_semaphore;
     rdc->get_window_semaphore(&image_available_semaphore, &render_finished_semaphore);
-    rdc->get_graph_queue(&graph_queue);
+    graph_queue = rdc->get_graph_queue();
 
     RenderDeviceContext::AcquiredNext *acquired_next;
     acquired_next = (RenderDeviceContext::AcquiredNext *) imalloc(sizeof(RenderDeviceContext::AcquiredNext));
 
     PerspectiveCamera camera(45.0f, 0.0f, 0.01, 45.0f);
-    controller.set_control_camera(&camera);
+    controller.make_current_camera(&camera);
 
     glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
         controller.on_event_mouse(button, action, 0.0f, 0.0f);
@@ -140,12 +141,15 @@ int main(int argc, char **argv)
         controller.on_event_cursor((float) xpos, (float) ypos);
     });
 
+    std::unique_ptr<Editor> editor = std::make_unique<Editor>(rd);
+    editor->initialize();
+
     while (!glfwWindowShouldClose(window)) {
         /* poll events */
         glfwPollEvents();
+        rdc->acquire_next_image(acquired_next);
 
         controller.on_update();
-        rdc->acquire_next_image(acquired_next);
         rd->command_buffer_begin(acquired_next->command_buffer);
         {
             VkRect2D rect = {};
@@ -172,6 +176,13 @@ int main(int argc, char **argv)
                 vkCmdBindVertexBuffers(acquired_next->command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
                 vkCmdBindIndexBuffer(acquired_next->command_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
                 vkCmdDrawIndexed(acquired_next->command_buffer, std::size(indices), 1, 0, 0, 0);
+
+                bool show_demo_flag = true;
+                editor->begin_new_frame(acquired_next->command_buffer);
+                {
+                    ImGui::ShowDemoWindow(&show_demo_flag);
+                }
+                editor->end_new_frame(acquired_next->command_buffer);
             }
             rd->command_end_render_pass(acquired_next->command_buffer);
         }
