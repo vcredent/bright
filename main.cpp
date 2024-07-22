@@ -27,7 +27,7 @@
 #include <chrono>
 #include "render/camera/track_ball_camera_controller.h"
 #include "render/camera/perspective_camera.h"
-#include "render/gui/editor.h"
+#include "render/editor/editor_render_device.h"
 
 struct Vertex {
     glm::vec3 position;
@@ -141,8 +141,10 @@ int main(int argc, char **argv)
         controller.on_event_cursor((float) xpos, (float) ypos);
     });
 
-    std::unique_ptr<Editor> editor = std::make_unique<Editor>(rd);
+    std::unique_ptr<EditorRenderDevice> editor = std::make_unique<EditorRenderDevice>(rd);
     editor->initialize();
+
+    static bool show_demo_flag = true;
 
     while (!glfwWindowShouldClose(window)) {
         /* poll events */
@@ -177,12 +179,12 @@ int main(int argc, char **argv)
                 vkCmdBindIndexBuffer(acquired_next->command_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
                 vkCmdDrawIndexed(acquired_next->command_buffer, std::size(indices), 1, 0, 0, 0);
 
-                bool show_demo_flag = true;
-                editor->begin_new_frame(acquired_next->command_buffer);
+                /* ImGui */
+                editor->command_begin_new_frame(acquired_next->command_buffer);
                 {
                     ImGui::ShowDemoWindow(&show_demo_flag);
                 }
-                editor->end_new_frame(acquired_next->command_buffer);
+                editor->command_end_new_frame(acquired_next->command_buffer);
             }
             rd->command_end_render_pass(acquired_next->command_buffer);
         }

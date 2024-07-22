@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* imgui_context.cpp                                                        */
+/* editor_render_device.cpp                                                 */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,11 +20,11 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "editor.h"
+#include "editor_render_device.h"
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 
-Editor::Editor(RenderDevice *p_device)
+EditorRenderDevice::EditorRenderDevice(RenderDevice *p_device)
     : rd(p_device)
 {
     // Setup Dear ImGui context
@@ -32,20 +32,20 @@ Editor::Editor(RenderDevice *p_device)
     ImGui::CreateContext();
 }
 
-Editor::~Editor()
+EditorRenderDevice::~EditorRenderDevice()
 {
     /* do nothing... */
 }
 
-void Editor::initialize()
+void EditorRenderDevice::initialize()
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-    //io.ConfigViewportsNoAutoMerge = true;
-    //io.ConfigViewportsNoTaskBarIcon = true;
+    io.ConfigViewportsNoAutoMerge = true;
+    io.ConfigViewportsNoTaskBarIcon = true;
 
     // set default font.
     io.Fonts->AddFontFromFileTTF("../resource/fonts/smiley-sans-v1.1.1/SmileySans-Oblique.ttf", 21.0f,
@@ -84,7 +84,7 @@ void Editor::initialize()
     ImGui_ImplVulkan_Init(&init_info, rdc->get_render_pass());
 }
 
-void Editor::begin_new_frame(VkCommandBuffer command_buffer)
+void EditorRenderDevice::command_begin_new_frame(VkCommandBuffer command_buffer)
 {
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -93,7 +93,7 @@ void Editor::begin_new_frame(VkCommandBuffer command_buffer)
     ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 }
 
-void Editor::end_new_frame(VkCommandBuffer command_buffer)
+void EditorRenderDevice::command_end_new_frame(VkCommandBuffer command_buffer)
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
@@ -109,7 +109,7 @@ void Editor::end_new_frame(VkCommandBuffer command_buffer)
     }
 }
 
-void Editor::_set_theme_embrace_the_darkness()
+void EditorRenderDevice::_set_theme_embrace_the_darkness()
 {
     ImVec4* colors = ImGui::GetStyle().Colors;
     colors[ImGuiCol_Text]                   = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);

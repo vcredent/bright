@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* imgui_context.h                                                          */
+/* editor_render_device.h                                                   */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -26,15 +26,16 @@
 #include <imgui.h>
 #include "drivers/render_device.h"
 
-class Editor {
+class EditorRenderDevice {
 public:
-    Editor(RenderDevice *p_device);
-    ~Editor();
+    EditorRenderDevice(RenderDevice *p_device);
+    ~EditorRenderDevice();
 
     void initialize();
 
-    void begin_new_frame(VkCommandBuffer command_buffer);
-    void end_new_frame(VkCommandBuffer command_buffer);
+    /* begin new gui frame */
+    void command_begin_new_frame(VkCommandBuffer command_buffer);
+    void command_end_new_frame(VkCommandBuffer command_buffer);
 
 private:
     void _set_theme_embrace_the_darkness();
