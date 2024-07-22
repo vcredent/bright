@@ -33,9 +33,16 @@ public:
 
     void initialize();
 
+    ImTextureID create_texture_id(RenderDevice::Texture2D *p_texture);
+    void destroy_texture_id(ImTextureID texture_id);
+
     /* begin new gui frame */
     void command_begin_new_frame(VkCommandBuffer command_buffer);
     void command_end_new_frame(VkCommandBuffer command_buffer);
+
+    void command_begin_viewport(const char *title);
+    void command_end_viewport();
+    void command_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height);
 
 private:
     void _set_theme_embrace_the_darkness();

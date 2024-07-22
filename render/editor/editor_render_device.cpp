@@ -84,6 +84,16 @@ void EditorRenderDevice::initialize()
     ImGui_ImplVulkan_Init(&init_info, rdc->get_render_pass());
 }
 
+ImTextureID EditorRenderDevice::create_texture_id(RenderDevice::Texture2D *p_texture)
+{
+    return (ImTextureID) ImGui_ImplVulkan_AddTexture(p_texture->sampler, p_texture->image_view, p_texture->image_layout);
+}
+
+void EditorRenderDevice::destroy_texture_id(ImTextureID texture_id)
+{
+    ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet) texture_id);
+}
+
 void EditorRenderDevice::command_begin_new_frame(VkCommandBuffer command_buffer)
 {
     ImGui_ImplVulkan_NewFrame();
@@ -107,6 +117,26 @@ void EditorRenderDevice::command_end_new_frame(VkCommandBuffer command_buffer)
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
     }
+}
+
+void EditorRenderDevice::command_begin_viewport(const char *title)
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::Begin(title);
+}
+
+void EditorRenderDevice::command_end_viewport()
+{
+    ImGui::End();
+    ImGui::PopStyleVar();
+}
+
+void EditorRenderDevice::command_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
+{
+    ImVec2 size = ImGui::GetContentRegionAvail();
+    *p_width = size.x;
+    *p_height = size.y;
+    ImGui::Image(texture, ImVec2(*p_width, *p_height));
 }
 
 void EditorRenderDevice::_set_theme_embrace_the_darkness()

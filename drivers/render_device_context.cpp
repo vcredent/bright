@@ -137,20 +137,22 @@ RenderDeviceContext::get_window_semaphore(VkSemaphore *p_available_semaphore, Vk
     *p_finished_semaphore = window->render_finished_semaphore;
 }
 
-void RenderDeviceContext::acquire_next_image(RenderDeviceContext::AcquiredNext *p_acquired_next)
+RenderDeviceContext::AcquiredNext *RenderDeviceContext::acquire_next_image()
 {
-    p_acquired_next->swap_chain = window->swap_chain;
-    p_acquired_next->wait_semaphore = window->image_available_semaphore;
-    p_acquired_next->render_pass = window->render_pass;
+    window->acquired_next->swap_chain = window->swap_chain;
+    window->acquired_next->wait_semaphore = window->image_available_semaphore;
+    window->acquired_next->render_pass = window->render_pass;
 
     VkResult U_ASSERT_ONLY err;
-    err = vkAcquireNextImageKHR(device, window->swap_chain, UINT32_MAX, p_acquired_next->wait_semaphore, VK_NULL_HANDLE, &p_acquired_next->index);
+    err = vkAcquireNextImageKHR(device, window->swap_chain, UINT32_MAX, window->acquired_next->wait_semaphore, VK_NULL_HANDLE, &window->acquired_next->index);
     assert(!err);
 
-    p_acquired_next->command_buffer = window->swap_chain_resources[p_acquired_next->index].command_buffer;
-    p_acquired_next->framebuffer = window->swap_chain_resources[p_acquired_next->index].framebuffer;
-    p_acquired_next->width = window->width;
-    p_acquired_next->height = window->height;
+    window->acquired_next->command_buffer = window->swap_chain_resources[window->acquired_next->index].command_buffer;
+    window->acquired_next->framebuffer = window->swap_chain_resources[window->acquired_next->index].framebuffer;
+    window->acquired_next->width = window->width;
+    window->acquired_next->height = window->height;
+
+    return window->acquired_next;
 }
 
 void RenderDeviceContext::free_command_buffer(VkCommandBuffer command_buffer)
@@ -171,6 +173,8 @@ void RenderDeviceContext::_initialize_window(void *hwind, VkSurfaceKHR surface)
     window = (Window *) imalloc(sizeof(Window));
     window->surface = surface;
     window->hwind = hwind;
+
+    window->acquired_next = (AcquiredNext *) imalloc(sizeof(AcquiredNext));
 
     VkSurfaceCapabilitiesKHR capabilities;
     err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, window->surface, &capabilities);
@@ -208,6 +212,7 @@ void RenderDeviceContext::_clean_up_window()
     vkDestroyRenderPass(device, window->render_pass, allocation_callbacks);
     _clean_up_swap_chain();
     vkDestroySurfaceKHR(instance, window->surface, allocation_callbacks);
+    free(window->acquired_next);
     free(window);
 }
 
@@ -246,7 +251,8 @@ void RenderDeviceContext::_create_device()
 
     /* create logic device */
     const char *extensions[] = {
-            "VK_KHR_swapchain"
+            "VK_KHR_swapchain",
+            "VK_KHR_synchronization2"
     };
 
     VkDeviceCreateInfo device_create_info = {
@@ -325,32 +331,44 @@ void RenderDeviceContext::_create_swap_chain()
 
     if (!old_swap_chain) {
         // attachment
-        VkAttachmentDescription attachment_description = {};
-        attachment_description.format = window->format;
-        attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
-        attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-        attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        VkAttachmentDescription color_attachment = {
+                /* flags */ no_flag_bits,
+                /* format */ window->format,
+                /* samples */ VK_SAMPLE_COUNT_1_BIT,
+                /* loadOp */VK_ATTACHMENT_LOAD_OP_CLEAR,
+                /* storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
+                /* stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                /* stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                /* initialLayout */ VK_IMAGE_LAYOUT_UNDEFINED,
+                /* finalLayout */ VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        };
 
-        // subpass
-        VkAttachmentReference color_attachment = {};
-        color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        VkAttachmentReference color_attachment_reference = {};
+        color_attachment_reference.attachment = 0;
+        color_attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-        VkSubpassDescription subpass_description = {};
-        subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass_description.colorAttachmentCount = 1;
-        subpass_description.pColorAttachments = &color_attachment;
+        VkSubpassDescription subpass = {};
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass.colorAttachmentCount = 1;
+        subpass.pColorAttachments = &color_attachment_reference;
+
+        VkSubpassDependency subpass_dependency = {};
+        subpass_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        subpass_dependency.dstSubpass = 0;
+        subpass_dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        subpass_dependency.srcAccessMask = 0;
+        subpass_dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        subpass_dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
         // create render pass
         VkRenderPassCreateInfo render_pass_create_info = {};
         render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         render_pass_create_info.attachmentCount = 1;
-        render_pass_create_info.pAttachments = &attachment_description;
+        render_pass_create_info.pAttachments = &color_attachment;
         render_pass_create_info.subpassCount = 1;
-        render_pass_create_info.pSubpasses = &subpass_description;
+        render_pass_create_info.pSubpasses = &subpass;
+        render_pass_create_info.dependencyCount = 1;
+        render_pass_create_info.pDependencies = &subpass_dependency;
 
         err = vkCreateRenderPass(device, &render_pass_create_info, allocation_callbacks, &window->render_pass);
         assert(!err);

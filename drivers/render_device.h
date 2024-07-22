@@ -56,32 +56,57 @@ public:
         VkPipelineBindPoint bind_point;
     };
 
+    struct Texture2D {
+        VkImage image;
+        VkImageView image_view;
+        VkImageLayout image_layout;
+        VkDescriptorSet descriptor_set;
+        VmaAllocation allocation;
+        VmaAllocationInfo allocation_info;
+        uint32_t width;
+        uint32_t height;
+        VkFormat format;
+        VkSampler sampler;
+    };
+
 public:
     RenderDeviceContext *get_device_context() { return vk_rdc; }
     VkDescriptorPool get_descriptor_pool() { return descriptor_pool; }
+    VkFormat get_surface_format() { return vk_rdc->get_surface_format(); }
 
     Buffer *create_buffer(VkBufferUsageFlags usage, VkDeviceSize size);
     void destroy_buffer(Buffer *p_buffer);
     void write_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
     void read_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
+    void create_render_pass(uint32_t attachment_count, VkAttachmentDescription *p_attachments, uint32_t subpass_count, VkSubpassDescription *p_subpass, uint32_t dependency_count, VkSubpassDependency *p_dependencies, VkRenderPass *p_render_pass);
+    void destroy_render_pass(VkRenderPass render_pass);
+    void allocate_command_buffer(VkCommandBuffer *p_command_buffer);
+    void free_command_buffer(VkCommandBuffer command_buffer);
+    Texture2D *create_texture(uint32_t width, uint32_t height, VkSampler sampler, VkFormat format, VkImageUsageFlags usage);
+    void destroy_texture(Texture2D *p_texture);
+    void create_framebuffer(uint32_t width, uint32_t height, uint32_t image_view_count, VkImageView *p_image_view, VkRenderPass render_pass, VkFramebuffer *p_framebuffer);
+    void destroy_framebuffer(VkFramebuffer framebuffer);
+    void create_sampler(VkSampler *p_sampler);
+    void destroy_sampler(VkSampler sampler);
+    void transition_image_layout(Texture2D *p_texture, VkImageLayout new_layout);
 
     void create_descriptor_set_layout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout);
     void destroy_descriptor_set_layout(VkDescriptorSetLayout descriptor_set_layout);
-    void allocate_descriptor(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor);
-    void free_descriptor(VkDescriptorSet descriptor);
+    void allocate_descriptor_set(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor_set);
+    void free_descriptor_set(VkDescriptorSet descriptor_set);
     void write_descriptor_set(Buffer *p_buffer, VkDescriptorSet descriptor_set);
 
     Pipeline *create_graph_pipeline(ShaderInfo *p_shader_attribute);
     void destroy_pipeline(Pipeline *p_pipeline);
 
-    void command_buffer_begin(VkCommandBuffer command_buffer);
+    void command_buffer_begin(VkCommandBuffer command_buffer, VkCommandBufferUsageFlags usage);
     void command_buffer_end(VkCommandBuffer command_buffer);
     void command_begin_render_pass(VkCommandBuffer command_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect);
     void command_end_render_pass(VkCommandBuffer command_buffer);
     void command_bind_vertex_buffer(Buffer *p_buffer);
     void command_bind_graph_pipeline(VkCommandBuffer command_buffer, Pipeline *p_pipeline);
     void command_buffer_submit(VkCommandBuffer command_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence);
-    void command_bind_descriptor(VkCommandBuffer command_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor);
+    void command_bind_descriptor_set(VkCommandBuffer command_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor);
     void command_setval_viewport(VkCommandBuffer command_buffer , uint32_t w, uint32_t h);
     void present(VkQueue queue, VkSwapchainKHR swap_chain, uint32_t index, VkSemaphore wait_semaphore);
 

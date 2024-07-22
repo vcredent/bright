@@ -23,11 +23,14 @@
 #include "perspective_camera.h"
 
 PerspectiveCamera::PerspectiveCamera(float fov, float aspect, float near, float far)
-    : fov(fov), aspect_ratio(aspect), near(near), far(far)
 {
     position = glm::vec3(0.0f, 0.0f, 3.0f);
     right = glm::vec3(1.0f, 0.0f, 0.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
+    this->fov = fov;
+    this->aspect_ratio = aspect;
+    this->near = near;
+    this->far = far;
 }
 
 PerspectiveCamera::~PerspectiveCamera()

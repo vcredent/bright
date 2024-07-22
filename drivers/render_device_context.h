@@ -63,6 +63,7 @@ public:
     float get_aspect_ratio() { return window->aspect_ratio; }
     void *get_native_hwind() { return window->hwind; }
     uint32_t get_image_buffer_count() { return window->image_buffer_count; }
+    VkFormat get_surface_format() { return window->format; }
 
     struct AcquiredNext {
         VkSwapchainKHR swap_chain;
@@ -75,7 +76,7 @@ public:
         uint32_t height;
     };
 
-    void acquire_next_image(AcquiredNext *p_acquire_next);
+    RenderDeviceContext::AcquiredNext *acquire_next_image();
     void allocate_command_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_command_buffer);
     void free_command_buffer(VkCommandBuffer command_buffer);
 
@@ -105,6 +106,7 @@ protected:
         uint32_t width;
         uint32_t height;
         float aspect_ratio;
+        AcquiredNext *acquired_next;
     };
 
     void _initialize_window(void *hwind, VkSurfaceKHR surface);

@@ -28,6 +28,7 @@
 #include "render/camera/track_ball_camera_controller.h"
 #include "render/camera/perspective_camera.h"
 #include "render/editor/editor_render_device.h"
+#include "render/render_canvas.h"
 
 struct Vertex {
     glm::vec3 position;
@@ -96,7 +97,7 @@ int main(int argc, char **argv)
     rd->create_descriptor_set_layout(ARRAY_SIZE(descriptor_layout_binds), descriptor_layout_binds, &descriptor_layout);
 
     VkDescriptorSet mvp_descriptor;
-    rd->allocate_descriptor(descriptor_layout, &mvp_descriptor);
+    rd->allocate_descriptor_set(descriptor_layout, &mvp_descriptor);
 
     RenderDevice::ShaderInfo shader_info = {
             /* vertex= */ "../shader/vertex.glsl.spv",
@@ -127,9 +128,6 @@ int main(int argc, char **argv)
     rdc->get_window_semaphore(&image_available_semaphore, &render_finished_semaphore);
     graph_queue = rdc->get_graph_queue();
 
-    RenderDeviceContext::AcquiredNext *acquired_next;
-    acquired_next = (RenderDeviceContext::AcquiredNext *) imalloc(sizeof(RenderDeviceContext::AcquiredNext));
-
     PerspectiveCamera camera(45.0f, 0.0f, 0.01, 45.0f);
     controller.make_current_camera(&camera);
 
@@ -141,48 +139,67 @@ int main(int argc, char **argv)
         controller.on_event_cursor((float) xpos, (float) ypos);
     });
 
+    std::unique_ptr<RenderCanvas> canvas = std::make_unique<RenderCanvas>(rd);
+    canvas->initialize();
+
     std::unique_ptr<EditorRenderDevice> editor = std::make_unique<EditorRenderDevice>(rd);
     editor->initialize();
 
+    uint32_t viewport_width = 32;
+    uint32_t viewport_height = 32;
     static bool show_demo_flag = true;
 
     while (!glfwWindowShouldClose(window)) {
         /* poll events */
         glfwPollEvents();
-        rdc->acquire_next_image(acquired_next);
 
+        /* render to canvas */
+        VkCommandBuffer canvas_command_buffer;
+        canvas->command_begin_canvas_render(&canvas_command_buffer, viewport_width, viewport_height);
+        {
+            static auto startTime = std::chrono::high_resolution_clock::now();
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            float time = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count() / 1000.0f;
+            MVPMatrix mvp = {};
+            mvp.m = glm::rotate(glm::mat4(1.0f), time * glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 2.0f));
+            mvp.v = camera.look_at();
+            camera.set_aspect_ratio((float) viewport_width / (float) viewport_height);
+            mvp.p = camera.perspective();
+            mvp.p[1][1] *= -1;
+            rd->write_buffer(mvp_matrix_buffer, 0, sizeof(MVPMatrix), &mvp);
+
+            rd->command_bind_graph_pipeline(canvas_command_buffer, pipeline);
+            rd->command_bind_descriptor_set(canvas_command_buffer, pipeline, mvp_descriptor);
+            rd->write_descriptor_set(mvp_matrix_buffer, mvp_descriptor);
+            rd->command_setval_viewport(canvas_command_buffer, viewport_width, viewport_height);
+
+            VkDeviceSize offset = 0;
+            vkCmdBindVertexBuffers(canvas_command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
+            vkCmdBindIndexBuffer(canvas_command_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
+            vkCmdDrawIndexed(canvas_command_buffer, std::size(indices), 1, 0, 0, 0);
+        }
+        RenderDevice::Texture2D *canvas_texture = canvas->command_end_canvas_render();
+
+        /* render to window */
+        RenderDeviceContext::AcquiredNext *acquired_next = rdc->acquire_next_image();
         controller.on_update();
-        rd->command_buffer_begin(acquired_next->command_buffer);
+        ImTextureID imtex;
+        rd->command_buffer_begin(acquired_next->command_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
         {
             VkRect2D rect = {};
             rect.extent = { rdc->get_width(), rdc->get_height() };
             rd->command_begin_render_pass(acquired_next->command_buffer, acquired_next->render_pass, acquired_next->framebuffer, &rect);
             {
-                static auto startTime = std::chrono::high_resolution_clock::now();
-                auto currentTime = std::chrono::high_resolution_clock::now();
-                float time = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count() / 1000.0f;
-                MVPMatrix mvp = {};
-                mvp.m = glm::rotate(glm::mat4(1.0f), time * glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 2.0f));
-                mvp.v = camera.look_at();
-                camera.set_aspect_ratio(rdc->get_aspect_ratio());
-                mvp.p = camera.perspective();
-                mvp.p[1][1] *= -1;
-                rd->write_buffer(mvp_matrix_buffer, 0, sizeof(MVPMatrix), &mvp);
-
-                rd->command_bind_graph_pipeline(acquired_next->command_buffer, pipeline);
-                rd->command_bind_descriptor(acquired_next->command_buffer, pipeline, mvp_descriptor);
-                rd->write_descriptor_set(mvp_matrix_buffer, mvp_descriptor);
-                rd->command_setval_viewport(acquired_next->command_buffer, rdc->get_width(), rdc->get_height());
-
-                VkDeviceSize offset = 0;
-                vkCmdBindVertexBuffers(acquired_next->command_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
-                vkCmdBindIndexBuffer(acquired_next->command_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
-                vkCmdDrawIndexed(acquired_next->command_buffer, std::size(indices), 1, 0, 0, 0);
-
                 /* ImGui */
                 editor->command_begin_new_frame(acquired_next->command_buffer);
                 {
                     ImGui::ShowDemoWindow(&show_demo_flag);
+                    editor->command_begin_viewport("视口");
+                    {
+                        imtex = editor->create_texture_id(canvas_texture);
+                        editor->command_draw_texture(imtex, &viewport_width, &viewport_height);
+                    }
+                    editor->command_end_viewport();
                 }
                 editor->command_end_new_frame(acquired_next->command_buffer);
             }
@@ -192,14 +209,14 @@ int main(int argc, char **argv)
         VkPipelineStageFlags mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         rd->command_buffer_submit(acquired_next->command_buffer, 1, &image_available_semaphore, 1, &render_finished_semaphore, &mask, graph_queue, VK_NULL_HANDLE);
         rd->present(graph_queue, acquired_next->swap_chain, acquired_next->index, render_finished_semaphore);
+        editor->destroy_texture_id(imtex);
     }
 
-    free(acquired_next);
     rd->destroy_buffer(mvp_matrix_buffer);
     rd->destroy_buffer(index_buffer);
     rd->destroy_buffer(vertex_buffer);
     rd->destroy_pipeline(pipeline);
-    rd->free_descriptor(mvp_descriptor);
+    rd->free_descriptor_set(mvp_descriptor);
     rd->destroy_descriptor_set_layout(descriptor_layout);
     rdc->destroy_render_device(rd);
     glfwDestroyWindow(window);

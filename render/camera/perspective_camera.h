@@ -32,21 +32,6 @@ public:
 
     virtual glm::mat4 look_at() override final;
     virtual glm::mat4 perspective() override final;
-
-    void get_perspective_far() { this->far; }
-    void get_perspective_near() { this->near; }
-    void get_perspective_fov() { this->fov; }
-
-    void set_aspect_ratio(float aspect) { this->aspect_ratio = aspect; }
-    void set_perspective_far(float far) { this->far = far; }
-    void set_perspective_near(float near) { this->near = near; }
-    void set_perspective_fov(float fov) { this->fov = fov; }
-
-private:
-    float aspect_ratio;
-    float far;
-    float near;
-    float fov;
 };
 
 #endif /* _GAME_PLAY_CAMERA_H_ */

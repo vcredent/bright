@@ -80,6 +80,221 @@ RenderDevice::read_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size
     vmaUnmapMemory(allocator, buffer->allocation);
 }
 
+void RenderDevice::create_render_pass(uint32_t attachment_count, VkAttachmentDescription *p_attachments, uint32_t subpass_count, VkSubpassDescription *p_subpass, uint32_t dependency_count, VkSubpassDependency *p_dependencies, VkRenderPass *p_render_pass)
+{
+    VkResult U_ASSERT_ONLY err;
+
+    // create render pass
+    VkRenderPassCreateInfo render_pass_create_info = {};
+    render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    render_pass_create_info.attachmentCount = attachment_count;
+    render_pass_create_info.pAttachments = p_attachments;
+    render_pass_create_info.subpassCount = subpass_count;
+    render_pass_create_info.pSubpasses = p_subpass;
+    render_pass_create_info.dependencyCount = dependency_count;
+    render_pass_create_info.pDependencies = p_dependencies;
+
+    err = vkCreateRenderPass(vk_device, &render_pass_create_info, allocation_callbacks, p_render_pass);
+    assert(!err);
+}
+
+void RenderDevice::destroy_render_pass(VkRenderPass render_pass)
+{
+    vkDestroyRenderPass(vk_device, render_pass, allocation_callbacks);
+}
+
+void RenderDevice::allocate_command_buffer(VkCommandBuffer *p_command_buffer)
+{
+    vk_rdc->allocate_command_buffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, p_command_buffer);
+}
+
+void RenderDevice::free_command_buffer(VkCommandBuffer command_buffer)
+{
+    vk_rdc->free_command_buffer(command_buffer);
+}
+
+RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t height, VkSampler sampler, VkFormat format, VkImageUsageFlags usage)
+{
+    VkResult U_ASSERT_ONLY err;
+    Texture2D *texture;
+
+    texture = (Texture2D *) imalloc(sizeof(Texture2D));
+    texture->format = format;
+    texture->width = width;
+    texture->height = height;
+    texture->sampler = sampler;
+
+    VkImageCreateInfo image_create_info = {
+            /* sType */ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+            /* pNext */ nextptr,
+            /* flags */ no_flag_bits,
+            /* imageType */ VK_IMAGE_TYPE_2D,
+            /* format */ texture->format,
+            /* extent */ { width, height, 1 },
+            /* mipLevels */ 1,
+            /* arrayLayers */ 1,
+            /* samples */ VK_SAMPLE_COUNT_1_BIT,
+            /* tiling */ VK_IMAGE_TILING_OPTIMAL,
+            /* usage */ usage,
+            /* sharingMode */ VK_SHARING_MODE_EXCLUSIVE,
+            /* queueFamilyIndexCount */ 0,
+            /* pQueueFamilyIndices */ nullptr,
+            /* initialLayout */ VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    VmaAllocationCreateInfo allocation_create_info = {};
+    allocation_create_info.usage = VMA_MEMORY_USAGE_AUTO;
+    err = vmaCreateImage(allocator, &image_create_info, &allocation_create_info, &texture->image, &texture->allocation, &texture->allocation_info);
+    assert(!err);
+
+    VkImageViewCreateInfo image_view_create_info = {
+            /* sType */ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            /* pNext */ nextptr,
+            /* flags */ no_flag_bits,
+            /* image */ texture->image,
+            /* viewType */ VK_IMAGE_VIEW_TYPE_2D,
+            /* format */ texture->format,
+            /* components */
+                {
+                    .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .a = VK_COMPONENT_SWIZZLE_IDENTITY,
+                },
+            /* subresourceRange */
+                {
+                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                    .baseMipLevel = 0,
+                    .levelCount = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount = 1,
+                },
+    };
+
+    err = vkCreateImageView(vk_device, &image_view_create_info, allocation_callbacks, &texture->image_view);
+    assert(!err);
+
+    return texture;
+}
+
+void RenderDevice::destroy_texture(Texture2D *p_texture)
+{
+    vmaDestroyImage(allocator, p_texture->image, p_texture->allocation);
+    vkDestroyImageView(vk_device, p_texture->image_view, allocation_callbacks);
+    if (p_texture->descriptor_set)
+        free_descriptor_set(p_texture->descriptor_set);
+}
+
+void
+RenderDevice::create_framebuffer(uint32_t width, uint32_t height, uint32_t image_view_count, VkImageView *p_image_view, VkRenderPass render_pass, VkFramebuffer *p_framebuffer)
+{
+    VkFramebufferCreateInfo framebuffer_create_info = {
+            /* sType */ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+            /* pNext */ nextptr,
+            /* flags */ no_flag_bits,
+            /* renderPass */ render_pass,
+            /* attachmentCount */ image_view_count,
+            /* pAttachments */ p_image_view,
+            /* width */ width,
+            /* height */ height,
+            /* layers */ 1,
+    };
+
+    vkCreateFramebuffer(vk_device, &framebuffer_create_info, allocation_callbacks, p_framebuffer);
+}
+
+void RenderDevice::destroy_framebuffer(VkFramebuffer framebuffer)
+{
+    vkDestroyFramebuffer(vk_device, framebuffer, allocation_callbacks);
+}
+
+void RenderDevice::create_sampler(VkSampler *p_sampler)
+{
+    VkSamplerCreateInfo sampler_create_info = {};
+    sampler_create_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    sampler_create_info.magFilter = VK_FILTER_LINEAR;
+    sampler_create_info.minFilter = VK_FILTER_LINEAR;
+    sampler_create_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_create_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_create_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_create_info.anisotropyEnable = VK_FALSE;
+    sampler_create_info.maxAnisotropy = 16;
+    sampler_create_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    sampler_create_info.unnormalizedCoordinates = VK_FALSE;
+    sampler_create_info.compareEnable = VK_FALSE;
+    sampler_create_info.compareOp = VK_COMPARE_OP_ALWAYS;
+    sampler_create_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    sampler_create_info.mipLodBias = 0.0f;
+    sampler_create_info.minLod = 0.0f;
+    sampler_create_info.maxLod = 0.0f;
+
+    vkCreateSampler(vk_device, &sampler_create_info, allocation_callbacks, p_sampler);
+}
+
+void RenderDevice::destroy_sampler(VkSampler sampler)
+{
+    vkDestroySampler(vk_device, sampler, allocation_callbacks);
+}
+
+void RenderDevice::transition_image_layout(Texture2D *p_texture, VkImageLayout new_layout)
+{
+    VkCommandBuffer one_time_cmd_buffer;
+    allocate_command_buffer(&one_time_cmd_buffer);
+    command_buffer_begin(one_time_cmd_buffer, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+    VkImageMemoryBarrier barrier = {};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = p_texture->image_layout;
+    barrier.newLayout = new_layout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = p_texture->image;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+
+    VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+    VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+
+    if (p_texture->image_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        goto pipeline_barrier_create_end_tag;
+    }
+
+    if (p_texture->image_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        goto pipeline_barrier_create_end_tag;
+    }
+
+    if (p_texture->image_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_HOST_READ_BIT;
+        goto pipeline_barrier_create_end_tag;
+    }
+
+    throw std::invalid_argument("unsupported layout transition!");
+
+    pipeline_barrier_create_end_tag:
+    vkCmdPipelineBarrier(
+            one_time_cmd_buffer,
+            sourceStage,
+            destinationStage,
+            0,
+            0, nullptr,
+            0, nullptr,
+            1, &barrier
+    );
+
+    command_buffer_end(one_time_cmd_buffer);
+    free_command_buffer(one_time_cmd_buffer);
+
+    p_texture->image_layout = new_layout;
+}
+
 void
 RenderDevice::create_descriptor_set_layout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout)
 {
@@ -103,7 +318,7 @@ void RenderDevice::destroy_descriptor_set_layout(VkDescriptorSetLayout descripto
 }
 
 void
-RenderDevice::allocate_descriptor(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor)
+RenderDevice::allocate_descriptor_set(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor_set)
 {
     VkDescriptorSetAllocateInfo descriptor_allocate_info = {
             /* sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -113,12 +328,12 @@ RenderDevice::allocate_descriptor(VkDescriptorSetLayout descriptor_set_layout, V
             /* pSetLayouts */ &descriptor_set_layout,
     };
 
-    vkAllocateDescriptorSets(vk_device, &descriptor_allocate_info, p_descriptor);
+    vkAllocateDescriptorSets(vk_device, &descriptor_allocate_info, p_descriptor_set);
 }
 
-void RenderDevice::free_descriptor(VkDescriptorSet descriptor)
+void RenderDevice::free_descriptor_set(VkDescriptorSet descriptor_set)
 {
-    vkFreeDescriptorSets(vk_device, descriptor_pool, 1, &descriptor);
+    vkFreeDescriptorSets(vk_device, descriptor_pool, 1, &descriptor_set);
 }
 
 void RenderDevice::write_descriptor_set(Buffer *p_buffer, VkDescriptorSet descriptor_set)
@@ -278,7 +493,7 @@ RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(ShaderInfo *p_shader
 
     VkDynamicState dynamic_state[] = {
             VK_DYNAMIC_STATE_VIEWPORT,
-            VK_DYNAMIC_STATE_SCISSOR
+            VK_DYNAMIC_STATE_SCISSOR,
     };
 
     VkPipelineDynamicStateCreateInfo dynamic_state_crate_info = {
@@ -331,17 +546,17 @@ void RenderDevice::_initialize_descriptor_pool()
     VkResult U_ASSERT_ONLY err;
 
     VkDescriptorPoolSize pool_size[] = {
-            { VK_DESCRIPTOR_TYPE_SAMPLER,                64 },
-            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 64 },
-            { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          64 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          64 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,   64 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,   64 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         64 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         64 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 64 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 64 },
-            { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       64 }
+            { VK_DESCRIPTOR_TYPE_SAMPLER,                256 },
+            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 256 },
+            { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          256 },
+            { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          256 },
+            { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,   256 },
+            { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,   256 },
+            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         256 },
+            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         256 },
+            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 256 },
+            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 256 },
+            { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       256 }
     };
 
     VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
@@ -363,12 +578,12 @@ void RenderDevice::destroy_pipeline(Pipeline *p_pipeline)
     vkDestroyPipeline(vk_device, p_pipeline->pipeline, allocation_callbacks);
 }
 
-void RenderDevice::command_buffer_begin(VkCommandBuffer command_buffer)
+void RenderDevice::command_buffer_begin(VkCommandBuffer command_buffer, VkCommandBufferUsageFlags usage)
 {
     VkCommandBufferBeginInfo command_buffer_begin_info = {
             /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
             /* pNext */ nextptr,
-            /* flags */ VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT,
+            /* flags */ usage,
             /* pInheritanceInfo */ nullptr,
     };
     vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info);
@@ -432,7 +647,7 @@ void RenderDevice::command_buffer_submit(VkCommandBuffer command_buffer, uint32_
     assert(!err);
 }
 
-void RenderDevice::command_bind_descriptor(VkCommandBuffer command_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor)
+void RenderDevice::command_bind_descriptor_set(VkCommandBuffer command_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor)
 {
     vkCmdBindDescriptorSets(command_buffer, p_pipeline->bind_point, p_pipeline->layout, 0, 1, &descriptor, 0, VK_NULL_HANDLE);
 }

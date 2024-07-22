@@ -48,6 +48,7 @@ add_executable(${PROGRAM_NAME}
     render/camera/controller.cpp
     render/camera/track_ball_camera_controller.cpp
     render/editor/editor_render_device.cpp
+    render/render_canvas.cpp
     # ============================ #
     #        implementation        #
     # ============================ #

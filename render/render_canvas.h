@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* camera.h                                                                 */
+/* render_canvas.h                                                          */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,51 +20,33 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _CAMERA_H_
-#define _CAMERA_H_
+#ifndef _CONVAS_H_
+#define _CONVAS_H_
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "drivers/render_device.h"
 
-class Camera {
+class RenderCanvas {
 public:
-    virtual glm::mat4 look_at() = 0; /* calculation view matrix */
-    virtual glm::mat4 perspective() = 0; /* calculation projection matrix */
+    RenderCanvas(RenderDevice *p_device);
+   ~RenderCanvas();
 
-    glm::vec3 get_position() { return this->position; }
-    glm::vec3 get_right() { return this->right; }
-    glm::vec3 get_up() { return this->up; }
-    float get_yaw() { return this->yaw; }
-    float get_pitch() { return this->pitch; }
-    float get_roll() { return this->roll; }
-    void get_far() { this->far; }
-    void get_near() { this->near; }
-    void get_fov() { this->fov; }
+    void initialize();
 
-    void set_position(glm::vec3 &position) { this->position = position; }
-    void set_right(glm::vec3 &right) { this->right = right; }
-    void set_up(glm::vec3 &up) { this->up = up; }
-    void set_yaw(float yaw) { this->yaw = yaw; }
-    void set_pitch(float pitch) { this->pitch = pitch; }
-    void set_roll(float roll) { this->roll = roll; }
-    void set_aspect_ratio(float aspect) { this->aspect_ratio = aspect; }
-    void set_far(float far) { this->far = far; }
-    void set_near(float near) { this->near = near; }
-    void set_fov(float fov) { this->fov = fov; }
+    void command_begin_canvas_render(VkCommandBuffer *p_command_buffer, uint32_t width, uint32_t height);
+    RenderDevice::Texture2D *command_end_canvas_render();
 
-protected:
-    /* the local_* variable is camera self local coordinate system */
-    glm::vec3 position;
-    glm::vec3 right;
-    glm::vec3 up;
-    glm::vec3 direction;
-    float yaw;
-    float pitch;
-    float roll;
-    float far;
-    float near;
-    float fov;
-    float aspect_ratio;
+private:
+    void _create_canvas_texture(uint32_t width, uint32_t height);
+    void _clean_up_canvas_texture();
+
+    RenderDevice *rd;
+    VkRenderPass render_pass;
+    RenderDevice::Texture2D *texture;
+    VkFramebuffer framebuffer;
+    VkSampler sampler;
+    VkCommandBuffer canvas_command_buffer;
+
+    VkQueue graph_queue;
 };
 
-#endif /* _CAMERA_H_ */
+#endif /* _CONVAS_H_ */
