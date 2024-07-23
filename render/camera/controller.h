@@ -23,7 +23,7 @@
 #ifndef _CAMERA_CONTROLLER_H_
 #define _CAMERA_CONTROLLER_H_
 
-#include <GLFW/glfw3.h>
+#include "platform/window.h"
 #include <unordered_map>
 #include "camera.h"
 

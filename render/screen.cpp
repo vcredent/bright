@@ -45,15 +45,14 @@ Screen::~Screen()
     free(window);
 }
 
-void Screen::initialize(GLFWwindow *p_hwind)
+void Screen::initialize(Window *screen_window)
 {
     VkResult U_ASSERT_ONLY err;
 
-    hwind = p_hwind;
-
     /* imalloc display window struct and set surface */
-    window = (Window *) imalloc(sizeof(Window));
-    glfwCreateWindowSurface(vk_instance, hwind, allocation_callbacks, &window->vk_surface);
+    window = (_Window *) imalloc(sizeof(_Window));
+    window->native_window_handle = screen_window->get_native_window();
+    screen_window->create_vulkan_surface(vk_instance, allocation_callbacks, &window->vk_surface);
 
     VkSurfaceCapabilitiesKHR capabilities;
     err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk_physical_device, window->vk_surface, &capabilities);
@@ -287,8 +286,9 @@ void Screen::_update_swap_chain()
     VkSurfaceCapabilitiesKHR capabilities;
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk_physical_device, window->vk_surface, &capabilities);
     VkExtent2D extent = capabilities.currentExtent;
+
     /* is update */
-    if (extent.width != window->width || extent.height != window->height) {
+    if ((extent.width != window->width || extent.height != window->height) && (extent.width != 0 || extent.height != 0)) {
         vkDeviceWaitIdle(vk_device);
         _clean_up_swap_chain();
         _create_swap_chain();

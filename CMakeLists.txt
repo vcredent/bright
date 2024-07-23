@@ -43,6 +43,7 @@ add_executable(${PROGRAM_NAME}
     main.cpp
     drivers/render_device_context.cpp
     drivers/render_device.cpp
+    platform/window.cpp
     platform/win32/render_device_context_win32.cpp
     render/camera/perspective_camera.cpp
     render/camera/controller.cpp

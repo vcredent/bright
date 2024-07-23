@@ -24,12 +24,12 @@
 #define _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H
 
 #include "drivers/render_device.h"
-#include <GLFW/glfw3.h>
+#include "platform/window.h"
 
 // Render driver context for vulkan
 class RenderDeviceContextWin32 : public RenderDeviceContext {
 public:
-    RenderDeviceContextWin32(GLFWwindow *window);
+    RenderDeviceContextWin32(Window *window);
     ~RenderDeviceContextWin32();
 
     RenderDevice *load_render_device();

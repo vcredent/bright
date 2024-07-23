@@ -24,7 +24,7 @@
 #define _SCREEN_H_
 
 #include "drivers/render_device.h"
-#include <GLFW/glfw3.h>
+#include "platform/window.h"
 
 class Screen {
 public:
@@ -32,10 +32,10 @@ public:
    ~Screen();
 
     VkRenderPass get_render_pass() { return window->render_pass; }
-    void *get_native_window() { return hwind; }
+    void *get_native_window() { return window->native_window_handle; }
     uint32_t get_image_buffer_count() { return window->image_buffer_count; }
 
-    void initialize(GLFWwindow *p_hwind);
+    void initialize(Window *screen_window);
     VkCommandBuffer cmd_begin_window_render();
     void cmd_end_window_render(VkCommandBuffer cmd_buffer);
 
@@ -47,7 +47,7 @@ private:
         VkFramebuffer framebuffer;
     };
 
-    struct Window {
+    struct _Window {
         VkSurfaceKHR vk_surface = VK_NULL_HANDLE;
         VkFormat format;
         VkColorSpaceKHR color_space;
@@ -61,6 +61,7 @@ private:
         VkSemaphore render_finished_semaphore;
         uint32_t width;
         uint32_t height;
+        void *native_window_handle;
     };
 
     void _create_swap_chain();
@@ -68,13 +69,12 @@ private:
     void _update_swap_chain();
 
     RenderDevice *rd = VK_NULL_HANDLE;
-    GLFWwindow *hwind = VK_NULL_HANDLE;
     VkInstance vk_instance = VK_NULL_HANDLE;
     VkPhysicalDevice vk_physical_device = VK_NULL_HANDLE;
     VkDevice vk_device = VK_NULL_HANDLE;\
     uint32_t vk_graph_queue_family = 0;
     VkCommandPool vk_cmd_pool = VK_NULL_HANDLE;
-    Window *window = VK_NULL_HANDLE;
+    _Window *window = VK_NULL_HANDLE;
     VkQueue vk_graph_queue = VK_NULL_HANDLE;
 
     uint32_t acquire_next_index;

@@ -56,20 +56,14 @@ static TrackBallCameraController controller;
 
 int main(int argc, char **argv)
 {
-    glfwInit();
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    Window *window = memnew(Window, "CopilotEngine", 1980, 1080);
 
-    GLFWwindow *hwindow = glfwCreateWindow(1920, 1080, "CopilotEngine", nullptr, nullptr);
-    assert(hwindow != nullptr);
-
-    auto rdc = std::make_unique<RenderDeviceContextWin32>(hwindow);
+    auto rdc = std::make_unique<RenderDeviceContextWin32>(window);
     // initialize
     rdc->initialize();
 
     RenderDevice *rd;
     rd = rdc->load_render_device();
-
-    glfwSetWindowUserPointer(hwindow, rdc.get());
 
     VkVertexInputBindingDescription binds[] = {
             { 0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX  }
@@ -107,16 +101,8 @@ int main(int argc, char **argv)
     PerspectiveCamera camera(45.0f, 0.0f, 0.01, 45.0f);
     controller.make_current_camera(&camera);
 
-    glfwSetMouseButtonCallback(hwindow, [](GLFWwindow* window, int button, int action, int mods) {
-        controller.on_event_mouse(button, action, 0.0f, 0.0f);
-    });
-
-    glfwSetCursorPosCallback(hwindow, [](GLFWwindow* window, double xpos, double ypos) {
-        controller.on_event_cursor((float) xpos, (float) ypos);
-    });
-
     Screen *screen = memnew(Screen, rd);
-    screen->initialize(hwindow);
+    screen->initialize(window);
 
     RenderDevice::ShaderInfo shader_info = {
             /* vertex= */ "../shader/vertex.glsl.spv",
@@ -142,9 +128,9 @@ int main(int argc, char **argv)
     uint32_t viewport_height = 32;
     static bool show_demo_flag = true;
 
-    while (!glfwWindowShouldClose(hwindow)) {
+    while (window->is_close()) {
         /* poll events */
-        glfwPollEvents();
+        window->poll_events();
 
         /* render to canvas */
         VkCommandBuffer canvas_cmd_buffer;
@@ -221,8 +207,7 @@ int main(int argc, char **argv)
     rd->free_descriptor_set(mvp_descriptor);
     rd->destroy_descriptor_set_layout(descriptor_layout);
     rdc->destroy_render_device(rd);
-    glfwDestroyWindow(hwindow);
-    glfwTerminate();
+    memdel(window);
 
     return 0;
 }

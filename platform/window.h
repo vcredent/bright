@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* render_device_context_win32.cpp                                          */
+/* window.h                                                                 */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,27 +20,58 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "render_device_context_win32.h"
+#ifndef _COPILOT_WINDOW_H_
+#define _COPILOT_WINDOW_H_
 
-RenderDeviceContextWin32::RenderDeviceContextWin32(Window *window)
-{
-    VkSurfaceKHR surface;
-    window->create_vulkan_surface(get_instance(), allocation_callbacks, &surface);
-    _initialize_window_arguments(surface);
-    vkDestroySurfaceKHR(get_instance(), surface, allocation_callbacks);
-}
+#include <GLFW/glfw3.h>
+#include <copilot/error.h>
+#include <unordered_map>
 
-RenderDeviceContextWin32::~RenderDeviceContextWin32()
-{
-    /* do nothing in here... */
-}
+class Window;
 
-RenderDevice *RenderDeviceContextWin32::load_render_device()
-{
-    return memnew(RenderDevice, this);
-}
+typedef void (*PFN_WindowResizeCallback) (Window *window, int w, int h);
+typedef void (*PFN_WindowCloseCallback) (Window *window);
 
-void RenderDeviceContextWin32::destroy_render_device(RenderDevice *p_render_device)
-{
-    memdel(p_render_device);
-}
+struct Rect2D {
+    uint32_t w;
+    uint32_t h;
+};
+
+class Window {
+public:
+    Window(const char *title, int width, int height);
+    ~Window();
+
+#if defined(VK_VERSION_1_0)
+    void create_vulkan_surface(VkInstance instance, const VkAllocationCallbacks* allocator, VkSurfaceKHR *p_surface)
+      {
+          glfwCreateWindowSurface(instance, handle, allocator, p_surface);
+      }
+#endif
+
+    void *get_user_pointer(const std::string& name);
+    void set_user_pointer(const std::string& name, void *pointer);
+    void remove_user_pointer(const std::string& name);
+
+    void get_size(Rect2D *p_rect);
+    void *get_native_window() { return handle; }
+
+    void set_visible(bool is_visible);
+
+    void set_window_resize_callbacks(PFN_WindowResizeCallback callback);
+    void set_window_close_callbacks(PFN_WindowCloseCallback callback);
+
+    bool is_close();
+    bool is_visible() { return visible; }
+    void poll_events();
+
+private:
+    GLFWwindow *handle;
+    bool visible = true;
+    std::unordered_map<std::string, void *> window_user_pointers;
+
+    PFN_WindowResizeCallback window_resize_callback = nullptr;
+    PFN_WindowCloseCallback window_close_callback = nullptr;
+};
+
+#endif /* _COPILOT_WINDOW_H_ */
