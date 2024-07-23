@@ -132,3 +132,8 @@ void Window::toggle_full_screen()
 
     glfwSetWindowMonitor(handle, NULL, full_screen_rect.x, full_screen_rect.y, full_screen_rect.w, full_screen_rect.h, 0);
 }
+
+int Window::getkey(int key)
+{
+    return glfwGetKey(handle, key);
+}

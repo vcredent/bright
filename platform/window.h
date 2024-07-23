@@ -68,6 +68,7 @@ public:
 
     void poll_events();
     void toggle_full_screen();
+    int getkey(int key);
 
 private:
     GLFWwindow *handle;
