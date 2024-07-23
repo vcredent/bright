@@ -33,8 +33,10 @@ typedef void (*PFN_WindowResizeCallback) (Window *window, int w, int h);
 typedef void (*PFN_WindowCloseCallback) (Window *window);
 
 struct Rect2D {
-    uint32_t w;
-    uint32_t h;
+    int w;
+    int h;
+    int x;
+    int y;
 };
 
 class Window {
@@ -62,12 +64,16 @@ public:
     void set_window_close_callbacks(PFN_WindowCloseCallback callback);
 
     bool is_close();
-    bool is_visible() { return visible; }
+    bool is_visible() { return visible_flag; }
+
     void poll_events();
+    void toggle_full_screen();
 
 private:
     GLFWwindow *handle;
-    bool visible = true;
+    bool visible_flag = true;
+    bool full_screen_flag = false;
+    Rect2D full_screen_rect;
     std::unordered_map<std::string, void *> window_user_pointers;
 
     PFN_WindowResizeCallback window_resize_callback = nullptr;

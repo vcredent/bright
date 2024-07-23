@@ -132,6 +132,9 @@ int main(int argc, char **argv)
         /* poll events */
         window->poll_events();
 
+        if (glfwGetKey((GLFWwindow *) window->get_native_window(), GLFW_KEY_F11) == GLFW_PRESS)
+            window->toggle_full_screen();
+
         /* render to canvas */
         VkCommandBuffer canvas_cmd_buffer;
         canvas->cmd_begin_canvas_render(&canvas_cmd_buffer, viewport_width, viewport_height);

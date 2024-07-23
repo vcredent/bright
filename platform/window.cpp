@@ -67,10 +67,7 @@ void Window::set_user_pointer(const std::string &name, void *pointer)
 
 void Window::get_size(Rect2D *p_rect)
 {
-    int w, h;
-    glfwGetWindowSize(handle, &w, &h);
-    p_rect->w = w;
-    p_rect->h = h;
+    glfwGetWindowSize(handle, &p_rect->w, &p_rect->h);
 }
 
 void Window::remove_user_pointer(const std::string &name)
@@ -80,7 +77,7 @@ void Window::remove_user_pointer(const std::string &name)
 
 void Window::set_visible(bool is_visible)
 {
-    visible = is_visible;
+    visible_flag = is_visible;
 
     if (is_visible) {
         glfwShowWindow(handle);
@@ -116,4 +113,22 @@ void Window::poll_events()
 {
     glfwMakeContextCurrent(handle);
     glfwPollEvents();
+}
+
+void Window::toggle_full_screen()
+{
+    full_screen_flag = !full_screen_flag;
+
+    if (full_screen_flag) {
+        GLFWmonitor *primary_monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode *vidmode = glfwGetVideoMode(primary_monitor);
+
+        glfwGetWindowPos(handle, &full_screen_rect.x, &full_screen_rect.y);
+        get_size(&full_screen_rect);
+
+        glfwSetWindowMonitor(handle, primary_monitor, 0, 0, vidmode->width, vidmode->height, vidmode->refreshRate);
+        return;
+    }
+
+    glfwSetWindowMonitor(handle, NULL, full_screen_rect.x, full_screen_rect.y, full_screen_rect.w, full_screen_rect.h, 0);
 }
