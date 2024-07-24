@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* render_screen.h                                                          */
+/* renderer_screen.h                                                        */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -26,10 +26,10 @@
 #include "drivers/render_device.h"
 #include "platform/window.h"
 
-class Screen {
+class RendererScreen {
 public:
-    Screen(RenderDevice *p_render_device);
-   ~Screen();
+    RendererScreen(RenderDevice *p_render_device);
+   ~RendererScreen();
 
     VkRenderPass get_render_pass() { return window->render_pass; }
     void *get_native_window() { return window->native_window_handle; }

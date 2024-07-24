@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* render_editor.cpp                                                        */
+/* renderer_editor.cpp                                                      */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,11 +20,11 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "editor.h"
+#include "renderer_editor.h"
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 
-Editor::Editor(RenderDevice *p_device)
+RendererEditor::RendererEditor(RenderDevice *p_device)
     : rd(p_device)
 {
     // Setup Dear ImGui context
@@ -32,13 +32,13 @@ Editor::Editor(RenderDevice *p_device)
     ImGui::CreateContext();
 }
 
-Editor::~Editor()
+RendererEditor::~RendererEditor()
 {
     ImGui_ImplGlfw_Shutdown();
     ImGui_ImplVulkan_Shutdown();
 }
 
-void Editor::initialize(Screen *p_screen)
+void RendererEditor::initialize(RendererScreen *p_screen)
 {
     screen = p_screen;
 
@@ -87,17 +87,17 @@ void Editor::initialize(Screen *p_screen)
     ImGui_ImplVulkan_Init(&init_info, screen->get_render_pass());
 }
 
-ImTextureID Editor::create_texture(RenderDevice::Texture2D *p_texture)
+ImTextureID RendererEditor::create_texture(RenderDevice::Texture2D *p_texture)
 {
     return (ImTextureID) ImGui_ImplVulkan_AddTexture(p_texture->sampler, p_texture->image_view, p_texture->image_layout);
 }
 
-void Editor::destroy_texture(ImTextureID texture_id)
+void RendererEditor::destroy_texture(ImTextureID texture_id)
 {
     ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet) texture_id);
 }
 
-void Editor::cmd_begin_editor_render(VkCommandBuffer cmd_buffer)
+void RendererEditor::cmd_begin_editor_render(VkCommandBuffer cmd_buffer)
 {
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -106,7 +106,7 @@ void Editor::cmd_begin_editor_render(VkCommandBuffer cmd_buffer)
     ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 }
 
-void Editor::cmd_end_editor_render(VkCommandBuffer cmd_buffer)
+void RendererEditor::cmd_end_editor_render(VkCommandBuffer cmd_buffer)
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
@@ -122,34 +122,34 @@ void Editor::cmd_end_editor_render(VkCommandBuffer cmd_buffer)
     }
 }
 
-void Editor::cmd_begin_window(const char *title)
+void RendererEditor::cmd_begin_window(const char *title)
 {
     ImGui::Begin(title);
 }
 
-void Editor::cmd_end_window()
+void RendererEditor::cmd_end_window()
 {
     ImGui::End();
 }
 
-void Editor::cmd_begin_viewport(const char *title)
+void RendererEditor::cmd_begin_viewport(const char *title)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::Begin(title);
 }
 
-void Editor::cmd_end_viewport()
+void RendererEditor::cmd_end_viewport()
 {
     ImGui::End();
     ImGui::PopStyleVar();
 }
 
-void Editor::cmd_same_line128()
+void RendererEditor::cmd_same_line128()
 {
     ImGui::SameLine(128.0f);
 }
 
-void Editor::cmd_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
+void RendererEditor::cmd_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
 {
     ImVec2 size = ImGui::GetContentRegionAvail();
     *p_width = size.x;
@@ -157,7 +157,7 @@ void Editor::cmd_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *
     ImGui::Image(texture, ImVec2(*p_width, *p_height));
 }
 
-void Editor::cmd_drag_float(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+void RendererEditor::cmd_drag_float(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
     ImGui::Text(label);
     cmd_same_line128();
@@ -166,7 +166,7 @@ void Editor::cmd_drag_float(const char *label, float *v, float v_speed, float v_
     ImGui::PopID();
 }
 
-void Editor::cmd_drag_float2(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+void RendererEditor::cmd_drag_float2(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
     ImGui::PushID(label);
     ImGui::Text(label);
@@ -175,7 +175,7 @@ void Editor::cmd_drag_float2(const char *label, float *v, float v_speed, float v
     ImGui::PopID();
 }
 
-void Editor::cmd_drag_float3(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+void RendererEditor::cmd_drag_float3(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
     ImGui::PushID(label);
     ImGui::Text(label);
@@ -183,7 +183,7 @@ void Editor::cmd_drag_float3(const char *label, float *v, float v_speed, float v
     ImGui::DragFloat3("", v, v_speed, v_min, v_max, format);
     ImGui::PopID();}
 
-void Editor::cmd_drag_float4(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+void RendererEditor::cmd_drag_float4(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
     ImGui::PushID(label);
     ImGui::Text(label);
@@ -191,7 +191,7 @@ void Editor::cmd_drag_float4(const char *label, float *v, float v_speed, float v
     ImGui::DragFloat4("", v, v_speed, v_min, v_max, format);
     ImGui::PopID();}
 
-void Editor::_set_theme_embrace_the_darkness()
+void RendererEditor::_set_theme_embrace_the_darkness()
 {
     ImVec4* colors = ImGui::GetStyle().Colors;
     colors[ImGuiCol_Text]                   = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);

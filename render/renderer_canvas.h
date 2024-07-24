@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* render_editor.h                                                          */
+/* renderer_canvas.h                                                        */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,44 +20,33 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _EDITOR_H_
-#define _EDITOR_H_
+#ifndef _CONVAS_H_
+#define _CONVAS_H_
 
-#include <imgui.h>
 #include "drivers/render_device.h"
-#include "screen.h"
 
-class Editor {
+class RendererCanvas {
 public:
-    Editor(RenderDevice *p_device);
-    ~Editor();
+    RendererCanvas(RenderDevice *p_device);
+   ~RendererCanvas();
 
-    void initialize(Screen *p_render_window);
+    void initialize();
 
-    ImTextureID create_texture(RenderDevice::Texture2D *p_texture);
-    void destroy_texture(ImTextureID texture_id);
-
-    /* begin new gui frame */
-    void cmd_begin_editor_render(VkCommandBuffer cmd_buffer);
-    void cmd_end_editor_render(VkCommandBuffer cmd_buffer);
-
-    void cmd_begin_window(const char *title);
-    void cmd_end_window();
-    void cmd_begin_viewport(const char *title);
-    void cmd_end_viewport();
-
-    void cmd_same_line128();
-    void cmd_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height);
-    void cmd_drag_float(const char *label, float *v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
-    void cmd_drag_float2(const char *label, float v[2], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
-    void cmd_drag_float3(const char *label, float v[3], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
-    void cmd_drag_float4(const char *label, float v[4], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
+    void cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer, uint32_t width, uint32_t height);
+    RenderDevice::Texture2D *cmd_end_canvas_render();
 
 private:
-    void _set_theme_embrace_the_darkness();
+    void _create_canvas_texture(uint32_t width, uint32_t height);
+    void _clean_up_canvas_texture();
 
     RenderDevice *rd;
-    Screen *screen;
+    VkRenderPass render_pass;
+    RenderDevice::Texture2D *texture;
+    VkFramebuffer framebuffer;
+    VkSampler sampler;
+    VkCommandBuffer canvas_cmd_buffer;
+
+    VkQueue graph_queue;
 };
 
-#endif /* _EDITOR_H_ */
+#endif /* _CONVAS_H_ */

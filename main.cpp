@@ -25,9 +25,9 @@
 #include <chrono>
 #include "render/camera/track_ball_camera_controller.h"
 #include "render/camera/perspective_camera.h"
-#include "render/editor.h"
-#include "render/canvas.h"
-#include "render/screen.h"
+#include "render/renderer_editor.h"
+#include "render/renderer_canvas.h"
+#include "render/renderer_screen.h"
 
 struct Vertex {
     glm::vec3 position;
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
     PerspectiveCamera camera(45.0f, 0.0f, 0.01, 45.0f);
     controller.make_current_camera(&camera);
 
-    Screen *screen = memnew(Screen, rd);
+    RendererScreen *screen = memnew(RendererScreen, rd);
     screen->initialize(window);
 
     RenderDevice::ShaderInfo shader_info = {
@@ -118,10 +118,10 @@ int main(int argc, char **argv)
     RenderDevice::Pipeline *pipeline;
     pipeline = rd->create_graph_pipeline(screen->get_render_pass(), &shader_info);
 
-    Canvas *canvas = memnew(Canvas, rd);
+    RendererCanvas *canvas = memnew(RendererCanvas, rd);
     canvas->initialize();
 
-    Editor *editor = memnew(Editor, rd);
+    RendererEditor *editor = memnew(RendererEditor, rd);
     editor->initialize(screen);
 
     uint32_t viewport_width = 32;

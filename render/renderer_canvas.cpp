@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* render_canvas.cpp                                                        */
+/* renderer_canvas.cpp                                                      */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,15 +20,15 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "canvas.h"
+#include "renderer_canvas.h"
 
-Canvas::Canvas(RenderDevice *p_device)
+RendererCanvas::RendererCanvas(RenderDevice *p_device)
     : rd(p_device)
 {
     /* do nothing... */
 }
 
-Canvas::~Canvas()
+RendererCanvas::~RendererCanvas()
 {
     _clean_up_canvas_texture();
     rd->destroy_sampler(sampler);
@@ -36,7 +36,7 @@ Canvas::~Canvas()
     rd->free_cmd_buffer(canvas_cmd_buffer);
 }
 
-void Canvas::initialize()
+void RendererCanvas::initialize()
 {
     graph_queue = rd->get_device_context()->get_graph_queue();
 
@@ -79,7 +79,7 @@ void Canvas::initialize()
     _create_canvas_texture(32, 32);
 }
 
-void Canvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer, uint32_t width, uint32_t height)
+void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer, uint32_t width, uint32_t height)
 {
     if (texture->width != width || texture->height != height) {
         _clean_up_canvas_texture();
@@ -96,7 +96,7 @@ void Canvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer, uint32_t wid
     *p_cmd_buffer = canvas_cmd_buffer;
 }
 
-RenderDevice::Texture2D *Canvas::cmd_end_canvas_render()
+RenderDevice::Texture2D *RendererCanvas::cmd_end_canvas_render()
 {
     rd->cmd_end_render_pass(canvas_cmd_buffer);
     rd->cmd_buffer_end(canvas_cmd_buffer);
@@ -112,14 +112,14 @@ RenderDevice::Texture2D *Canvas::cmd_end_canvas_render()
     return texture;
 }
 
-void Canvas::_create_canvas_texture(uint32_t width, uint32_t height)
+void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
 {
     texture = rd->create_texture(width, height, sampler, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     rd->transition_image_layout(texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     rd->create_framebuffer(texture->width, texture->height, 1, &texture->image_view, render_pass, &framebuffer);
 }
 
-void Canvas::_clean_up_canvas_texture()
+void RendererCanvas::_clean_up_canvas_texture()
 {
     rd->destroy_texture(texture);
     texture = VK_NULL_HANDLE;

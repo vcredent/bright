@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* render_screen.cpp                                                        */
+/* renderer_screen.cpp                                                      */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,10 +20,10 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "screen.h"
+#include "renderer_screen.h"
 #include <algorithm>
 
-Screen::Screen(RenderDevice *p_render_device)
+RendererScreen::RendererScreen(RenderDevice *p_render_device)
     : rd(p_render_device)
 {
     vk_instance = rd->get_device_context()->get_instance();
@@ -34,7 +34,7 @@ Screen::Screen(RenderDevice *p_render_device)
     vk_graph_queue = rd->get_device_context()->get_graph_queue();
 }
 
-Screen::~Screen()
+RendererScreen::~RendererScreen()
 {
     vkDestroySemaphore(vk_device, window->image_available_semaphore, allocation_callbacks);
     vkDestroySemaphore(vk_device, window->render_finished_semaphore, allocation_callbacks);
@@ -45,7 +45,7 @@ Screen::~Screen()
     free(window);
 }
 
-void Screen::initialize(Window *screen_window)
+void RendererScreen::initialize(Window *screen_window)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -93,7 +93,7 @@ void Screen::initialize(Window *screen_window)
     _create_swap_chain();
 }
 
-VkCommandBuffer Screen::cmd_begin_window_render()
+VkCommandBuffer RendererScreen::cmd_begin_window_render()
 {
     _update_swap_chain();
     vkAcquireNextImageKHR(vk_device, window->swap_chain, UINT64_MAX, window->image_available_semaphore, nullptr, &acquire_next_index);
@@ -109,7 +109,7 @@ VkCommandBuffer Screen::cmd_begin_window_render()
     return cmd_buffer;
 }
 
-void Screen::cmd_end_window_render(VkCommandBuffer cmd_buffer)
+void RendererScreen::cmd_end_window_render(VkCommandBuffer cmd_buffer)
 {
     rd->cmd_end_render_pass(cmd_buffer);
     rd->cmd_buffer_end(cmd_buffer);
@@ -119,7 +119,7 @@ void Screen::cmd_end_window_render(VkCommandBuffer cmd_buffer)
     rd->present(vk_graph_queue, window->swap_chain, acquire_next_index, window->render_finished_semaphore);
 }
 
-void Screen::_create_swap_chain()
+void RendererScreen::_create_swap_chain()
 {
     VkResult U_ASSERT_ONLY err;
     VkSwapchainKHR old_swap_chain;
@@ -270,7 +270,7 @@ void Screen::_create_swap_chain()
     }
 }
 
-void Screen::_clean_up_swap_chain()
+void RendererScreen::_clean_up_swap_chain()
 {
     for (uint32_t i = 0; i < window->image_buffer_count; i++) {
         vkFreeCommandBuffers(vk_device, vk_cmd_pool, 1, &window->swap_chain_resources[i].cmd_buffer);
@@ -281,7 +281,7 @@ void Screen::_clean_up_swap_chain()
     free(window->swap_chain_resources);
 }
 
-void Screen::_update_swap_chain()
+void RendererScreen::_update_swap_chain()
 {
     VkSurfaceCapabilitiesKHR capabilities;
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk_physical_device, window->vk_surface, &capabilities);
