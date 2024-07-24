@@ -37,6 +37,7 @@ public:
     float get_yaw() { return yaw; }
     float get_pitch() { return pitch; }
     float get_roll() { return roll; }
+    float get_aspect_ratio() { return aspect_ratio; }
     float get_far() { return far; }
     float get_near() { return near; }
     float get_fov() { return fov; }
