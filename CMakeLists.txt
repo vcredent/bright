@@ -25,14 +25,14 @@ cmake_minimum_required(VERSION 3.26)
 project(copilot)
 
 set(CMAKE_CXX_STANDARD 23)
-set(PROGRAM_NAME engine)
+set(PROGRAM_NAME copilot)
 
-include_directories(${PROJECT_NAME} SYSTEM thirdparty)
-include_directories(${PROJECT_NAME} SYSTEM thirdparty/vulkan/Include)
-include_directories(${PROJECT_NAME} SYSTEM thirdparty/glfw/include)
-include_directories(${PROJECT_NAME} SYSTEM thirdparty/imgui)
-include_directories(${PROJECT_NAME} SYSTEM include)
-include_directories(${PROJECT_NAME} /)
+include_directories(${PROGRAM_NAME} SYSTEM thirdparty)
+include_directories(${PROGRAM_NAME} SYSTEM thirdparty/vulkan/Include)
+include_directories(${PROGRAM_NAME} SYSTEM thirdparty/glfw/include)
+include_directories(${PROGRAM_NAME} SYSTEM thirdparty/imgui)
+include_directories(${PROGRAM_NAME} SYSTEM include)
+include_directories(${PROGRAM_NAME} /)
 
 link_directories(
     thirdparty/vulkan
@@ -51,6 +51,7 @@ add_executable(${PROGRAM_NAME}
     render/renderer_editor.cpp
     render/renderer_canvas.cpp
     render/renderer_screen.cpp
+    render/renderer_graph.cpp
     # ============================ #
     #        implementation        #
     # ============================ #
