@@ -86,21 +86,39 @@ void Window::set_visible(bool is_visible)
     }
 }
 
-void Window::set_window_resize_callbacks(PFN_WindowResizeCallback callback)
+void Window::set_window_close_callbacks(PFN_WindowCloseCallback callback)
 {
-    window_resize_callback = callback;
-    glfwSetWindowSizeCallback(handle, [] (GLFWwindow *glfw_window, int w, int h) {
+    fn_window_close_callback = callback;
+    glfwSetWindowCloseCallback(handle, [](GLFWwindow *glfw_window) {
         Window *window = (Window *) glfwGetWindowUserPointer(glfw_window);
-        window->window_resize_callback(window, w, h);
+        window->fn_window_close_callback(window);
     });
 }
 
-void Window::set_window_close_callbacks(PFN_WindowCloseCallback callback)
+void Window::set_window_resize_callbacks(PFN_WindowResizeCallback callback)
 {
-    window_close_callback = callback;
-    glfwSetWindowCloseCallback(handle, [](GLFWwindow *glfw_window) {
+    fn_window_resize_callback = callback;
+    glfwSetWindowSizeCallback(handle, [] (GLFWwindow *glfw_window, int w, int h) {
         Window *window = (Window *) glfwGetWindowUserPointer(glfw_window);
-        window->window_close_callback(window);
+        window->fn_window_resize_callback(window, w, h);
+    });
+}
+
+void Window::set_window_mouse_button_callbacks(PFN_WindowMouseButtonCallback callback)
+{
+    fn_window_mouse_button_callback = callback;
+    glfwSetMouseButtonCallback(handle, [](GLFWwindow *glfw_window, int button, int action, int mods) {
+        Window *window = (Window *) glfwGetWindowUserPointer(glfw_window);
+        window->fn_window_mouse_button_callback(window, button, action, mods);
+    });
+}
+
+void Window::set_window_cursor_position_callbacks(PFN_WindowCursorPositionCallback callback)
+{
+    fn_window_cursor_position_callback = callback;
+    glfwSetCursorPosCallback(handle, [](GLFWwindow *glfw_window, double x, double y) {
+        Window *window = (Window *) glfwGetWindowUserPointer(glfw_window);
+        window->fn_window_cursor_position_callback(window, x, y);
     });
 }
 

@@ -36,17 +36,17 @@ public:
     };
 
     virtual void on_update();
-    virtual void on_event_mouse(int button, int action, double x, double y);
+    virtual void on_event_mouse_button(int button, int action, int mods);
     virtual void on_event_cursor(float x, float y);
     virtual void on_event_key(int key, bool action, int modes);
 
     void make_current_camera(Camera *camera) { this->camera = camera; }
 
 protected:
-    bool mouse_left_key;
-    bool mouse_right_key;
-    float mouse_position_x;
-    float mouse_position_y;
+    bool mouse_left_key_click;
+    bool mouse_right_key_click;
+    float cursor_position_x;
+    float cursor_position_y;
     Camera *camera = nullptr;
 
     /* get key event */

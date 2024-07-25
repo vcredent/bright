@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* perspective_camera.cpp                                                   */
+/* camera.h                                                                 */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,31 +20,4 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "perspective_camera.h"
-
-PerspectiveCamera::PerspectiveCamera(float fov, float aspect, float near, float far)
-{
-    position = glm::vec3(0.0f, 0.0f, 4.0f);
-    right = glm::vec3(1.0f, 0.0f, 0.0f);
-    up = glm::vec3(0.0f, 1.0f, 0.0f);
-    this->fov = fov;
-    this->aspect_ratio = aspect;
-    this->near = near;
-    this->far = far;
-}
-
-PerspectiveCamera::~PerspectiveCamera()
-{
-    /* do nothing... */
-}
-
-glm::mat4 PerspectiveCamera::look_at()
-{
-    direction = glm::cross(up, right);
-    return glm::lookAt(position, position + direction, up);
-}
-
-glm::mat4 PerspectiveCamera::perspective()
-{
-    return glm::perspective(glm::radians(fov), aspect_ratio, near, far);
-}
+#include "camera.h"

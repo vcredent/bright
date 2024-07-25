@@ -28,6 +28,7 @@
 #include "render/renderer_editor.h"
 #include "render/renderer_canvas.h"
 #include "render/renderer_screen.h"
+#include <glm/gtc/type_ptr.hpp>
 
 struct Vertex {
     glm::vec3 position;
@@ -57,6 +58,15 @@ static TrackBallCameraController controller;
 int main(int argc, char **argv)
 {
     Window *window = memnew(Window, "CopilotEngine", 1980, 1080);
+
+    /* set camera callback */
+    window->set_window_mouse_button_callbacks([](Window *window, int button, int action, int mods) {
+        controller.on_event_mouse_button(button, action, mods);
+    });
+
+    window->set_window_cursor_position_callbacks([](Window *window, double x, double y) {
+        controller.on_event_cursor((float) x, (float) y);
+    });
 
     auto rdc = std::make_unique<RenderDeviceContextWin32>(window);
     // initialize
@@ -177,6 +187,10 @@ int main(int argc, char **argv)
 
                 editor->cmd_begin_window("摄像机参数");
                 {
+                    glm::vec3 position = camera.get_position();
+                    editor->cmd_drag_float3("位置: ", glm::value_ptr(position), 0.01f);
+                    camera.set_position(position);
+
                     float fov = camera.get_fov();
                     editor->cmd_drag_float("景深: ", &fov, 0.01f);
                     camera.set_fov(fov);

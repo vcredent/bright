@@ -27,14 +27,14 @@ void CameraController::on_update()
     /* do nothing... */
 }
 
-void CameraController::on_event_mouse(int button, int action, double x, double y)
+void CameraController::on_event_mouse_button(int button, int action, int mods)
 {
     switch (button) {
         case GLFW_MOUSE_BUTTON_LEFT:
-            mouse_left_key = action;
+            mouse_left_key_click = action;
             break;
         case GLFW_MOUSE_BUTTON_RIGHT:
-            mouse_left_key = action;
+            mouse_left_key_click = action;
             break;
         default:
             return;
@@ -43,8 +43,8 @@ void CameraController::on_event_mouse(int button, int action, double x, double y
 
 void CameraController::on_event_cursor(float x, float y)
 {
-    this->mouse_position_x = x;
-    this->mouse_position_y = y;
+    this->cursor_position_x = x;
+    this->cursor_position_y = y;
 }
 
 void CameraController::on_event_key(int key, bool action, int modes)
