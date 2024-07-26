@@ -30,7 +30,7 @@ public:
     PerspectiveCamera(float fov, float aspect, float near, float far);
    ~PerspectiveCamera();
 
-    virtual glm::mat4 look_at() override final;
+    virtual glm::mat4 look_view() override final;
     virtual glm::mat4 perspective() override final;
 };
 

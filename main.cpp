@@ -151,7 +151,7 @@ int main(int argc, char **argv)
             float time = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count() / 1000.0f;
             MVPMatrix mvp = {};
             mvp.m = glm::rotate(glm::mat4(1.0f), time * glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 2.0f));
-            mvp.v = camera.look_at();
+            mvp.v = camera.look_view();
             camera.set_aspect_ratio((float) viewport_width / (float) viewport_height);
             mvp.p = camera.perspective();
             mvp.p[1][1] *= -1;

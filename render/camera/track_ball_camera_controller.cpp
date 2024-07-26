@@ -36,8 +36,3 @@ void TrackBallCameraController::on_update()
 {
 
 }
-
-glm::vec3 TrackBallCameraController::track_ball_mapping(float x, float y)
-{
-
-}

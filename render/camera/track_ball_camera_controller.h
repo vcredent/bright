@@ -32,8 +32,6 @@ public:
 
     virtual void on_update() override final;
 
-private:
-    static glm::vec3 track_ball_mapping(float x, float y);
 };
 
 #endif /* _TRACK_BALL_CAMERA_CONTROLLER_H_ */

@@ -28,7 +28,7 @@
 
 class Camera {
 public:
-    virtual glm::mat4 look_at() = 0; /* calculation view matrix */
+    virtual glm::mat4 look_view() = 0; /* calculation view matrix */
     virtual glm::mat4 perspective() = 0; /* calculation projection matrix */
 
     glm::vec3 get_position() { return position; }
