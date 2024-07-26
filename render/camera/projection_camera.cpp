@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* camera_controller.h                                                      */
+/* projection_camera.cpp                                                    */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,40 +20,31 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _CAMERA_CONTROLLER_H_
-#define _CAMERA_CONTROLLER_H_
+#include "projection_camera.h"
 
-#include "platform/window.h"
-#include <unordered_map>
-#include "camera.h"
+PerspectiveCamera::PerspectiveCamera(float fov, float aspect, float near, float far)
+{
+    position = glm::vec3(0.0f, 0.0f, 4.0f);
+    right = glm::vec3(1.0f, 0.0f, 0.0f);
+    up = glm::vec3(0.0f, 1.0f, 0.0f);
+    this->fov = fov;
+    this->aspect_ratio = aspect;
+    this->near = near;
+    this->far = far;
+}
 
-class CameraController {
-public:
-    struct KeyEvent {
-        int key;
-        bool action;
-        int modes;
-    };
+PerspectiveCamera::~PerspectiveCamera()
+{
+    /* do nothing... */
+}
 
-    virtual void on_update();
-    virtual void on_event_mouse_button(int button, int action, int mods);
-    virtual void on_event_cursor(float x, float y);
-    virtual void on_event_key(int key, bool action, int modes);
+glm::mat4 PerspectiveCamera::look_view()
+{
+    direction = glm::cross(up, right);
+    return glm::lookAt(position, position + direction, up);
+}
 
-    void make_current_camera(Camera *camera) { this->camera = camera; }
-
-protected:
-    bool mouse_left_key_click;
-    bool mouse_right_key_click;
-    float cursor_position_x;
-    float cursor_position_y;
-    Camera *camera = nullptr;
-
-    /* get key event */
-    KeyEvent *getkey(int key);
-
-private:
-    std::unordered_map<int, KeyEvent> key_events;
-};
-
-#endif /* _CAMERA_CONTROLLER_H_ */
+glm::mat4 PerspectiveCamera::perspective()
+{
+    return glm::perspective(glm::radians(fov), aspect_ratio, near, far);
+}

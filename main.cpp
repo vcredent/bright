@@ -24,7 +24,7 @@
 #include <vector>
 #include <chrono>
 #include "render/camera/track_ball_camera_controller.h"
-#include "render/camera/perspective_camera.h"
+#include "render/camera/projection_camera.h"
 #include "render/renderer_editor.h"
 #include "render/renderer_canvas.h"
 #include "render/renderer_screen.h"
