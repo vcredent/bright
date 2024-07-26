@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* projection_camera.h                                                      */
+/* math.h                                                              */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,34 +20,16 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _PROJECTION_CAMERA_H_
-#define _PROJECTION_CAMERA_H_
+#ifndef _COPILOT_MATH_H_
+#define _COPILOT_MATH_H_
 
-#include "camera.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-class ProjectionCamera : public Camera {
-public:
-    ProjectionCamera(float v_fov = 45.0f, float v_near = 0.01f, float v_far = 65.0f, float v_aspect_ratio = 1.0f);
-    ~ProjectionCamera();
+typedef glm::vec2 Vec2;
+typedef glm::vec3 Vec3;
+typedef glm::vec4 Vec4;
+typedef glm::mat4 Mat4;
 
-    float get_fov() { return fov; }
-    float get_near() { return near; }
-    float get_far() { return far; }
-    float get_aspect_ratio() { return aspect_ratio; }
-
-    void set_fov(float v_fov) { fov = v_fov; }
-    void set_near(float v_near) { near = v_near; }
-    void set_far(float v_far) { far = v_far; }
-    void set_aspect_ratio(float v_aspect_ratio) { aspect_ratio = v_aspect_ratio; }
-
-    virtual Mat4 look_view() override final;
-    virtual Mat4 perspective() override final;
-
-private:
-    float fov;
-    float near;
-    float far;
-    float aspect_ratio;
-};
-
-#endif /* _PROJECTION_CAMERA_H_ */
+#endif /* _COPILOT_MATH_H_ */

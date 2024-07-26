@@ -22,29 +22,25 @@
 /* ======================================================================== */
 #include "projection_camera.h"
 
-PerspectiveCamera::PerspectiveCamera(float fov, float aspect, float near, float far)
-{
-    position = glm::vec3(0.0f, 0.0f, 4.0f);
-    right = glm::vec3(1.0f, 0.0f, 0.0f);
-    up = glm::vec3(0.0f, 1.0f, 0.0f);
-    this->fov = fov;
-    this->aspect_ratio = aspect;
-    this->near = near;
-    this->far = far;
-}
-
-PerspectiveCamera::~PerspectiveCamera()
+ProjectionCamera::ProjectionCamera(float v_fov, float v_near, float v_far, float v_aspect_ratio)
+    : fov(v_fov), near(v_near), far(v_far), aspect_ratio(v_aspect_ratio)
 {
     /* do nothing... */
 }
 
-glm::mat4 PerspectiveCamera::look_view()
+ProjectionCamera::~ProjectionCamera()
 {
-    direction = glm::cross(up, right);
-    return glm::lookAt(position, position + direction, up);
+    /* do nothing... */
 }
 
-glm::mat4 PerspectiveCamera::perspective()
+Mat4 ProjectionCamera::look_view()
 {
-    return glm::perspective(glm::radians(fov), aspect_ratio, near, far);
+    return glm::lookAt(position, position + glm::normalize(glm::cross(up, right)), up);
+}
+
+Mat4 ProjectionCamera::perspective()
+{
+    Mat4 perspective = glm::perspective(fov, aspect_ratio, near, far);
+    perspective[1][1] *= -1;
+    return perspective;
 }

@@ -27,7 +27,7 @@
 #include "render/renderer_editor.h"
 #include "render/renderer_canvas.h"
 #include "render/renderer_screen.h"
-#include <glm/gtc/type_ptr.hpp>
+#include <random>
 
 struct Vertex {
     glm::vec3 position;
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
     index_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, index_buffer_size);
     rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
 
-    PerspectiveCamera camera(45.0f, 0.0f, 0.01, 45.0f);
+    ProjectionCamera *camera = memnew(ProjectionCamera);
 
     RendererScreen *screen = memnew(RendererScreen, rd);
     screen->initialize(window);
@@ -140,15 +140,11 @@ int main(int argc, char **argv)
         VkCommandBuffer canvas_cmd_buffer;
         canvas->cmd_begin_canvas_render(&canvas_cmd_buffer, viewport_width, viewport_height);
         {
-            static auto startTime = std::chrono::high_resolution_clock::now();
-            auto currentTime = std::chrono::high_resolution_clock::now();
-            float time = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count() / 1000.0f;
-            MVPMatrix mvp = {};
-            mvp.m = glm::rotate(glm::mat4(1.0f), time * glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 2.0f));
-            mvp.v = camera.look_view();
-            camera.set_aspect_ratio((float) viewport_width / (float) viewport_height);
-            mvp.p = camera.perspective();
-            mvp.p[1][1] *= -1;
+            MVPMatrix mvp;
+            mvp.m = glm::translate(Mat4(1.0f), Vec3(0.0f, 0.0f, 0.0f));
+            mvp.v = camera->look_view();
+            camera->set_aspect_ratio((float) viewport_width / (float) viewport_height);
+            mvp.p = camera->perspective();
             rd->write_buffer(mvp_matrix_buffer, 0, sizeof(MVPMatrix), &mvp);
 
             rd->cmd_bind_graph_pipeline(canvas_cmd_buffer, pipeline);
@@ -180,21 +176,21 @@ int main(int argc, char **argv)
 
                 editor->cmd_begin_window("摄像机参数");
                 {
-                    glm::vec3 position = camera.get_position();
+                    glm::vec3 position = camera->get_position();
                     editor->cmd_drag_float3("位置: ", glm::value_ptr(position), 0.01f);
-                    camera.set_position(position);
+                    camera->set_position(position);
 
-                    float fov = camera.get_fov();
+                    float fov = camera->get_fov();
                     editor->cmd_drag_float("景深: ", &fov, 0.01f);
-                    camera.set_fov(fov);
+                    camera->set_fov(fov);
 
-                    float near = camera.get_near();
+                    float near = camera->get_near();
                     editor->cmd_drag_float("近点: ", &near, 0.01f);
-                    camera.set_near(near);
+                    camera->set_near(near);
 
-                    float far = camera.get_far();
+                    float far = camera->get_far();
                     editor->cmd_drag_float("远点: ", &far, 0.01f);
-                    camera.set_far(far);
+                    camera->set_far(far);
                 }
                 editor->cmd_end_window();
             }
@@ -204,6 +200,7 @@ int main(int argc, char **argv)
         editor->destroy_texture(im_texture);
     }
 
+    memdel(camera);
     memdel(screen);
     memdel(canvas);
     memdel(editor);
