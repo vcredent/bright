@@ -23,7 +23,6 @@
 #include "platform/win32/render_device_context_win32.h"
 #include <vector>
 #include <chrono>
-#include "render/camera/track_ball_camera_controller.h"
 #include "render/camera/projection_camera.h"
 #include "render/renderer_editor.h"
 #include "render/renderer_canvas.h"
@@ -53,19 +52,15 @@ const std::vector<uint32_t> indices = {
         0, 1, 2, 2, 3, 0
 };
 
-static TrackBallCameraController controller;
-
 int main(int argc, char **argv)
 {
     Window *window = memnew(Window, "CopilotEngine", 1980, 1080);
 
     /* set camera callback */
     window->set_window_mouse_button_callbacks([](Window *window, int button, int action, int mods) {
-        controller.on_event_mouse_button(button, action, mods);
     });
 
     window->set_window_cursor_position_callbacks([](Window *window, double x, double y) {
-        controller.on_event_cursor((float) x, (float) y);
     });
 
     auto rdc = std::make_unique<RenderDeviceContextWin32>(window);
@@ -109,7 +104,6 @@ int main(int argc, char **argv)
     rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
 
     PerspectiveCamera camera(45.0f, 0.0f, 0.01, 45.0f);
-    controller.make_current_camera(&camera);
 
     RendererScreen *screen = memnew(RendererScreen, rd);
     screen->initialize(window);
@@ -170,7 +164,6 @@ int main(int argc, char **argv)
         RenderDevice::Texture2D *canvas_texture = canvas->cmd_end_canvas_render();
 
         /* render to window */
-        controller.on_update();
         ImTextureID im_texture;
         VkCommandBuffer window_cmd_buffer = screen->cmd_begin_window_render();
         {
