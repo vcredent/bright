@@ -24,21 +24,22 @@
 #define _CAMERA_H_
 
 #include <copilot/math.h>
+#include <copilot/typedefs.h>
 
 class Camera {
 public:
     virtual Mat4 look_view() = 0;
     virtual Mat4 perspective() = 0;
 
-    Vec3 get_position() { return position; }
-    Vec3 get_right() { return right; }
-    Vec3 get_up() { return up; }
-    float get_speed() { return speed; }
+    V_FORCEINLINE inline Vec3 get_position() { return position; }
+    V_FORCEINLINE inline Vec3 get_right() { return right; }
+    V_FORCEINLINE inline Vec3 get_up() { return up; }
+    V_FORCEINLINE inline float get_speed() { return speed; }
 
-    void set_position(Vec3 v_position) { position = v_position; }
-    void set_right(Vec3 v_right) { right = v_right; }
-    void set_up(Vec3 v_up) { up = v_up; }
-    void set_speed(float v_speed) { speed = v_speed; }
+    V_FORCEINLINE void set_position(Vec3 v_position) { position = v_position; }
+    V_FORCEINLINE void set_right(Vec3 v_right) { right = v_right; }
+    V_FORCEINLINE void set_up(Vec3 v_up) { up = v_up; }
+    V_FORCEINLINE void set_speed(float v_speed) { speed = v_speed; }
 
 protected:
     Vec3 position = Vec3(0.0f, 0.0f, 3.0f);

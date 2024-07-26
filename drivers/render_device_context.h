@@ -32,7 +32,7 @@
 #include <vma/vk_mem_alloc.h>
 
 #include <copilot/error.h>
-#include <copilot/typealias.h>
+#include <copilot/typedefs.h>
 #include <time.h>
 
 #define no_flag_bits         0
