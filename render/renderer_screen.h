@@ -15,7 +15,7 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
@@ -36,8 +36,9 @@ public:
     Window *get_focused_window() { return focused_window; }
 
     void initialize(Window *v_focused_window);
-    VkCommandBuffer cmd_begin_window_render();
-    void cmd_end_window_render(VkCommandBuffer cmd_buffer);
+
+    VkCommandBuffer cmd_begin_screen_render();
+    void cmd_end_screen_render(VkCommandBuffer cmd_buffer);
 
 private:
     struct SwapchainResource {
@@ -70,12 +71,12 @@ private:
     RenderDevice *rd = VK_NULL_HANDLE;
     VkInstance vk_instance = VK_NULL_HANDLE;
     VkPhysicalDevice vk_physical_device = VK_NULL_HANDLE;
-    VkDevice vk_device = VK_NULL_HANDLE;\
+    VkDevice vk_device = VK_NULL_HANDLE;
     uint32_t vk_graph_queue_family = 0;
     VkCommandPool vk_cmd_pool = VK_NULL_HANDLE;
     _Window *window = VK_NULL_HANDLE;
     VkQueue vk_graph_queue = VK_NULL_HANDLE;
-    Window *focused_window;
+    Window *focused_window = VK_NULL_HANDLE;
 
     uint32_t acquire_next_index;
 };

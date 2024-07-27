@@ -15,7 +15,7 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
@@ -25,7 +25,7 @@
 #include <chrono>
 #include "render/camera/track_ball_camera_controller.h"
 #include "render/camera/projection_camera.h"
-#include "render/renderer_editor.h"
+#include "render/renderer_imgui.h"
 #include "render/renderer_canvas.h"
 #include "render/renderer_screen.h"
 
@@ -119,8 +119,8 @@ int main(int argc, char **argv)
     RendererCanvas *canvas = memnew(RendererCanvas, rd);
     canvas->initialize();
 
-    RendererEditor *editor = memnew(RendererEditor, rd);
-    editor->initialize(screen);
+    RendererImGui *imgui = memnew(RendererImGui, rd);
+    imgui->initialize(screen);
 
     uint32_t viewport_width = 32;
     uint32_t viewport_height = 32;
@@ -157,50 +157,50 @@ int main(int argc, char **argv)
 
         /* render to window */
         ImTextureID im_texture;
-        VkCommandBuffer window_cmd_buffer = screen->cmd_begin_window_render();
+        VkCommandBuffer window_cmd_buffer = screen->cmd_begin_screen_render();
         {
             /* ImGui */
-            editor->cmd_begin_editor_render(window_cmd_buffer);
+            imgui->cmd_begin_imgui_render(window_cmd_buffer);
             {
                 ImGui::ShowDemoWindow(&show_demo_flag);
-                editor->cmd_begin_viewport("视口");
+                imgui->cmd_begin_viewport("视口");
                 {
-                    im_texture = editor->create_texture(canvas_texture);
-                    editor->cmd_draw_texture(im_texture, &viewport_width, &viewport_height);
+                    im_texture = imgui->create_texture(canvas_texture);
+                    imgui->cmd_draw_texture(im_texture, &viewport_width, &viewport_height);
                 }
-                editor->cmd_end_viewport();
+                imgui->cmd_end_viewport();
 
-                editor->cmd_begin_window("摄像机参数");
+                imgui->cmd_begin_window("摄像机参数");
                 {
                     glm::vec3 position = camera->get_position();
-                    editor->cmd_drag_float3("位置: ", glm::value_ptr(position), 0.01f);
+                    imgui->cmd_drag_float3("位置: ", glm::value_ptr(position), 0.01f);
                     camera->set_position(position);
 
                     float fov = camera->get_fov();
-                    editor->cmd_drag_float("景深: ", &fov, 0.01f);
+                    imgui->cmd_drag_float("景深: ", &fov, 0.01f);
                     camera->set_fov(fov);
 
                     float near = camera->get_near();
-                    editor->cmd_drag_float("近点: ", &near, 0.01f);
+                    imgui->cmd_drag_float("近点: ", &near, 0.01f);
                     camera->set_near(near);
 
                     float far = camera->get_far();
-                    editor->cmd_drag_float("远点: ", &far, 0.01f);
+                    imgui->cmd_drag_float("远点: ", &far, 0.01f);
                     camera->set_far(far);
                 }
-                editor->cmd_end_window();
+                imgui->cmd_end_window();
             }
-            editor->cmd_end_editor_render(window_cmd_buffer);
+            imgui->cmd_end_imgui_render(window_cmd_buffer);
         }
-        screen->cmd_end_window_render(window_cmd_buffer);
-        editor->destroy_texture(im_texture);
+        screen->cmd_end_screen_render(window_cmd_buffer);
+        imgui->destroy_texture(im_texture);
     }
 
     memdel(track_ball_controller);
     memdel(camera);
     memdel(screen);
     memdel(canvas);
-    memdel(editor);
+    memdel(imgui);
     rd->destroy_buffer(mvp_matrix_buffer);
     rd->destroy_buffer(index_buffer);
     rd->destroy_buffer(vertex_buffer);

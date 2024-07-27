@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_editor.h                                                        */
+/* renderer_imgui.h                                                         */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -15,7 +15,7 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
@@ -29,10 +29,10 @@
 #include <unordered_map>
 #include "event/eventdefs.h"
 
-class RendererEditor {
+class RendererImGui {
 public:
-    RendererEditor(RenderDevice *p_device);
-    ~RendererEditor();
+    RendererImGui(RenderDevice *p_device);
+    ~RendererImGui();
 
     void initialize(RendererScreen *p_render_window);
 
@@ -40,8 +40,8 @@ public:
     void destroy_texture(ImTextureID texture_id);
 
     /* begin new gui frame */
-    void cmd_begin_editor_render(VkCommandBuffer cmd_buffer);
-    void cmd_end_editor_render(VkCommandBuffer cmd_buffer);
+    void cmd_begin_imgui_render(VkCommandBuffer cmd_buffer);
+    void cmd_end_imgui_render(VkCommandBuffer cmd_buffer);
 
     void cmd_begin_window(const char *title);
     void cmd_end_window();

@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_editor.cpp                                                      */
+/* renderer_imgui.cpp                                                       */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -15,16 +15,16 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "renderer_editor.h"
+#include "renderer_imgui.h"
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 
-RendererEditor::RendererEditor(RenderDevice *p_device)
+RendererImGui::RendererImGui(RenderDevice *p_device)
     : rd(p_device)
 {
     // Setup Dear ImGui context
@@ -32,13 +32,13 @@ RendererEditor::RendererEditor(RenderDevice *p_device)
     ImGui::CreateContext();
 }
 
-RendererEditor::~RendererEditor()
+RendererImGui::~RendererImGui()
 {
     ImGui_ImplGlfw_Shutdown();
     ImGui_ImplVulkan_Shutdown();
 }
 
-void RendererEditor::initialize(RendererScreen *p_screen)
+void RendererImGui::initialize(RendererScreen *p_screen)
 {
     screen = p_screen;
 
@@ -68,7 +68,7 @@ void RendererEditor::initialize(RendererScreen *p_screen)
 
     // Setup Platform/Renderer backends
     auto rdc = rd->get_device_context();
-    ImGui_ImplGlfw_InitForVulkan((GLFWwindow *) screen->get_system_window()->get_native_window(), true);
+    ImGui_ImplGlfw_InitForVulkan((GLFWwindow *) screen->get_focused_window()->get_native_window(), true);
 
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = rdc->get_instance();
@@ -87,17 +87,17 @@ void RendererEditor::initialize(RendererScreen *p_screen)
     ImGui_ImplVulkan_Init(&init_info, screen->get_render_pass());
 }
 
-ImTextureID RendererEditor::create_texture(RenderDevice::Texture2D *p_texture)
+ImTextureID RendererImGui::create_texture(RenderDevice::Texture2D *p_texture)
 {
     return (ImTextureID) ImGui_ImplVulkan_AddTexture(p_texture->sampler, p_texture->image_view, p_texture->image_layout);
 }
 
-void RendererEditor::destroy_texture(ImTextureID texture_id)
+void RendererImGui::destroy_texture(ImTextureID texture_id)
 {
     ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet) texture_id);
 }
 
-void RendererEditor::cmd_begin_editor_render(VkCommandBuffer cmd_buffer)
+void RendererImGui::cmd_begin_imgui_render(VkCommandBuffer cmd_buffer)
 {
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -106,7 +106,7 @@ void RendererEditor::cmd_begin_editor_render(VkCommandBuffer cmd_buffer)
     ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 }
 
-void RendererEditor::cmd_end_editor_render(VkCommandBuffer cmd_buffer)
+void RendererImGui::cmd_end_imgui_render(VkCommandBuffer cmd_buffer)
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
@@ -122,34 +122,34 @@ void RendererEditor::cmd_end_editor_render(VkCommandBuffer cmd_buffer)
     }
 }
 
-void RendererEditor::cmd_begin_window(const char *title)
+void RendererImGui::cmd_begin_window(const char *title)
 {
     ImGui::Begin(title);
 }
 
-void RendererEditor::cmd_end_window()
+void RendererImGui::cmd_end_window()
 {
     ImGui::End();
 }
 
-void RendererEditor::cmd_begin_viewport(const char *title)
+void RendererImGui::cmd_begin_viewport(const char *title)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     cmd_begin_window(title);
 }
 
-void RendererEditor::cmd_end_viewport()
+void RendererImGui::cmd_end_viewport()
 {
     cmd_end_window();
     ImGui::PopStyleVar();
 }
 
-void RendererEditor::cmd_same_line128()
+void RendererImGui::cmd_same_line128()
 {
     ImGui::SameLine(128.0f);
 }
 
-void RendererEditor::cmd_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
+void RendererImGui::cmd_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
 {
     ImVec2 size = ImGui::GetContentRegionAvail();
     *p_width = size.x;
@@ -157,7 +157,7 @@ void RendererEditor::cmd_draw_texture(ImTextureID texture, uint32_t *p_width, ui
     ImGui::Image(texture, ImVec2(*p_width, *p_height));
 }
 
-void RendererEditor::cmd_drag_float(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+void RendererImGui::cmd_drag_float(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
     ImGui::Text(label);
     cmd_same_line128();
@@ -166,7 +166,7 @@ void RendererEditor::cmd_drag_float(const char *label, float *v, float v_speed, 
     ImGui::PopID();
 }
 
-void RendererEditor::cmd_drag_float2(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+void RendererImGui::cmd_drag_float2(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
     ImGui::PushID(label);
     ImGui::Text(label);
@@ -175,7 +175,7 @@ void RendererEditor::cmd_drag_float2(const char *label, float *v, float v_speed,
     ImGui::PopID();
 }
 
-void RendererEditor::cmd_drag_float3(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+void RendererImGui::cmd_drag_float3(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
     ImGui::PushID(label);
     ImGui::Text(label);
@@ -183,7 +183,7 @@ void RendererEditor::cmd_drag_float3(const char *label, float *v, float v_speed,
     ImGui::DragFloat3("", v, v_speed, v_min, v_max, format);
     ImGui::PopID();}
 
-void RendererEditor::cmd_drag_float4(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+void RendererImGui::cmd_drag_float4(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
     ImGui::PushID(label);
     ImGui::Text(label);
@@ -192,17 +192,17 @@ void RendererEditor::cmd_drag_float4(const char *label, float *v, float v_speed,
     ImGui::PopID();
 }
 
-void RendererEditor::cmd_show_cursor()
+void RendererImGui::cmd_show_cursor()
 {
     screen->get_focused_window()->show_cursor();
 }
 
-void RendererEditor::cmd_hide_cursor()
+void RendererImGui::cmd_hide_cursor()
 {
     screen->get_focused_window()->hide_cursor();
 }
 
-void RendererEditor::_set_theme_embrace_the_darkness()
+void RendererImGui::_set_theme_embrace_the_darkness()
 {
     ImVec4* colors = ImGui::GetStyle().Colors;
     colors[ImGuiCol_Text]                   = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);

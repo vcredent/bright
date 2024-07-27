@@ -15,7 +15,7 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
@@ -59,15 +59,15 @@ void RendererScreen::initialize(Window *v_focused_window)
     assert(!err);
 
     /* pick surface format */
-    uint32_t foramt_count = 0;
-    err = vkGetPhysicalDeviceSurfaceFormatsKHR(vk_physical_device, window->vk_surface, &foramt_count, nullptr);
+    uint32_t format_count = 0;
+    err = vkGetPhysicalDeviceSurfaceFormatsKHR(vk_physical_device, window->vk_surface, &format_count, nullptr);
     assert(!err);
 
-    VkSurfaceFormatKHR *surface_formats_khr = (VkSurfaceFormatKHR *) imalloc(sizeof(VkSurfaceFormatKHR) * foramt_count);
-    err = vkGetPhysicalDeviceSurfaceFormatsKHR(vk_physical_device, window->vk_surface, &foramt_count, surface_formats_khr);
+    VkSurfaceFormatKHR *surface_formats_khr = (VkSurfaceFormatKHR *) imalloc(sizeof(VkSurfaceFormatKHR) * format_count);
+    err = vkGetPhysicalDeviceSurfaceFormatsKHR(vk_physical_device, window->vk_surface, &format_count, surface_formats_khr);
     assert(!err);
 
-    VkSurfaceFormatKHR surface_format = pick_surface_format(surface_formats_khr, foramt_count);
+    VkSurfaceFormatKHR surface_format = pick_surface_format(surface_formats_khr, format_count);
     window->format = surface_format.format;
     window->color_space = surface_format.colorSpace;
 
@@ -93,7 +93,7 @@ void RendererScreen::initialize(Window *v_focused_window)
     _create_swap_chain();
 }
 
-VkCommandBuffer RendererScreen::cmd_begin_window_render()
+VkCommandBuffer RendererScreen::cmd_begin_screen_render()
 {
     _update_swap_chain();
     vkAcquireNextImageKHR(vk_device, window->swap_chain, UINT64_MAX, window->image_available_semaphore, nullptr, &acquire_next_index);
@@ -109,7 +109,7 @@ VkCommandBuffer RendererScreen::cmd_begin_window_render()
     return cmd_buffer;
 }
 
-void RendererScreen::cmd_end_window_render(VkCommandBuffer cmd_buffer)
+void RendererScreen::cmd_end_screen_render(VkCommandBuffer cmd_buffer)
 {
     rd->cmd_end_render_pass(cmd_buffer);
     rd->cmd_buffer_end(cmd_buffer);
