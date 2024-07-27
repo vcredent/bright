@@ -163,6 +163,7 @@ void RendererImGui::cmd_drag_float(const char *label, float *v, float v_speed, f
     cmd_same_line128();
     ImGui::PushID(label);
     ImGui::DragFloat("", v, v_speed, v_min, v_max, format);
+    _check_dragging_cursor();
     ImGui::PopID();
 }
 
@@ -172,6 +173,7 @@ void RendererImGui::cmd_drag_float2(const char *label, float *v, float v_speed, 
     ImGui::Text(label);
     cmd_same_line128();
     ImGui::DragFloat2("", v, v_speed, v_min, v_max, format);
+    _check_dragging_cursor();
     ImGui::PopID();
 }
 
@@ -181,7 +183,9 @@ void RendererImGui::cmd_drag_float3(const char *label, float *v, float v_speed, 
     ImGui::Text(label);
     cmd_same_line128();
     ImGui::DragFloat3("", v, v_speed, v_min, v_max, format);
-    ImGui::PopID();}
+    _check_dragging_cursor();
+    ImGui::PopID();
+}
 
 void RendererImGui::cmd_drag_float4(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
@@ -189,6 +193,7 @@ void RendererImGui::cmd_drag_float4(const char *label, float *v, float v_speed, 
     ImGui::Text(label);
     cmd_same_line128();
     ImGui::DragFloat4("", v, v_speed, v_min, v_max, format);
+    _check_dragging_cursor();
     ImGui::PopID();
 }
 
@@ -200,6 +205,25 @@ void RendererImGui::cmd_show_cursor()
 void RendererImGui::cmd_hide_cursor()
 {
     screen->get_focused_window()->hide_cursor();
+}
+
+void RendererImGui::_check_dragging_cursor()
+{
+    ImGuiID item = ImGui::GetItemID();
+
+    if (item == drag_item_id && !ImGui::IsItemActive()) {
+        is_dragging = false;
+        goto _CHECK_DRAGGING_TAG;
+    }
+
+    if (!is_dragging && ImGui::IsItemActive()) {
+        is_dragging = true;
+        drag_item_id = item;
+        goto _CHECK_DRAGGING_TAG;
+    }
+
+_CHECK_DRAGGING_TAG:
+    is_dragging ? cmd_hide_cursor() : cmd_show_cursor();
 }
 
 void RendererImGui::_set_theme_embrace_the_darkness()

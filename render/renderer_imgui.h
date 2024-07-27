@@ -59,10 +59,13 @@ public:
     void cmd_hide_cursor();
 
 private:
+    void _check_dragging_cursor();
     void _set_theme_embrace_the_darkness();
 
     RenderDevice *rd;
     RendererScreen *screen;
+    unsigned int drag_item_id = 0;
+    bool is_dragging = false;
 };
 
 #endif /* _EDITOR_H_ */
