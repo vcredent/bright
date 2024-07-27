@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* controller.h                                                             */
+/* renderer_viewport.h                                                      */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -15,46 +15,27 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _CAMERA_CONTROLLER_H_
-#define _CAMERA_CONTROLLER_H_
+#ifndef _RENDERER_VIEWPORT_H_
+#define _RENDERER_VIEWPORT_H_
 
-#include "camera.h"
-#include "event/inpdefs.h"
+#include "render/renderer_imgui.h"
 
-class CameraController {
+class RendererViewport : public RegisterEventCallback {
 public:
-    CameraController(Camera *v_camera = NULL);
-    ~CameraController();
+    RendererViewport(const char *v_title, RendererImGui *v_rd);
+    ~RendererViewport();
 
-    virtual void on_event_mouse_button(int button, int action, int mods);
-    virtual void on_event_cursor(float x, float y);
-    virtual void on_update_camera();
+    void cmd_begin_viewport_render();
+    void cmd_end_viewport_render();
+    void cmd_draw_image(RenderDevice::Texture2D *v_texture);
 
-    V_FORCEINLINE
-    inline void make_current_camera(Camera *v_camera) { camera = v_camera; }
-
-protected:
-    struct MouseEvent {
-        int button;
-        int action;
-        int mods;
-    };
-
-    struct CursorEvent {
-        float x;
-        float y;
-    };
-
-    /* events */
-    MouseEvent *mouse = NULL;
-    CursorEvent *cursor = NULL;
-
-    Camera *camera = NULL;
+private:
+    ImTextureID texture = NULL;
 };
 
-#endif /* _CAMERA_CONTROLLER_H_ */
+#endif /* _RENDERER_VIEWPORT_H_ */

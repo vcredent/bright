@@ -23,6 +23,8 @@
 #ifndef _TYPEDEFS_H_
 #define _TYPEDEFS_H_
 
+#define autoinit() {}
+
 #define V_FORCEINLINE __attribute__((__always_inline__))
 #define U_ASSERT_ONLY __attribute__((unused))
 #define ARRAY_SIZE(a) ( sizeof(a) / sizeof(a[0]) )

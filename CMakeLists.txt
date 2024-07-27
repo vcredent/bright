@@ -52,6 +52,7 @@ add_executable(${PROGRAM_NAME}
     render/renderer_imgui.cpp
     render/renderer_canvas.cpp
     render/renderer_screen.cpp
+    render/gui/renderer_viewport.cpp
     # ============================ #
     #        implementation        #
     # ============================ #

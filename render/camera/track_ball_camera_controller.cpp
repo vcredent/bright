@@ -60,5 +60,5 @@ void TrackBallCameraController::on_update_camera()
 
 bool TrackBallCameraController::_check_update()
 {
-    return camera != NULL && (mouse->button == EVENT_INPUT_MOUSE_BUTTON_LEFT && mouse->action);
+    return camera != NULL && (mouse->button == INP_MOUSE_BUTTON_LEFT && mouse->action);
 }

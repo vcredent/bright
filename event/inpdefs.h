@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* controller.h                                                             */
+/* inpdefs.h                                                                */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,41 +20,28 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _CAMERA_CONTROLLER_H_
-#define _CAMERA_CONTROLLER_H_
+#ifndef _COPILOT_INPDEFS_H_
+#define _COPILOT_INPDEFS_H_
 
-#include "camera.h"
-#include "event/inpdefs.h"
+typedef void CastPointer;
+typedef void (*PFN_EventWindowCloseCallback) (CastPointer *pointer);
+typedef void (*PFN_EventWindowResizeCallback) (CastPointer *pointer, int w, int h);
+typedef void (*PFN_EventWindowMouseButtonCallback) (CastPointer *pointer, int button, int action, int mods);
+typedef void (*PFN_EventWindowCursorPositionCallback) (CastPointer *pointer, float x, float y);
 
-class CameraController {
-public:
-    CameraController(Camera *v_camera = NULL);
-    ~CameraController();
+/* even input of mouse button id, this mapping by glfw
+ * defined macros value. */
+#define INP_MOUSE_BUTTON_1         0
+#define INP_MOUSE_BUTTON_2         1
+#define INP_MOUSE_BUTTON_3         2
+#define INP_MOUSE_BUTTON_4         3
+#define INP_MOUSE_BUTTON_5         4
+#define INP_MOUSE_BUTTON_6         5
+#define INP_MOUSE_BUTTON_7         6
+#define INP_MOUSE_BUTTON_8         7
+#define INP_MOUSE_BUTTON_LAST      INP_MOUSE_BUTTON_8
+#define INP_MOUSE_BUTTON_LEFT      INP_MOUSE_BUTTON_1
+#define INP_MOUSE_BUTTON_RIGHT     INP_MOUSE_BUTTON_2
+#define INP_MOUSE_BUTTON_MIDDLE    INP_MOUSE_BUTTON_3
 
-    virtual void on_event_mouse_button(int button, int action, int mods);
-    virtual void on_event_cursor(float x, float y);
-    virtual void on_update_camera();
-
-    V_FORCEINLINE
-    inline void make_current_camera(Camera *v_camera) { camera = v_camera; }
-
-protected:
-    struct MouseEvent {
-        int button;
-        int action;
-        int mods;
-    };
-
-    struct CursorEvent {
-        float x;
-        float y;
-    };
-
-    /* events */
-    MouseEvent *mouse = NULL;
-    CursorEvent *cursor = NULL;
-
-    Camera *camera = NULL;
-};
-
-#endif /* _CAMERA_CONTROLLER_H_ */
+#endif /* _COPILOT_INPDEFS_H_ */

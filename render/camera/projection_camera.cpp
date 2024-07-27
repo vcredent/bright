@@ -22,8 +22,8 @@
 /* ======================================================================== */
 #include "projection_camera.h"
 
-ProjectionCamera::ProjectionCamera(float v_fov, float v_near, float v_far, float v_aspect_ratio)
-    : fov(v_fov), near(v_near), far(v_far), aspect_ratio(v_aspect_ratio)
+ProjectionCamera::ProjectionCamera(float v_fov, float v_near, float v_far)
+    : fov(v_fov), near(v_near), far(v_far)
 {
     /* do nothing... */
 }

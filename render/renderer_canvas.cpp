@@ -79,7 +79,7 @@ void RendererCanvas::initialize()
     _create_canvas_texture(32, 32);
 }
 
-void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer, uint32_t width, uint32_t height)
+void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer)
 {
     if (texture->width != width || texture->height != height) {
         _clean_up_canvas_texture();
@@ -96,6 +96,12 @@ void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer, uint
     *p_cmd_buffer = canvas_cmd_buffer;
 }
 
+void RendererCanvas::set_canvas_extent(uint32_t v_width, uint32_t v_height)
+{
+    width  = v_width;
+    height = v_height;
+}
+
 RenderDevice::Texture2D *RendererCanvas::cmd_end_canvas_render()
 {
     rd->cmd_end_render_pass(canvas_cmd_buffer);
@@ -103,11 +109,11 @@ RenderDevice::Texture2D *RendererCanvas::cmd_end_canvas_render()
 
     // submit
     rd->cmd_buffer_submit(canvas_cmd_buffer,
-                              0, nullptr,
-                              0, nullptr,
-                              nullptr,
-                              graph_queue,
-                              nullptr);
+                          0, nullptr,
+                          0, nullptr,
+                          nullptr,
+                          graph_queue,
+                          nullptr);
 
     return texture;
 }

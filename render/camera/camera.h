@@ -38,6 +38,7 @@ public:
     V_FORCEINLINE inline float get_pitch() { return pitch; }
     V_FORCEINLINE inline float get_yaw() { return yaw; }
     V_FORCEINLINE inline float get_roll() { return roll; }
+    V_FORCEINLINE inline float get_aspect_ratio() { return aspect_ratio; }
     V_FORCEINLINE inline float get_speed() { return speed; }
     V_FORCEINLINE inline float get_sensitivity() { return sensitivity; }
 
@@ -47,6 +48,7 @@ public:
     V_FORCEINLINE inline void set_pitch(float v_pitch) { pitch = glm::clamp(v_pitch, -89.0f, 89.0f); }
     V_FORCEINLINE inline void set_yaw(float v_yaw) { yaw = v_yaw; }
     V_FORCEINLINE inline void set_roll(float v_roll) { roll = v_roll; }
+    V_FORCEINLINE inline void set_aspect_ratio(float v_aspect_ratio) { aspect_ratio = v_aspect_ratio; }
     V_FORCEINLINE inline void set_speed(float v_speed) { speed = v_speed; }
     V_FORCEINLINE inline void set_action_on_view_matrix(Matrix4 action_on) { action_on_view_matrix = action_on; }
     V_FORCEINLINE inline void set_sensitivity(float v_sensitivity) { sensitivity = v_sensitivity; }
@@ -58,6 +60,7 @@ protected:
     float pitch = 0.0f;
     float yaw = -90.0f;
     float roll = 0.0f;
+    float aspect_ratio = 1.0f;
 
     float speed = 0.5f;
     float sensitivity = 0.05f;

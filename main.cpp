@@ -28,6 +28,7 @@
 #include "render/renderer_imgui.h"
 #include "render/renderer_canvas.h"
 #include "render/renderer_screen.h"
+#include "render/gui/renderer_viewport.h"
 
 struct Vertex {
     glm::vec3 position;
@@ -122,8 +123,20 @@ int main(int argc, char **argv)
     RendererImGui *imgui = memnew(RendererImGui, rd);
     imgui->initialize(screen);
 
-    uint32_t viewport_width = 32;
-    uint32_t viewport_height = 32;
+    RendererViewport *viewport = memnew(RendererViewport, "视口", imgui);
+    viewport->set_window_user_pointer("#CANVAS", canvas);
+    viewport->set_window_user_pointer("#CAMERA", camera);
+
+    viewport->set_window_resize_callback([](CastPointer *pointer, int w, int h) {
+        RendererViewport *viewport = (RendererViewport *) pointer;
+
+        RendererCanvas *canvas = (RendererCanvas *) viewport->get_window_user_pointer("#CANVAS");
+        canvas->set_canvas_extent(w, h);
+
+        Camera *camera = (Camera *) viewport->get_window_user_pointer("#CAMERA");
+        camera->set_aspect_ratio((float) w / (float) h);
+    });
+
     static bool show_demo_flag = true;
 
     while (window->is_close()) {
@@ -132,21 +145,20 @@ int main(int argc, char **argv)
 
         /* render to canvas */
         VkCommandBuffer canvas_cmd_buffer;
-        canvas->cmd_begin_canvas_render(&canvas_cmd_buffer, viewport_width, viewport_height);
+        canvas->cmd_begin_canvas_render(&canvas_cmd_buffer);
         {
             track_ball_controller->on_update_camera();
 
             MVPMatrix mvp;
             mvp.m = glm::translate(Matrix4(1.0f), Vector3(0.0f, 0.0f, 0.0f));
             mvp.v = camera->look_view();
-            camera->set_aspect_ratio((float) viewport_width / (float) viewport_height);
             mvp.p = camera->perspective();
             rd->write_buffer(mvp_matrix_buffer, 0, sizeof(MVPMatrix), &mvp);
 
             rd->cmd_bind_graph_pipeline(canvas_cmd_buffer, pipeline);
             rd->cmd_bind_descriptor_set(canvas_cmd_buffer, pipeline, mvp_descriptor);
             rd->write_descriptor_set_buffer(mvp_matrix_buffer, mvp_descriptor);
-            rd->cmd_setval_viewport(canvas_cmd_buffer, viewport_width, viewport_height);
+            rd->cmd_setval_viewport(canvas_cmd_buffer, canvas->get_canvas_width(), canvas->get_canvas_height());
 
             VkDeviceSize offset = 0;
             vkCmdBindVertexBuffers(canvas_cmd_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
@@ -156,19 +168,17 @@ int main(int argc, char **argv)
         RenderDevice::Texture2D *canvas_texture = canvas->cmd_end_canvas_render();
 
         /* render to window */
-        ImTextureID im_texture;
         VkCommandBuffer window_cmd_buffer = screen->cmd_begin_screen_render();
         {
             /* ImGui */
             imgui->cmd_begin_imgui_render(window_cmd_buffer);
             {
                 ImGui::ShowDemoWindow(&show_demo_flag);
-                imgui->cmd_begin_viewport("视口");
+                viewport->cmd_begin_viewport_render();
                 {
-                    im_texture = imgui->create_texture(canvas_texture);
-                    imgui->cmd_draw_texture(im_texture, &viewport_width, &viewport_height);
+                    viewport->cmd_draw_image(canvas_texture);
                 }
-                imgui->cmd_end_viewport();
+                viewport->cmd_end_viewport_render();
 
                 imgui->cmd_begin_window("摄像机参数");
                 {
@@ -193,9 +203,9 @@ int main(int argc, char **argv)
             imgui->cmd_end_imgui_render(window_cmd_buffer);
         }
         screen->cmd_end_screen_render(window_cmd_buffer);
-        imgui->destroy_texture(im_texture);
     }
 
+    memdel(viewport);
     memdel(track_ball_controller);
     memdel(camera);
     memdel(screen);

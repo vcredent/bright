@@ -97,6 +97,42 @@ void RendererImGui::destroy_texture(ImTextureID texture_id)
     ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet) texture_id);
 }
 
+void RendererImGui::register_event_window(const char *title, CastPointer *window)
+{
+    EventCallbacks *callbacks;
+    _check_event_callbacks(title, &callbacks);
+    callbacks->window  = window;
+}
+
+void RendererImGui::register_window_user_pointer(const char *title, const char *name, CastPointer *pointer)
+{
+    EventCallbacks *callbacks;
+    _check_event_callbacks(title, &callbacks);
+    callbacks->pointer[name] = pointer;
+}
+
+void
+RendererImGui::register_window_resize_callback(const char *title, PFN_EventWindowResizeCallback fnEventWindowResizeCallback)
+{
+    EventCallbacks *callbacks;
+    _check_event_callbacks(title, &callbacks);
+    callbacks->fnEventWindowResizeCallback = fnEventWindowResizeCallback;
+}
+
+void RendererImGui::register_window_cursor_position_callback(const char *title, PFN_EventWindowCursorPositionCallback fnEventWindowCursorPositionCallback)
+{
+    EventCallbacks *callbacks;
+    _check_event_callbacks(title, &callbacks);
+    callbacks->fnEventWindowCursorPositionCallback = fnEventWindowCursorPositionCallback;
+}
+
+CastPointer *RendererImGui::get_window_user_pointer(const char *title, const char *name)
+{
+    EventCallbacks *callbacks;
+    _check_event_callbacks(title, &callbacks);
+    return callbacks->pointer[name];
+}
+
 void RendererImGui::cmd_begin_imgui_render(VkCommandBuffer cmd_buffer)
 {
     ImGui_ImplVulkan_NewFrame();
@@ -125,6 +161,33 @@ void RendererImGui::cmd_end_imgui_render(VkCommandBuffer cmd_buffer)
 void RendererImGui::cmd_begin_window(const char *title)
 {
     ImGui::Begin(title);
+
+    EventCallbacks *callbacks;
+    _check_event_callbacks(title, &callbacks);
+    RegisterEventCallback *rec = (RegisterEventCallback *) callbacks->window;
+
+    if (rec != NULL) {
+        ImVec2 region = ImGui::GetContentRegionAvail();
+        rec->set_size(region.x, region.y);
+
+        if (callbacks->fnEventWindowResizeCallback != NULL) {
+            if (callbacks->region.w != region.x || callbacks->region.h != region.y) {
+                callbacks->region.w = region.x;
+                callbacks->region.h = region.y;
+                callbacks->fnEventWindowResizeCallback(callbacks->window, region.x, region.y);
+            }
+        }
+
+        if (callbacks->fnEventWindowCursorPositionCallback != NULL) {
+            ImVec2 cursor = ImGui::GetCursorPos();
+            if (callbacks->cursor.x != cursor.x || callbacks->cursor.y != cursor.y) {
+                callbacks->cursor.x = cursor.x;
+                callbacks->cursor.y = cursor.y;
+                callbacks->fnEventWindowCursorPositionCallback(callbacks->window, cursor.x, cursor.y);
+            }
+        }
+    }
+
 }
 
 void RendererImGui::cmd_end_window()
@@ -149,12 +212,9 @@ void RendererImGui::cmd_same_line128()
     ImGui::SameLine(128.0f);
 }
 
-void RendererImGui::cmd_draw_texture(ImTextureID texture, uint32_t *p_width, uint32_t *p_height)
+void RendererImGui::cmd_draw_texture(ImTextureID texture, uint32_t width, uint32_t height)
 {
-    ImVec2 size = ImGui::GetContentRegionAvail();
-    *p_width = size.x;
-    *p_height = size.y;
-    ImGui::Image(texture, ImVec2(*p_width, *p_height));
+    ImGui::Image(texture, ImVec2(width, height));
 }
 
 void RendererImGui::cmd_drag_float(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
@@ -205,6 +265,17 @@ void RendererImGui::cmd_show_cursor()
 void RendererImGui::cmd_hide_cursor()
 {
     screen->get_focused_window()->hide_cursor();
+}
+
+void RendererImGui::_check_event_callbacks(const char *title, EventCallbacks **p_callbacks)
+{
+    auto finded = event_callbacks.find(title);
+    if (finded == event_callbacks.end()) {
+        EventCallbacks callbacks = {};
+        event_callbacks.insert(std::make_pair(title, callbacks));
+        finded = event_callbacks.find(title);
+    }
+    *p_callbacks = &finded->second;
 }
 
 void RendererImGui::_check_dragging_cursor()
