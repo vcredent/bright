@@ -124,17 +124,22 @@ int main(int argc, char **argv)
     imgui->initialize(screen);
 
     RendererViewport *viewport = memnew(RendererViewport, "视口", imgui);
-    viewport->set_window_user_pointer("#CANVAS", canvas);
-    viewport->set_window_user_pointer("#CAMERA", camera);
+    viewport->add_window_user_pointer("#CANVAS", canvas);
+    viewport->add_window_user_pointer("#TRACK_BALL_CONTROLLER", track_ball_controller);
 
-    viewport->set_window_resize_callback([](CastPointer *pointer, int w, int h) {
-        RendererViewport *viewport = (RendererViewport *) pointer;
+    viewport->set_window_resize_callback([](RegisterEventCallback *event, int w, int h) {
+        event->pointer<RendererCanvas>("#CANVAS")->set_canvas_extent(w, h);
+        event->pointer<CameraController>("#TRACK_BALL_CONTROLLER")->get_current_camera()->set_aspect_ratio((float) w / (float) h);
+    });
 
-        RendererCanvas *canvas = (RendererCanvas *) viewport->get_window_user_pointer("#CANVAS");
-        canvas->set_canvas_extent(w, h);
+    viewport->set_window_mouse_button_callback([](RegisterEventCallback *event, int button, int action, int mods) {
+        if (button == INP_MOUSE_BUTTON_LEFT) {
+            event->pointer<CameraController>("#TRACK_BALL_CONTROLLER")->on_update_camera();
+        }
+    });
 
-        Camera *camera = (Camera *) viewport->get_window_user_pointer("#CAMERA");
-        camera->set_aspect_ratio((float) w / (float) h);
+    viewport->set_window_cursor_position_callback([](RegisterEventCallback *event, float x, float y) {
+        event->pointer<CameraController>("#TRACK_BALL_CONTROLLER")->on_event_cursor(x, y);
     });
 
     static bool show_demo_flag = true;
@@ -147,8 +152,6 @@ int main(int argc, char **argv)
         VkCommandBuffer canvas_cmd_buffer;
         canvas->cmd_begin_canvas_render(&canvas_cmd_buffer);
         {
-            track_ball_controller->on_update_camera();
-
             MVPMatrix mvp;
             mvp.m = glm::translate(Matrix4(1.0f), Vector3(0.0f, 0.0f, 0.0f));
             mvp.v = camera->look_view();

@@ -23,6 +23,8 @@
 #include "controller.h"
 #include <copilot/memalloc.h>
 
+#include <iostream>
+
 CameraController::CameraController(Camera *v_camera)
     : camera(v_camera)
 {

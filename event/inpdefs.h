@@ -23,12 +23,6 @@
 #ifndef _COPILOT_INPDEFS_H_
 #define _COPILOT_INPDEFS_H_
 
-typedef void CastPointer;
-typedef void (*PFN_EventWindowCloseCallback) (CastPointer *pointer);
-typedef void (*PFN_EventWindowResizeCallback) (CastPointer *pointer, int w, int h);
-typedef void (*PFN_EventWindowMouseButtonCallback) (CastPointer *pointer, int button, int action, int mods);
-typedef void (*PFN_EventWindowCursorPositionCallback) (CastPointer *pointer, float x, float y);
-
 /* even input of mouse button id, this mapping by glfw
  * defined macros value. */
 #define INP_MOUSE_BUTTON_1         0

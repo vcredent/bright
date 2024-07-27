@@ -91,39 +91,39 @@ void Window::set_visible(bool is_visible)
     }
 }
 
-void Window::set_window_close_callbacks(PFN_EventWindowCloseCallback callback)
+void Window::set_window_close_callbacks(PFN_WindowCloseCallback callback)
 {
-    fn_window_close_callback = callback;
+    fnWindowCloseCallback = callback;
     glfwSetWindowCloseCallback(handle, [](GLFWwindow *glfw_window) {
         Window *window = (Window *) glfwGetWindowUserPointer(glfw_window);
-        window->fn_window_close_callback((CastPointer *) window);
+        window->fnWindowCloseCallback(window);
     });
 }
 
-void Window::set_window_resize_callbacks(PFN_EventWindowResizeCallback callback)
+void Window::set_window_resize_callbacks(PFN_WindowResizeCallback callback)
 {
-    fn_window_resize_callback = callback;
+    fnWindowResizeCallback = callback;
     glfwSetWindowSizeCallback(handle, [] (GLFWwindow *glfw_window, int w, int h) {
         Window *window = (Window *) glfwGetWindowUserPointer(glfw_window);
-        window->fn_window_resize_callback((CastPointer *) window, w, h);
+        window->fnWindowResizeCallback(window, w, h);
     });
 }
 
-void Window::set_window_mouse_button_callbacks(PFN_EventWindowMouseButtonCallback callback)
+void Window::set_window_mouse_button_callbacks(PFN_WindowMouseButtonCallback callback)
 {
-    fn_window_mouse_button_callback = callback;
+    fnWindowMouseButtonCallback = callback;
     glfwSetMouseButtonCallback(handle, [](GLFWwindow *glfw_window, int button, int action, int mods) {
         Window *window = (Window *) glfwGetWindowUserPointer(glfw_window);
-        window->fn_window_mouse_button_callback((CastPointer *) window, button, action, mods);
+        window->fnWindowMouseButtonCallback(window, button, action, mods);
     });
 }
 
-void Window::set_window_cursor_position_callbacks(PFN_EventWindowCursorPositionCallback callback)
+void Window::set_window_cursor_position_callbacks(PFN_WindowCursorPositionCallback callback)
 {
-    fn_window_cursor_position_callback = callback;
+    fnWindowCursorPositionCallback = callback;
     glfwSetCursorPosCallback(handle, [](GLFWwindow *glfw_window, double x, double y) {
         Window *window = (Window *) glfwGetWindowUserPointer(glfw_window);
-        window->fn_window_cursor_position_callback((CastPointer *) window, x, y);
+        window->fnWindowCursorPositionCallback(window, x, y);
     });
 }
 

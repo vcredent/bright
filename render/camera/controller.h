@@ -35,8 +35,8 @@ public:
     virtual void on_event_cursor(float x, float y);
     virtual void on_update_camera();
 
-    V_FORCEINLINE
-    inline void make_current_camera(Camera *v_camera) { camera = v_camera; }
+    V_FORCEINLINE inline void make_current_camera(Camera *v_camera) { camera = v_camera; }
+    V_FORCEINLINE inline Camera *get_current_camera() { return camera; }
 
 protected:
     struct MouseEvent {

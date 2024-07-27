@@ -26,8 +26,14 @@
 #include <GLFW/glfw3.h>
 #include <copilot/error.h>
 #include <unordered_map>
-
 #include "event/inpdefs.h"
+
+class Window;
+
+typedef void (*PFN_WindowCloseCallback) (Window *window);
+typedef void (*PFN_WindowResizeCallback) (Window *window, int w, int h);
+typedef void (*PFN_WindowMouseButtonCallback) (Window *window, int button, int action, int mods);
+typedef void (*PFN_WindowCursorPositionCallback) (Window *window, float x, float y);
 
 struct Rect2D {
     int w;
@@ -58,10 +64,10 @@ public:
 
     void set_visible(bool is_visible);
 
-    void set_window_close_callbacks(PFN_EventWindowCloseCallback callback);
-    void set_window_resize_callbacks(PFN_EventWindowResizeCallback callback);
-    void set_window_mouse_button_callbacks(PFN_EventWindowMouseButtonCallback callback);
-    void set_window_cursor_position_callbacks(PFN_EventWindowCursorPositionCallback callback);
+    void set_window_close_callbacks(PFN_WindowCloseCallback callback);
+    void set_window_resize_callbacks(PFN_WindowResizeCallback callback);
+    void set_window_mouse_button_callbacks(PFN_WindowMouseButtonCallback callback);
+    void set_window_cursor_position_callbacks(PFN_WindowCursorPositionCallback callback);
 
     bool is_close();
     bool is_visible() { return visible_flag; }
@@ -79,10 +85,10 @@ private:
     Rect2D full_screen_rect;
     std::unordered_map<std::string, void *> window_user_pointers;
 
-    PFN_EventWindowCloseCallback fn_window_close_callback = nullptr;
-    PFN_EventWindowResizeCallback fn_window_resize_callback = nullptr;
-    PFN_EventWindowMouseButtonCallback fn_window_mouse_button_callback = nullptr;
-    PFN_EventWindowCursorPositionCallback fn_window_cursor_position_callback = nullptr;
+    PFN_WindowCloseCallback fnWindowCloseCallback = NULL;
+    PFN_WindowResizeCallback fnWindowResizeCallback = NULL;
+    PFN_WindowMouseButtonCallback fnWindowMouseButtonCallback = NULL;
+    PFN_WindowCursorPositionCallback fnWindowCursorPositionCallback = NULL;
 };
 
 #endif /* _COPILOT_WINDOW_H_ */

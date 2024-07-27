@@ -26,9 +26,15 @@
 #include <imgui.h>
 #include "drivers/render_device.h"
 #include "renderer_screen.h"
-#include "event/inpdefs.h"
 // std
 #include <unordered_map>
+
+class RegisterEventCallback;
+
+typedef void (*PFN_RegisterEventWindowCloseCallback) (RegisterEventCallback *event);
+typedef void (*PFN_RegisterEventWindowResizeCallback) (RegisterEventCallback *event, int w, int h);
+typedef void (*PFN_RegisterEventWindowMouseButtonCallback) (RegisterEventCallback *event, int button, int action, int mods);
+typedef void (*PFN_RegisterEventWindowCursorPositionCallback) (RegisterEventCallback *event, float x, float y);
 
 class RendererImGui {
 public:
@@ -40,12 +46,14 @@ public:
     ImTextureID create_texture(RenderDevice::Texture2D *p_texture);
     void destroy_texture(ImTextureID texture_id);
 
-    void register_event_window(const char *title, CastPointer *window);
-    void register_window_user_pointer(const char *title, const char *name, CastPointer *pointer);
-    void register_window_resize_callback(const char *title, PFN_EventWindowResizeCallback fnEventWindowResizeCallback);
-    void register_window_cursor_position_callback(const char *title, PFN_EventWindowCursorPositionCallback fnEventWindowCursorPositionCallback);
+    void register_event_window(const char *title, RegisterEventCallback *window);
+    void unregister_event_window(const char *title);
+    void register_window_user_pointer(const char *title, const char *name, void *pointer);
+    void register_window_resize_callback(const char *title, PFN_RegisterEventWindowResizeCallback fnEventWindowResizeCallback);
+    void register_window_mouse_button_callback(const char *title, PFN_RegisterEventWindowMouseButtonCallback fnEventWindowMouseButtonCallback);
+    void register_window_cursor_position_callback(const char *title, PFN_RegisterEventWindowCursorPositionCallback fnEventWindowCursorPositionCallback);
 
-    CastPointer *get_window_user_pointer(const char *title, const char *name);
+    void *get_window_user_pointer(const char *title, const char *name);
 
     /* begin new gui frame */
     void cmd_begin_imgui_render(VkCommandBuffer cmd_buffer);
@@ -68,8 +76,8 @@ public:
 
 private:
     struct EventCallbacks {
-        CastPointer *window;
-        std::unordered_map<const char *, CastPointer *> pointer = autoinit();
+        RegisterEventCallback *window;
+        std::unordered_map<const char *, void *> pointer = stackalloc();
 
         struct {
             uint32_t w;
@@ -77,15 +85,22 @@ private:
         } region;
 
         struct {
+            bool button[5];
+            int  current_press_button = -1;
+        } mouse;
+
+        struct {
             float x;
             float y;
         } cursor;
 
-        PFN_EventWindowResizeCallback fnEventWindowResizeCallback = NULL;
-        PFN_EventWindowCursorPositionCallback fnEventWindowCursorPositionCallback = NULL;
+        PFN_RegisterEventWindowResizeCallback fnRegisterEventWindowResizeCallback = NULL;
+        PFN_RegisterEventWindowMouseButtonCallback fnRegisterEventWindowMouseButtonCallback = NULL;
+        PFN_RegisterEventWindowCursorPositionCallback fnRegisterEventWindowCursorPositionCallback = NULL;
     };
 
-    void _check_event_callbacks(const char *title, EventCallbacks **p_callbacks);
+    void _window_event_process(EventCallbacks *callbacks);
+    bool _check_event_callbacks(const char *title, EventCallbacks **p_callbacks);
     void _check_dragging_cursor();
     void _set_theme_embrace_the_darkness();
 
@@ -94,7 +109,7 @@ private:
     unsigned int drag_item_id = 0;
     bool is_dragging = false;
 
-    std::unordered_map<const char *, EventCallbacks> event_callbacks;
+    std::unordered_map<const char *, EventCallbacks> window_event_callbacks;
 };
 
 class RegisterEventCallback {
@@ -115,22 +130,28 @@ public:
         return title;
       }
 
-    void set_window_user_pointer(const char *name, CastPointer *pointer)
+    void add_window_user_pointer(const char *name, void *pointer)
       {
         rd->register_window_user_pointer(title, name, pointer);
       }
 
-    CastPointer *get_window_user_pointer(const char *name)
+    template<typename T>
+    T *pointer(const char *name)
       {
-        return rd->get_window_user_pointer(title, name);
+        return (T*) rd->get_window_user_pointer(title, name);
       }
 
-    void set_window_resize_callback(PFN_EventWindowResizeCallback fnEventWindowResizeCallback)
+    void set_window_resize_callback(PFN_RegisterEventWindowResizeCallback fnEventWindowResizeCallback)
       {
         rd->register_window_resize_callback(title, fnEventWindowResizeCallback);
       }
 
-    void set_window_cursor_position_callback(PFN_EventWindowCursorPositionCallback fnEventWindowCursorPositionCallback)
+    void set_window_mouse_button_callback(PFN_RegisterEventWindowMouseButtonCallback fnEventWindowMouseButtonCallback)
+      {
+        rd->register_window_mouse_button_callback(title, fnEventWindowMouseButtonCallback);
+      }
+
+    void set_window_cursor_position_callback(PFN_RegisterEventWindowCursorPositionCallback fnEventWindowCursorPositionCallback)
       {
         rd->register_window_cursor_position_callback(title, fnEventWindowCursorPositionCallback);
       }

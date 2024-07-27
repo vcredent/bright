@@ -23,7 +23,7 @@
 #ifndef _TYPEDEFS_H_
 #define _TYPEDEFS_H_
 
-#define autoinit() {}
+#define stackalloc() {/* 0 */}
 
 #define V_FORCEINLINE __attribute__((__always_inline__))
 #define U_ASSERT_ONLY __attribute__((unused))

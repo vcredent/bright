@@ -97,40 +97,52 @@ void RendererImGui::destroy_texture(ImTextureID texture_id)
     ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet) texture_id);
 }
 
-void RendererImGui::register_event_window(const char *title, CastPointer *window)
+void RendererImGui::register_event_window(const char *title, RegisterEventCallback *window)
 {
-    EventCallbacks *callbacks;
-    _check_event_callbacks(title, &callbacks);
-    callbacks->window  = window;
+    EventCallbacks callbacks = stackalloc();
+    callbacks.window = window;
+    window_event_callbacks.insert(std::make_pair(title, callbacks));
 }
 
-void RendererImGui::register_window_user_pointer(const char *title, const char *name, CastPointer *pointer)
+void RendererImGui::register_window_user_pointer(const char *title, const char *name, void *pointer)
 {
     EventCallbacks *callbacks;
-    _check_event_callbacks(title, &callbacks);
-    callbacks->pointer[name] = pointer;
+    if (_check_event_callbacks(title, &callbacks))
+        callbacks->pointer[name] = pointer;
 }
 
-void
-RendererImGui::register_window_resize_callback(const char *title, PFN_EventWindowResizeCallback fnEventWindowResizeCallback)
+void RendererImGui::unregister_event_window(const char *title)
 {
-    EventCallbacks *callbacks;
-    _check_event_callbacks(title, &callbacks);
-    callbacks->fnEventWindowResizeCallback = fnEventWindowResizeCallback;
+    window_event_callbacks.erase(title);
 }
 
-void RendererImGui::register_window_cursor_position_callback(const char *title, PFN_EventWindowCursorPositionCallback fnEventWindowCursorPositionCallback)
+void RendererImGui::register_window_resize_callback(const char *title, PFN_RegisterEventWindowResizeCallback fnRegisterEventWindowResizeCallback)
 {
     EventCallbacks *callbacks;
-    _check_event_callbacks(title, &callbacks);
-    callbacks->fnEventWindowCursorPositionCallback = fnEventWindowCursorPositionCallback;
+    if (_check_event_callbacks(title, &callbacks))
+        callbacks->fnRegisterEventWindowResizeCallback = fnRegisterEventWindowResizeCallback;
 }
 
-CastPointer *RendererImGui::get_window_user_pointer(const char *title, const char *name)
+void RendererImGui::register_window_mouse_button_callback(const char *title, PFN_RegisterEventWindowMouseButtonCallback fnRegisterEventWindowMouseButtonCallback)
 {
     EventCallbacks *callbacks;
-    _check_event_callbacks(title, &callbacks);
-    return callbacks->pointer[name];
+    if (_check_event_callbacks(title, &callbacks))
+        callbacks->fnRegisterEventWindowMouseButtonCallback = fnRegisterEventWindowMouseButtonCallback;
+}
+
+void RendererImGui::register_window_cursor_position_callback(const char *title, PFN_RegisterEventWindowCursorPositionCallback fnRegisterEventWindowCursorPositionCallback)
+{
+    EventCallbacks *callbacks;
+    if (_check_event_callbacks(title, &callbacks))
+        callbacks->fnRegisterEventWindowCursorPositionCallback = fnRegisterEventWindowCursorPositionCallback;
+}
+
+void *RendererImGui::get_window_user_pointer(const char *title, const char *name)
+{
+    EventCallbacks *callbacks;
+    if (_check_event_callbacks(title, &callbacks))
+        return callbacks->pointer[name];
+    return NULL;
 }
 
 void RendererImGui::cmd_begin_imgui_render(VkCommandBuffer cmd_buffer)
@@ -163,31 +175,8 @@ void RendererImGui::cmd_begin_window(const char *title)
     ImGui::Begin(title);
 
     EventCallbacks *callbacks;
-    _check_event_callbacks(title, &callbacks);
-    RegisterEventCallback *rec = (RegisterEventCallback *) callbacks->window;
-
-    if (rec != NULL) {
-        ImVec2 region = ImGui::GetContentRegionAvail();
-        rec->set_size(region.x, region.y);
-
-        if (callbacks->fnEventWindowResizeCallback != NULL) {
-            if (callbacks->region.w != region.x || callbacks->region.h != region.y) {
-                callbacks->region.w = region.x;
-                callbacks->region.h = region.y;
-                callbacks->fnEventWindowResizeCallback(callbacks->window, region.x, region.y);
-            }
-        }
-
-        if (callbacks->fnEventWindowCursorPositionCallback != NULL) {
-            ImVec2 cursor = ImGui::GetCursorPos();
-            if (callbacks->cursor.x != cursor.x || callbacks->cursor.y != cursor.y) {
-                callbacks->cursor.x = cursor.x;
-                callbacks->cursor.y = cursor.y;
-                callbacks->fnEventWindowCursorPositionCallback(callbacks->window, cursor.x, cursor.y);
-            }
-        }
-    }
-
+    if (_check_event_callbacks(title, &callbacks))
+        _window_event_process(callbacks);
 }
 
 void RendererImGui::cmd_end_window()
@@ -267,15 +256,56 @@ void RendererImGui::cmd_hide_cursor()
     screen->get_focused_window()->hide_cursor();
 }
 
-void RendererImGui::_check_event_callbacks(const char *title, EventCallbacks **p_callbacks)
+void RendererImGui::_window_event_process(RendererImGui::EventCallbacks *callbacks)
 {
-    auto finded = event_callbacks.find(title);
-    if (finded == event_callbacks.end()) {
-        EventCallbacks callbacks = {};
-        event_callbacks.insert(std::make_pair(title, callbacks));
-        finded = event_callbacks.find(title);
+    RegisterEventCallback *rec = (RegisterEventCallback *) callbacks->window;
+    ImVec2 region = ImGui::GetContentRegionAvail();
+
+    if (rec != NULL) {
+        rec->set_size(region.x, region.y);
+
+        if (callbacks->fnRegisterEventWindowResizeCallback != NULL) {
+            if (callbacks->region.w != region.x || callbacks->region.h != region.y) {
+                callbacks->region.w = region.x;
+                callbacks->region.h = region.y;
+                callbacks->fnRegisterEventWindowResizeCallback(callbacks->window, region.x, region.y);
+            }
+        }
+
+        if (ImGui::IsWindowHovered()) {
+            if (callbacks->fnRegisterEventWindowCursorPositionCallback != NULL) {
+                ImVec2 cursor = ImGui::GetMousePos();
+                if (callbacks->cursor.x != cursor.x || callbacks->cursor.y != cursor.y) {
+                    callbacks->cursor.x = cursor.x;
+                    callbacks->cursor.y = cursor.y;
+                    callbacks->fnRegisterEventWindowCursorPositionCallback(callbacks->window, cursor.x, cursor.y);
+                }
+            }
+
+            if (callbacks->fnRegisterEventWindowMouseButtonCallback != NULL) {
+                bool *mouse_down_list = ImGui::GetIO().MouseDown;
+                for (uint32_t i = 0; i < 5; i++) {
+                    if (callbacks->mouse.current_press_button == i && !mouse_down_list[i]) {
+                        callbacks->mouse.current_press_button = -1;
+                        callbacks->fnRegisterEventWindowMouseButtonCallback(callbacks->window, i, false, 0);
+                    }
+
+                    if (mouse_down_list[i]) {
+                        callbacks->mouse.current_press_button = i;
+                        callbacks->fnRegisterEventWindowMouseButtonCallback(callbacks->window, i, true, 0);
+                    }
+                }
+            }
+        }
     }
-    *p_callbacks = &finded->second;
+}
+
+bool RendererImGui::_check_event_callbacks(const char *title, EventCallbacks **p_callbacks)
+{
+    auto finded = window_event_callbacks.find(title);
+    bool is_find = finded != window_event_callbacks.end();
+    is_find ? (*p_callbacks = &finded->second) : (*p_callbacks = NULL);
+    return finded != window_event_callbacks.end();
 }
 
 void RendererImGui::_check_dragging_cursor()
