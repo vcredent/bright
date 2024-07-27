@@ -32,10 +32,10 @@ public:
    ~RendererScreen();
 
     VkRenderPass get_render_pass() { return window->render_pass; }
-    void *get_native_window() { return window->native_window_handle; }
     uint32_t get_image_buffer_count() { return window->image_buffer_count; }
+    Window *get_focused_window() { return focused_window; }
 
-    void initialize(Window *screen_window);
+    void initialize(Window *v_focused_window);
     VkCommandBuffer cmd_begin_window_render();
     void cmd_end_window_render(VkCommandBuffer cmd_buffer);
 
@@ -61,7 +61,6 @@ private:
         VkSemaphore render_finished_semaphore;
         uint32_t width;
         uint32_t height;
-        void *native_window_handle;
     };
 
     void _create_swap_chain();
@@ -76,6 +75,7 @@ private:
     VkCommandPool vk_cmd_pool = VK_NULL_HANDLE;
     _Window *window = VK_NULL_HANDLE;
     VkQueue vk_graph_queue = VK_NULL_HANDLE;
+    Window *focused_window;
 
     uint32_t acquire_next_index;
 };

@@ -56,21 +56,6 @@ int main(int argc, char **argv)
 {
     Window *window = memnew(Window, "CopilotEngine", 1980, 1080);
 
-    CameraController *track_ball_controller;
-    track_ball_controller = memnew(TrackBallCameraController);
-    window->set_user_pointer("#CAMERA_CONTROLLER", track_ball_controller);
-
-    /* set camera callback */
-    window->set_window_mouse_button_callbacks([](Window *window, int button, int action, int mods) {
-        CameraController *controller = (CameraController *) window->get_user_pointer("#CAMERA_CONTROLLER");
-        controller->on_event_mouse_button(button, action, mods);
-    });
-
-    window->set_window_cursor_position_callbacks([](Window *window, double x, double y) {
-        CameraController *controller = (CameraController *) window->get_user_pointer("#CAMERA_CONTROLLER");
-        controller->on_event_cursor(x, y);
-    });
-
     auto rdc = std::make_unique<RenderDeviceContextWin32>(window);
     // initialize
     rdc->initialize();
@@ -112,7 +97,7 @@ int main(int argc, char **argv)
     rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
 
     ProjectionCamera *camera = memnew(ProjectionCamera);
-    track_ball_controller->make_current_camera(camera);
+    CameraController *track_ball_controller = memnew(TrackBallCameraController, camera);
 
     RendererScreen *screen = memnew(RendererScreen, rd);
     screen->initialize(window);
@@ -211,6 +196,7 @@ int main(int argc, char **argv)
         editor->destroy_texture(im_texture);
     }
 
+    memdel(track_ball_controller);
     memdel(camera);
     memdel(screen);
     memdel(canvas);

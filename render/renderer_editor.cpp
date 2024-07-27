@@ -68,7 +68,7 @@ void RendererEditor::initialize(RendererScreen *p_screen)
 
     // Setup Platform/Renderer backends
     auto rdc = rd->get_device_context();
-    ImGui_ImplGlfw_InitForVulkan((GLFWwindow *) screen->get_native_window(), true);
+    ImGui_ImplGlfw_InitForVulkan((GLFWwindow *) screen->get_system_window()->get_native_window(), true);
 
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = rdc->get_instance();
@@ -135,12 +135,12 @@ void RendererEditor::cmd_end_window()
 void RendererEditor::cmd_begin_viewport(const char *title)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::Begin(title);
+    cmd_begin_window(title);
 }
 
 void RendererEditor::cmd_end_viewport()
 {
-    ImGui::End();
+    cmd_end_window();
     ImGui::PopStyleVar();
 }
 
@@ -189,7 +189,18 @@ void RendererEditor::cmd_drag_float4(const char *label, float *v, float v_speed,
     ImGui::Text(label);
     cmd_same_line128();
     ImGui::DragFloat4("", v, v_speed, v_min, v_max, format);
-    ImGui::PopID();}
+    ImGui::PopID();
+}
+
+void RendererEditor::cmd_show_cursor()
+{
+    screen->get_focused_window()->show_cursor();
+}
+
+void RendererEditor::cmd_hide_cursor()
+{
+    screen->get_focused_window()->hide_cursor();
+}
 
 void RendererEditor::_set_theme_embrace_the_darkness()
 {

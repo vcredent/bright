@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* event.h                                                                  */
+/* eventdefs.h                                                              */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,8 +20,8 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _COPILOT_EVENT_H_
-#define _COPILOT_EVENT_H_
+#ifndef _COPILOT_EVENT_DEFS_H_
+#define _COPILOT_EVENT_DEFS_H_
 
 /* even input of mouse button id, this mapping by glfw
  * defined macros value. */
@@ -38,4 +38,4 @@
 #define EVENT_INPUT_MOUSE_BUTTON_RIGHT     EVENT_INPUT_MOUSE_BUTTON_2
 #define EVENT_INPUT_MOUSE_BUTTON_MIDDLE    EVENT_INPUT_MOUSE_BUTTON_3
 
-#endif /* _COPILOT_EVENT_H_ */
+#endif /* _COPILOT_EVENT_DEFS_H_ */

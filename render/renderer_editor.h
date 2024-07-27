@@ -26,6 +26,8 @@
 #include <imgui.h>
 #include "drivers/render_device.h"
 #include "renderer_screen.h"
+#include <unordered_map>
+#include "event/eventdefs.h"
 
 class RendererEditor {
 public:
@@ -52,6 +54,9 @@ public:
     void cmd_drag_float2(const char *label, float v[2], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
     void cmd_drag_float3(const char *label, float v[3], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
     void cmd_drag_float4(const char *label, float v[4], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
+
+    void cmd_show_cursor();
+    void cmd_hide_cursor();
 
 private:
     void _set_theme_embrace_the_darkness();

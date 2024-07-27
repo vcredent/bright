@@ -70,6 +70,11 @@ void Window::get_size(Rect2D *p_rect)
     glfwGetWindowSize(handle, &p_rect->w, &p_rect->h);
 }
 
+int Window::getkey(int key)
+{
+    return glfwGetKey(handle, key);
+}
+
 void Window::remove_user_pointer(const std::string &name)
 {
     window_user_pointers.erase(name);
@@ -151,7 +156,12 @@ void Window::toggle_full_screen()
     glfwSetWindowMonitor(handle, NULL, full_screen_rect.x, full_screen_rect.y, full_screen_rect.w, full_screen_rect.h, 0);
 }
 
-int Window::getkey(int key)
+void Window::show_cursor()
 {
-    return glfwGetKey(handle, key);
+    glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
+void Window::hide_cursor()
+{
+    glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }

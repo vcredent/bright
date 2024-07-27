@@ -24,7 +24,7 @@
 #define _CAMERA_CONTROLLER_H_
 
 #include "camera.h"
-#include "event.h"
+#include "event/eventdefs.h"
 
 class CameraController {
 public:

@@ -45,14 +45,14 @@ RendererScreen::~RendererScreen()
     free(window);
 }
 
-void RendererScreen::initialize(Window *screen_window)
+void RendererScreen::initialize(Window *v_focused_window)
 {
     VkResult U_ASSERT_ONLY err;
 
     /* imalloc display window struct and set surface */
     window = (_Window *) imalloc(sizeof(_Window));
-    window->native_window_handle = screen_window->get_native_window();
-    screen_window->create_vulkan_surface(vk_instance, allocation_callbacks, &window->vk_surface);
+    focused_window = v_focused_window;
+    focused_window->create_vulkan_surface(vk_instance, allocation_callbacks, &window->vk_surface);
 
     VkSurfaceCapabilitiesKHR capabilities;
     err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk_physical_device, window->vk_surface, &capabilities);

@@ -59,6 +59,7 @@ public:
 
     void get_size(Rect2D *p_rect);
     void *get_native_window() { return handle; }
+    int getkey(int key);
 
     void set_visible(bool is_visible);
 
@@ -72,7 +73,9 @@ public:
 
     void poll_events();
     void toggle_full_screen();
-    int getkey(int key);
+
+    void show_cursor();
+    void hide_cursor();
 
 private:
     GLFWwindow *handle;
