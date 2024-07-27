@@ -597,7 +597,7 @@ void RenderDevice::cmd_buffer_end(VkCommandBuffer cmd_buffer)
 void RenderDevice::cmd_begin_render_pass(VkCommandBuffer cmd_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect)
 {
     VkClearValue clear_color = {
-        0.0f, 0.0f, 0.0f, 1.0f
+        0.10f, 0.10f, 0.10f, 1.0f
     };
 
     VkRenderPassBeginInfo render_pass_begin_info = {

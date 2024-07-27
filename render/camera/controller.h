@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* projection_camera.cpp                                                    */
+/* controller.h                                                             */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,27 +20,41 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "projection_camera.h"
+#ifndef _CAMERA_CONTROLLER_H_
+#define _CAMERA_CONTROLLER_H_
 
-ProjectionCamera::ProjectionCamera(float v_fov, float v_near, float v_far, float v_aspect_ratio)
-    : fov(v_fov), near(v_near), far(v_far), aspect_ratio(v_aspect_ratio)
-{
-    /* do nothing... */
-}
+#include "camera.h"
+#include "event.h"
 
-ProjectionCamera::~ProjectionCamera()
-{
-    /* do nothing... */
-}
+class CameraController {
+public:
+    CameraController(Camera *v_camera = NULL);
+    ~CameraController();
 
-Matrix4 ProjectionCamera::look_view()
-{
-    return action_on_view_matrix * glm::lookAt(position, position + glm::normalize(glm::cross(up, right)), up);
-}
+    virtual void on_event_mouse_button(int button, int action, int mods);
+    virtual void on_event_cursor(float x, float y);
+    virtual void on_update_camera();
 
-Matrix4 ProjectionCamera::perspective()
-{
-    Matrix4 perspective = glm::perspective(fov, aspect_ratio, near, far);
-    perspective[1][1] *= -1;
-    return perspective;
-}
+    V_FORCEINLINE
+    inline void make_current_camera(Camera *v_camera) { camera = v_camera; }
+
+protected:
+    struct MouseEvent {
+        int button;
+        int action;
+        int mods;
+    };
+
+    struct CursorEvent {
+        float x;
+        float y;
+    };
+
+    /* events */
+    MouseEvent *mouse = NULL;
+    CursorEvent *cursor = NULL;
+
+    Camera *camera = NULL;
+};
+
+#endif /* _CAMERA_CONTROLLER_H_ */

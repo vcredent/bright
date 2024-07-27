@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* projection_camera.cpp                                                    */
+/* track_ball_camera_controller.cpp                                         */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,27 +20,45 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "projection_camera.h"
+#include "track_ball_camera_controller.h"
 
-ProjectionCamera::ProjectionCamera(float v_fov, float v_near, float v_far, float v_aspect_ratio)
-    : fov(v_fov), near(v_near), far(v_far), aspect_ratio(v_aspect_ratio)
+TrackBallCameraController::TrackBallCameraController(Camera *v_camera)
+    : CameraController(v_camera)
 {
     /* do nothing... */
 }
 
-ProjectionCamera::~ProjectionCamera()
+TrackBallCameraController::~TrackBallCameraController()
 {
     /* do nothing... */
 }
 
-Matrix4 ProjectionCamera::look_view()
+void TrackBallCameraController::on_update_camera()
 {
-    return action_on_view_matrix * glm::lookAt(position, position + glm::normalize(glm::cross(up, right)), up);
+    if (!_check_update())
+        return;
+
+    Matrix4 rotation = Matrix4(1.0f);
+
+    float sensitivity = camera->get_sensitivity();
+
+    float xoffset = (cursor->x - last_cursor_xpos) * sensitivity;
+    float yoffset = (cursor->y - last_cursor_ypos) * sensitivity;
+
+    last_cursor_xpos = cursor->x;
+    last_cursor_ypos = cursor->y;
+
+    camera->set_pitch(camera->get_pitch() - yoffset);
+    camera->set_yaw(camera->get_yaw() + xoffset);
+
+    Quat pitch = glm::angleAxis(glm::radians(camera->get_pitch()), camera->get_right());
+    Quat yaw = glm::angleAxis(glm::radians(camera->get_yaw()), camera->get_up());
+
+    rotation = glm::mat4_cast(yaw * pitch);
+    camera->set_action_on_view_matrix(rotation);
 }
 
-Matrix4 ProjectionCamera::perspective()
+bool TrackBallCameraController::_check_update()
 {
-    Matrix4 perspective = glm::perspective(fov, aspect_ratio, near, far);
-    perspective[1][1] *= -1;
-    return perspective;
+    return camera != NULL && (mouse->button == EVENT_INPUT_MOUSE_BUTTON_LEFT && mouse->action);
 }

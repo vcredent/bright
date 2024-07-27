@@ -40,8 +40,8 @@ public:
     void set_far(float v_far) { far = v_far; }
     void set_aspect_ratio(float v_aspect_ratio) { aspect_ratio = v_aspect_ratio; }
 
-    virtual Mat4 look_view() override final;
-    virtual Mat4 perspective() override final;
+    virtual Matrix4 look_view() override final;
+    virtual Matrix4 perspective() override final;
 
 private:
     float fov;

@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* projection_camera.cpp                                                    */
+/* event.h                                                                  */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,27 +20,22 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "projection_camera.h"
+#ifndef _COPILOT_EVENT_H_
+#define _COPILOT_EVENT_H_
 
-ProjectionCamera::ProjectionCamera(float v_fov, float v_near, float v_far, float v_aspect_ratio)
-    : fov(v_fov), near(v_near), far(v_far), aspect_ratio(v_aspect_ratio)
-{
-    /* do nothing... */
-}
+/* even input of mouse button id, this mapping by glfw
+ * defined macros value. */
+#define EVENT_INPUT_MOUSE_BUTTON_1         0
+#define EVENT_INPUT_MOUSE_BUTTON_2         1
+#define EVENT_INPUT_MOUSE_BUTTON_3         2
+#define EVENT_INPUT_MOUSE_BUTTON_4         3
+#define EVENT_INPUT_MOUSE_BUTTON_5         4
+#define EVENT_INPUT_MOUSE_BUTTON_6         5
+#define EVENT_INPUT_MOUSE_BUTTON_7         6
+#define EVENT_INPUT_MOUSE_BUTTON_8         7
+#define EVENT_INPUT_MOUSE_BUTTON_LAST      EVENT_INPUT_MOUSE_BUTTON_8
+#define EVENT_INPUT_MOUSE_BUTTON_LEFT      EVENT_INPUT_MOUSE_BUTTON_1
+#define EVENT_INPUT_MOUSE_BUTTON_RIGHT     EVENT_INPUT_MOUSE_BUTTON_2
+#define EVENT_INPUT_MOUSE_BUTTON_MIDDLE    EVENT_INPUT_MOUSE_BUTTON_3
 
-ProjectionCamera::~ProjectionCamera()
-{
-    /* do nothing... */
-}
-
-Matrix4 ProjectionCamera::look_view()
-{
-    return action_on_view_matrix * glm::lookAt(position, position + glm::normalize(glm::cross(up, right)), up);
-}
-
-Matrix4 ProjectionCamera::perspective()
-{
-    Matrix4 perspective = glm::perspective(fov, aspect_ratio, near, far);
-    perspective[1][1] *= -1;
-    return perspective;
-}
+#endif /* _COPILOT_EVENT_H_ */

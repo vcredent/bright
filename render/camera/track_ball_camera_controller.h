@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* projection_camera.cpp                                                    */
+/* track_ball_camera_controller.h                                           */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,27 +20,24 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "projection_camera.h"
+#ifndef _TRACK_BALL_CAMERA_CONTROLLER_H_
+#define _TRACK_BALL_CAMERA_CONTROLLER_H_
 
-ProjectionCamera::ProjectionCamera(float v_fov, float v_near, float v_far, float v_aspect_ratio)
-    : fov(v_fov), near(v_near), far(v_far), aspect_ratio(v_aspect_ratio)
-{
-    /* do nothing... */
-}
+#include "controller.h"
 
-ProjectionCamera::~ProjectionCamera()
-{
-    /* do nothing... */
-}
+class TrackBallCameraController : public CameraController {
+public:
+    TrackBallCameraController(Camera *v_camera = NULL);
+    ~TrackBallCameraController();
 
-Matrix4 ProjectionCamera::look_view()
-{
-    return action_on_view_matrix * glm::lookAt(position, position + glm::normalize(glm::cross(up, right)), up);
-}
+    virtual void on_update_camera() override final;
 
-Matrix4 ProjectionCamera::perspective()
-{
-    Matrix4 perspective = glm::perspective(fov, aspect_ratio, near, far);
-    perspective[1][1] *= -1;
-    return perspective;
-}
+private:
+    bool _check_update();
+
+    bool dragging = false;
+    float last_cursor_xpos = 0.0f;
+    float last_cursor_ypos = 0.0f;
+};
+
+#endif /* _TRACK_BALL_CAMERA_CONTROLLER_H_ */

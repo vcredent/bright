@@ -23,11 +23,11 @@
 #include "platform/win32/render_device_context_win32.h"
 #include <vector>
 #include <chrono>
+#include "render/camera/track_ball_camera_controller.h"
 #include "render/camera/projection_camera.h"
 #include "render/renderer_editor.h"
 #include "render/renderer_canvas.h"
 #include "render/renderer_screen.h"
-#include <random>
 
 struct Vertex {
     glm::vec3 position;
@@ -56,11 +56,19 @@ int main(int argc, char **argv)
 {
     Window *window = memnew(Window, "CopilotEngine", 1980, 1080);
 
+    CameraController *track_ball_controller;
+    track_ball_controller = memnew(TrackBallCameraController);
+    window->set_user_pointer("#CAMERA_CONTROLLER", track_ball_controller);
+
     /* set camera callback */
     window->set_window_mouse_button_callbacks([](Window *window, int button, int action, int mods) {
+        CameraController *controller = (CameraController *) window->get_user_pointer("#CAMERA_CONTROLLER");
+        controller->on_event_mouse_button(button, action, mods);
     });
 
     window->set_window_cursor_position_callbacks([](Window *window, double x, double y) {
+        CameraController *controller = (CameraController *) window->get_user_pointer("#CAMERA_CONTROLLER");
+        controller->on_event_cursor(x, y);
     });
 
     auto rdc = std::make_unique<RenderDeviceContextWin32>(window);
@@ -104,6 +112,7 @@ int main(int argc, char **argv)
     rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
 
     ProjectionCamera *camera = memnew(ProjectionCamera);
+    track_ball_controller->make_current_camera(camera);
 
     RendererScreen *screen = memnew(RendererScreen, rd);
     screen->initialize(window);
@@ -140,8 +149,10 @@ int main(int argc, char **argv)
         VkCommandBuffer canvas_cmd_buffer;
         canvas->cmd_begin_canvas_render(&canvas_cmd_buffer, viewport_width, viewport_height);
         {
+            track_ball_controller->on_update_camera();
+
             MVPMatrix mvp;
-            mvp.m = glm::translate(Mat4(1.0f), Vec3(0.0f, 0.0f, 0.0f));
+            mvp.m = glm::translate(Matrix4(1.0f), Vector3(0.0f, 0.0f, 0.0f));
             mvp.v = camera->look_view();
             camera->set_aspect_ratio((float) viewport_width / (float) viewport_height);
             mvp.p = camera->perspective();
