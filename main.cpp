@@ -23,7 +23,6 @@
 #include "platform/win32/render_device_context_win32.h"
 #include <vector>
 #include <chrono>
-#include "render/camera/track_ball_camera_controller.h"
 #include "render/camera/projection_camera.h"
 #include "render/renderer_imgui.h"
 #include "render/renderer_canvas.h"
@@ -31,8 +30,8 @@
 #include "render/gui/renderer_viewport.h"
 
 struct Vertex {
-    glm::vec3 position;
-    glm::vec3 color;
+    Vector3 position;
+    Vector3 color;
     glm::vec2 texCoord;
 };
 
@@ -121,23 +120,12 @@ int main(int argc, char **argv)
     imgui->initialize(screen);
 
     ProjectionCamera *camera = memnew(ProjectionCamera);
-    CameraController *controller = memnew(TrackBallCameraController, camera);
 
     RendererViewport *viewport = memnew(RendererViewport, "视口", imgui);
     viewport->add_window_user_pointer("#CANVAS", canvas);
-    viewport->add_window_user_pointer("#TACKBALL", controller);
 
     viewport->set_window_resize_callback([](RegisterEventCallback *event, int w, int h) {
         event->pointer<RendererCanvas>("#CANVAS")->set_canvas_extent(w, h);
-        event->pointer<CameraController>("#TACKBALL")->get_current_camera()->set_aspect_ratio((float) w / (float) h);
-    });
-
-    viewport->set_window_mouse_button_callback([](RegisterEventCallback *event, int button, int action, int mods) {
-        event->pointer<CameraController>("#TACKBALL")->on_event_mouse_button(button, action, mods);
-    });
-
-    viewport->set_window_cursor_position_callback([](RegisterEventCallback *event, float x, float y) {
-        event->pointer<CameraController>("#TACKBALL")->on_event_cursor(x, y);
     });
 
     static bool show_demo_flag = true;
@@ -146,14 +134,16 @@ int main(int argc, char **argv)
         /* poll events */
         window->poll_events();
 
+        camera->update();
+
         /* render to canvas */
         VkCommandBuffer canvas_cmd_buffer;
         canvas->cmd_begin_canvas_render(&canvas_cmd_buffer);
         {
             MVPMatrix mvp;
             mvp.m = glm::translate(Matrix4(1.0f), Vector3(0.0f, 0.0f, 0.0f));
-            mvp.v = camera->look_view();
-            mvp.p = camera->perspective();
+            mvp.v = camera->get_view_matrix();
+            mvp.p = camera->get_projection_matrix();
             rd->write_buffer(mvp_matrix_buffer, 0, sizeof(MVPMatrix), &mvp);
 
             rd->cmd_bind_graph_pipeline(canvas_cmd_buffer, pipeline);
@@ -183,9 +173,13 @@ int main(int argc, char **argv)
 
                 imgui->cmd_begin_window("摄像机参数");
                 {
-                    glm::vec3 position = camera->get_position();
+                    Vector3 position = camera->get_position();
                     imgui->cmd_drag_float3("位置: ", glm::value_ptr(position), 0.01f);
                     camera->set_position(position);
+
+                    Vector3 target = camera->get_target();
+                    imgui->cmd_drag_float3("目标: ", glm::value_ptr(target), 0.01f);
+                    camera->set_target(target);
 
                     float fov = camera->get_fov();
                     imgui->cmd_drag_float("景深: ", &fov, 0.01f);
@@ -207,7 +201,6 @@ int main(int argc, char **argv)
     }
 
     memdel(viewport);
-    memdel(controller);
     memdel(camera);
     memdel(screen);
     memdel(canvas);

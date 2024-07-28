@@ -47,7 +47,6 @@ add_executable(${PROGRAM_NAME}
     platform/win32/render_device_context_win32.cpp
     render/camera/camera.cpp
     render/camera/controller.cpp
-    render/camera/track_ball_camera_controller.cpp
     render/camera/projection_camera.cpp
     render/renderer_imgui.cpp
     render/renderer_canvas.cpp

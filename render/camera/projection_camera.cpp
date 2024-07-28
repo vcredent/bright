@@ -33,24 +33,13 @@ ProjectionCamera::~ProjectionCamera()
     /* do nothing... */
 }
 
-Matrix4 ProjectionCamera::look_view()
+void ProjectionCamera::update()
 {
-    Vector3 front;
-    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    Vector3 direction = glm::normalize(front);
+    Vector3 direction = glm::normalize(target - position);
+    Vector3 right = glm::normalize(glm::cross(world_up, direction));
+    Vector3 up = glm::normalize(glm::cross(direction, right));
+    view_matrix = glm::lookAt(position, position + direction, up);
 
-    right = glm::normalize(glm::cross(direction, up));
-    up = glm::normalize(glm::cross(right, direction));
-    position = target - direction * 3.0f; // 计算相机与目标的距离
-
-    return glm::lookAt(position, target, up);
-}
-
-Matrix4 ProjectionCamera::perspective()
-{
-    Matrix4 perspective = glm::perspective(fov, aspect_ratio, near, far);
-    perspective[1][1] *= -1;
-    return perspective;
+    projection_matrix = glm::perspective(fov, aspect_ratio, near, far);
+    projection_matrix[1][1] *= -1;
 }

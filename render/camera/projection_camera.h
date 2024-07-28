@@ -30,16 +30,15 @@ public:
     ProjectionCamera(float v_fov = 45.0f, float v_near = 0.01f, float v_far = 65.0f);
     ~ProjectionCamera();
 
-    float get_fov() { return fov; }
-    float get_near() { return near; }
-    float get_far() { return far; }
+    V_FORCEINLINE float get_fov() { return fov; }
+    V_FORCEINLINE float get_near() { return near; }
+    V_FORCEINLINE float get_far() { return far; }
 
-    void set_fov(float v_fov) { fov = v_fov; }
-    void set_near(float v_near) { near = v_near; }
-    void set_far(float v_far) { far = v_far; }
+    V_FORCEINLINE void set_fov(float v_fov) { fov = v_fov; }
+    V_FORCEINLINE void set_near(float v_near) { near = v_near; }
+    V_FORCEINLINE void set_far(float v_far) { far = v_far; }
 
-    virtual Matrix4 look_view() override final;
-    virtual Matrix4 perspective() override final;
+    virtual void update() override final;
 
 private:
     float fov;
