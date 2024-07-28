@@ -256,16 +256,6 @@ void RendererImGui::cmd_hide_cursor()
     screen->get_focused_window()->hide_cursor();
 }
 
-void RendererImGui::cmd_enable_drag_cursor()
-{
-    enabled_cursor_drag = true;
-}
-
-void RendererImGui::cmd_disable_drag_cursor()
-{
-    enabled_cursor_drag = false;
-}
-
 void RendererImGui::_window_event_process(RendererImGui::EventCallbacks *callbacks)
 {
     RegisterEventCallback *rec = (RegisterEventCallback *) callbacks->window;
@@ -282,7 +272,7 @@ void RendererImGui::_window_event_process(RendererImGui::EventCallbacks *callbac
             }
         }
 
-        if (ImGui::IsWindowHovered() || enabled_cursor_drag) {
+        if (ImGui::IsWindowHovered()) {
             if (callbacks->fnRegisterEventWindowCursorPositionCallback != NULL) {
                 ImVec2 cursor = ImGui::GetMousePos();
                 if (callbacks->cursor.x != cursor.x || callbacks->cursor.y != cursor.y) {
@@ -320,21 +310,28 @@ bool RendererImGui::_check_event_callbacks(const char *title, EventCallbacks **p
 
 void RendererImGui::_check_dragging_cursor()
 {
+    static bool     is_dragging = false;
+    static ImGuiID  current_drag_item = 0x7FFFFFFF;
+
     ImGuiID item = ImGui::GetItemID();
+    bool active = ImGui::IsItemActive();
 
-    if (item == drag_item_id && !ImGui::IsItemActive()) {
+    if (item == current_drag_item && !active) {
         is_dragging = false;
-        goto _CHECK_DRAGGING_TAG;
+        cmd_show_cursor();
+        current_drag_item = 0x7FFFFFFF;
+        goto _CHECK_DRAGGING_CURSOR_RETURN_TAG;
     }
 
-    if (!is_dragging && ImGui::IsItemActive()) {
+    if (!is_dragging && active) {
         is_dragging = true;
-        drag_item_id = item;
-        goto _CHECK_DRAGGING_TAG;
+        current_drag_item = item;
+        cmd_hide_cursor();
+        goto _CHECK_DRAGGING_CURSOR_RETURN_TAG;
     }
 
-_CHECK_DRAGGING_TAG:
-    is_dragging ? cmd_hide_cursor() : cmd_show_cursor();
+_CHECK_DRAGGING_CURSOR_RETURN_TAG:
+    /* do nothing.... */
 }
 
 void RendererImGui::_set_theme_embrace_the_darkness()

@@ -137,15 +137,13 @@ int main(int argc, char **argv)
 
         controller->on_event_mouse_button(button, action, mods);
 
-        if (button == INP_MOUSE_BUTTON_MIDDLE && !action) {
+        if (button == INP_MOUSE_BUTTON_LEFT && !action) {
             controller->uncontinued();
-            event->get_renderer()->cmd_disable_drag_cursor();
             event->get_renderer()->cmd_show_cursor();
         }
 
-        if (button == INP_MOUSE_BUTTON_MIDDLE && action) {
+        if (button == INP_MOUSE_BUTTON_LEFT && action) {
             controller->on_update_camera();
-            event->get_renderer()->cmd_enable_drag_cursor();
             event->get_renderer()->cmd_hide_cursor();
         }
     });

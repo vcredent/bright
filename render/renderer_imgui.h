@@ -73,8 +73,6 @@ public:
 
     void cmd_show_cursor();
     void cmd_hide_cursor();
-    void cmd_enable_drag_cursor();
-    void cmd_disable_drag_cursor();
 
 private:
     struct EventCallbacks {
@@ -108,9 +106,6 @@ private:
 
     RenderDevice *rd;
     RendererScreen *screen;
-    unsigned int drag_item_id = 0;
-    bool is_dragging = false;
-    bool enabled_cursor_drag = false;
 
     std::unordered_map<const char *, EventCallbacks> window_event_callbacks;
 };
