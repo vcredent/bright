@@ -121,35 +121,23 @@ int main(int argc, char **argv)
     imgui->initialize(screen);
 
     ProjectionCamera *camera = memnew(ProjectionCamera);
-    CameraController *track_ball_controller = memnew(TrackBallCameraController, camera);
+    CameraController *controller = memnew(TrackBallCameraController, camera);
 
     RendererViewport *viewport = memnew(RendererViewport, "视口", imgui);
     viewport->add_window_user_pointer("#CANVAS", canvas);
-    viewport->add_window_user_pointer("#TRACK_BALL_CONTROLLER", track_ball_controller);
+    viewport->add_window_user_pointer("#TACKBALL", controller);
 
     viewport->set_window_resize_callback([](RegisterEventCallback *event, int w, int h) {
         event->pointer<RendererCanvas>("#CANVAS")->set_canvas_extent(w, h);
-        event->pointer<CameraController>("#TRACK_BALL_CONTROLLER")->get_current_camera()->set_aspect_ratio((float) w / (float) h);
+        event->pointer<CameraController>("#TACKBALL")->get_current_camera()->set_aspect_ratio((float) w / (float) h);
     });
 
     viewport->set_window_mouse_button_callback([](RegisterEventCallback *event, int button, int action, int mods) {
-        CameraController *controller = event->pointer<CameraController>("#TRACK_BALL_CONTROLLER");
-
-        controller->on_event_mouse_button(button, action, mods);
-
-        if (button == INP_MOUSE_BUTTON_LEFT && !action) {
-            controller->uncontinued();
-            event->get_renderer()->cmd_show_cursor();
-        }
-
-        if (button == INP_MOUSE_BUTTON_LEFT && action) {
-            controller->on_update_camera();
-            event->get_renderer()->cmd_hide_cursor();
-        }
+        event->pointer<CameraController>("#TACKBALL")->on_event_mouse_button(button, action, mods);
     });
 
     viewport->set_window_cursor_position_callback([](RegisterEventCallback *event, float x, float y) {
-        event->pointer<CameraController>("#TRACK_BALL_CONTROLLER")->on_event_cursor(x, y);
+        event->pointer<CameraController>("#TACKBALL")->on_event_cursor(x, y);
     });
 
     static bool show_demo_flag = true;
@@ -219,7 +207,7 @@ int main(int argc, char **argv)
     }
 
     memdel(viewport);
-    memdel(track_ball_controller);
+    memdel(controller);
     memdel(camera);
     memdel(screen);
     memdel(canvas);

@@ -159,7 +159,7 @@ public:
         rd->register_window_cursor_position_callback(title, fnEventWindowCursorPositionCallback);
       }
 
-    void set_size(uint32_t w, uint32_t h)
+    void set_window_size(uint32_t w, uint32_t h)
       {
         width = w;
         height = h;

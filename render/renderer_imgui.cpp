@@ -262,7 +262,7 @@ void RendererImGui::_window_event_process(RendererImGui::EventCallbacks *callbac
     ImVec2 region = ImGui::GetContentRegionAvail();
 
     if (rec != NULL) {
-        rec->set_size(region.x, region.y);
+        rec->set_window_size(region.x, region.y);
 
         if (callbacks->fnRegisterEventWindowResizeCallback != NULL) {
             if (callbacks->region.w != region.x || callbacks->region.h != region.y) {
