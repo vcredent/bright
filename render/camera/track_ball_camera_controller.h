@@ -36,8 +36,8 @@ private:
     bool _check_update();
 
     bool dragging = false;
-    float last_cursor_xpos = 0.0f;
-    float last_cursor_ypos = 0.0f;
+    float last_xpos = 0.0f;
+    float last_ypos = 0.0f;
 };
 
 #endif /* _TRACK_BALL_CAMERA_CONTROLLER_H_ */

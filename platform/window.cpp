@@ -91,6 +91,11 @@ void Window::set_visible(bool is_visible)
     }
 }
 
+void Window::set_cursor_position(float x, float y)
+{
+    glfwSetCursorPos(handle, x, y);
+}
+
 void Window::set_window_close_callbacks(PFN_WindowCloseCallback callback)
 {
     fnWindowCloseCallback = callback;

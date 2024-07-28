@@ -256,6 +256,16 @@ void RendererImGui::cmd_hide_cursor()
     screen->get_focused_window()->hide_cursor();
 }
 
+void RendererImGui::cmd_enable_drag_cursor()
+{
+    enabled_cursor_drag = true;
+}
+
+void RendererImGui::cmd_disable_drag_cursor()
+{
+    enabled_cursor_drag = false;
+}
+
 void RendererImGui::_window_event_process(RendererImGui::EventCallbacks *callbacks)
 {
     RegisterEventCallback *rec = (RegisterEventCallback *) callbacks->window;
@@ -272,7 +282,7 @@ void RendererImGui::_window_event_process(RendererImGui::EventCallbacks *callbac
             }
         }
 
-        if (ImGui::IsWindowHovered()) {
+        if (ImGui::IsWindowHovered() || enabled_cursor_drag) {
             if (callbacks->fnRegisterEventWindowCursorPositionCallback != NULL) {
                 ImVec2 cursor = ImGui::GetMousePos();
                 if (callbacks->cursor.x != cursor.x || callbacks->cursor.y != cursor.y) {

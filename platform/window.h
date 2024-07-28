@@ -63,6 +63,7 @@ public:
     int getkey(int key);
 
     void set_visible(bool is_visible);
+    void set_cursor_position(float x, float y);
 
     void set_window_close_callbacks(PFN_WindowCloseCallback callback);
     void set_window_resize_callbacks(PFN_WindowResizeCallback callback);
@@ -82,6 +83,7 @@ private:
     GLFWwindow *handle;
     bool visible_flag = true;
     bool full_screen_flag = false;
+    bool cursor_disabled_flag = false;
     Rect2D full_screen_rect;
     std::unordered_map<std::string, void *> window_user_pointers;
 

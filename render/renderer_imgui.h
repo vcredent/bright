@@ -73,6 +73,8 @@ public:
 
     void cmd_show_cursor();
     void cmd_hide_cursor();
+    void cmd_enable_drag_cursor();
+    void cmd_disable_drag_cursor();
 
 private:
     struct EventCallbacks {
@@ -108,6 +110,7 @@ private:
     RendererScreen *screen;
     unsigned int drag_item_id = 0;
     bool is_dragging = false;
+    bool enabled_cursor_drag = false;
 
     std::unordered_map<const char *, EventCallbacks> window_event_callbacks;
 };
@@ -123,6 +126,11 @@ public:
     ~RegisterEventCallback()
       {
         /* do nothing... */
+      }
+
+    RendererImGui *get_renderer()
+      {
+        return rd;
       }
 
     const char *get_title()
@@ -165,7 +173,6 @@ public:
 protected:
     const char *title;
     RendererImGui *rd;
-
     uint32_t width  = 8;
     uint32_t height = 8;
 };

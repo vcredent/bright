@@ -57,13 +57,14 @@ protected:
     Vector3 position = Vector3(0.0f, 0.0f, 3.0f);
     Vector3 right = Vector3(1.0f, 0.0f, 0.0f);
     Vector3 up = Vector3(0.0f, 1.0f, 0.0f);
+    Vector3 target = Vector3(0.0f, 0.0f, 0.0f);
     float pitch = 0.0f;
     float yaw = -90.0f;
     float roll = 0.0f;
     float aspect_ratio = 1.0f;
 
     float speed = 0.5f;
-    float sensitivity = 0.05f;
+    float sensitivity = 0.5f;
 
     Matrix4 action_on_view_matrix = Matrix4(1.0f);
 };

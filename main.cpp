@@ -97,9 +97,6 @@ int main(int argc, char **argv)
     index_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, index_buffer_size);
     rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
 
-    ProjectionCamera *camera = memnew(ProjectionCamera);
-    CameraController *track_ball_controller = memnew(TrackBallCameraController, camera);
-
     RendererScreen *screen = memnew(RendererScreen, rd);
     screen->initialize(window);
 
@@ -123,6 +120,9 @@ int main(int argc, char **argv)
     RendererImGui *imgui = memnew(RendererImGui, rd);
     imgui->initialize(screen);
 
+    ProjectionCamera *camera = memnew(ProjectionCamera);
+    CameraController *track_ball_controller = memnew(TrackBallCameraController, camera);
+
     RendererViewport *viewport = memnew(RendererViewport, "视口", imgui);
     viewport->add_window_user_pointer("#CANVAS", canvas);
     viewport->add_window_user_pointer("#TRACK_BALL_CONTROLLER", track_ball_controller);
@@ -133,8 +133,20 @@ int main(int argc, char **argv)
     });
 
     viewport->set_window_mouse_button_callback([](RegisterEventCallback *event, int button, int action, int mods) {
-        if (button == INP_MOUSE_BUTTON_LEFT) {
-            event->pointer<CameraController>("#TRACK_BALL_CONTROLLER")->on_update_camera();
+        CameraController *controller = event->pointer<CameraController>("#TRACK_BALL_CONTROLLER");
+
+        controller->on_event_mouse_button(button, action, mods);
+
+        if (button == INP_MOUSE_BUTTON_MIDDLE && !action) {
+            controller->uncontinued();
+            event->get_renderer()->cmd_disable_drag_cursor();
+            event->get_renderer()->cmd_show_cursor();
+        }
+
+        if (button == INP_MOUSE_BUTTON_MIDDLE && action) {
+            controller->on_update_camera();
+            event->get_renderer()->cmd_enable_drag_cursor();
+            event->get_renderer()->cmd_hide_cursor();
         }
     });
 

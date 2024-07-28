@@ -21,6 +21,7 @@
 /*                                                                          */
 /* ======================================================================== */
 #include "track_ball_camera_controller.h"
+#include <iostream>
 
 TrackBallCameraController::TrackBallCameraController(Camera *v_camera)
     : CameraController(v_camera)
@@ -38,27 +39,32 @@ void TrackBallCameraController::on_update_camera()
     if (!_check_update())
         return;
 
-    Matrix4 rotation = Matrix4(1.0f);
+    if (!continued) {
+        last_xpos  = cursor->x;
+        last_ypos  = cursor->y;
+        continued = true;
+    }
+
+    float xpos = cursor->x;
+    float ypos = cursor->y;
+
+    float xoffset = xpos - last_xpos;
+    float yoffset = last_ypos - ypos;
 
     float sensitivity = camera->get_sensitivity();
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
 
-    float xoffset = (cursor->x - last_cursor_xpos) * sensitivity;
-    float yoffset = (cursor->y - last_cursor_ypos) * sensitivity;
+    if (abs(ypos - last_ypos) > 1.0f)
+        camera->set_pitch(camera->get_pitch() + yoffset);
+    if (abs(xpos - last_xpos) > 1.0f)
+        camera->set_yaw(camera->get_yaw() + xoffset);
 
-    last_cursor_xpos = cursor->x;
-    last_cursor_ypos = cursor->y;
-
-    camera->set_pitch(camera->get_pitch() - yoffset);
-    camera->set_yaw(camera->get_yaw() + xoffset);
-
-    Quat pitch = glm::angleAxis(glm::radians(camera->get_pitch()), camera->get_right());
-    Quat yaw = glm::angleAxis(glm::radians(camera->get_yaw()), camera->get_up());
-
-    rotation = glm::mat4_cast(yaw * pitch);
-    camera->set_action_on_view_matrix(rotation);
+    last_xpos  = xpos;
+    last_ypos  = ypos;
 }
 
 bool TrackBallCameraController::_check_update()
 {
-    return camera != NULL && (mouse->button == INP_MOUSE_BUTTON_LEFT && mouse->action);
+    return camera != NULL;
 }
