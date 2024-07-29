@@ -57,6 +57,7 @@ int main(int argc, char **argv)
     imgui->initialize(screen);
 
     ProjectionCamera *camera = memnew(ProjectionCamera);
+    camera->set_position(Vector3(0.0f, 0.0f, -6.0f));
 
     RendererViewport *viewport = memnew(RendererViewport, "视口", imgui);
     viewport->add_window_user_pointer("#CANVAS", canvas);

@@ -73,3 +73,10 @@ target_link_libraries(${PROGRAM_NAME}
     glfw3
     vulkan-1
 )
+
+add_custom_command(
+    TARGET ${PROGRAM_NAME}
+    POST_BUILD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/shader
+    COMMAND ${CMAKE_SOURCE_DIR}/shader/compile
+)
