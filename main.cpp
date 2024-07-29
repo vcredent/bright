@@ -57,7 +57,7 @@ int main(int argc, char **argv)
     imgui->initialize(screen);
 
     ProjectionCamera *camera = memnew(ProjectionCamera);
-    camera->set_position(Vector3(0.0f, 0.0f, 6.0f));
+    camera->set_position(Vec3(0.0f, 0.0f, 6.0f));
 
     RendererViewport *viewport = memnew(RendererViewport, "视口", imgui);
     viewport->add_window_user_pointer("#CANVAS", canvas);
@@ -106,15 +106,15 @@ int main(int argc, char **argv)
 
                 imgui->cmd_begin_window("模型参数");
                 {
-                    Vector3 position = object->get_object_position();
+                    Vec3 position = object->get_object_position();
                     imgui->cmd_drag_float3("平移: ", glm::value_ptr(position), 0.01f);
                     object->set_object_position(position);
 
-                    Vector3 rotation = object->get_object_rotation();
+                    Vec3 rotation = object->get_object_rotation();
                     imgui->cmd_drag_float3("旋转: ", glm::value_ptr(rotation), 0.01f);
                     object->set_object_rotation(rotation);
 
-                    Vector3 scaling = object->get_object_scaling();
+                    Vec3 scaling = object->get_object_scaling();
                     imgui->cmd_drag_float3("缩放: ", glm::value_ptr(scaling), 0.01f);
                     object->set_object_scaling(scaling);
                 }
@@ -122,11 +122,11 @@ int main(int argc, char **argv)
 
                 imgui->cmd_begin_window("摄像机参数");
                 {
-                    Vector3 position = camera->get_position();
+                    Vec3 position = camera->get_position();
                     imgui->cmd_drag_float3("位置: ", glm::value_ptr(position), 0.01f);
                     camera->set_position(position);
 
-                    Vector3 target = camera->get_target();
+                    Vec3 target = camera->get_target();
                     imgui->cmd_drag_float3("目标: ", glm::value_ptr(target), 0.01f);
                     camera->set_target(target);
 

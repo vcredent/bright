@@ -37,18 +37,18 @@ public:
     void cmd_end_graphics_render(VkCommandBuffer cmd_buffer);
 
     void cmd_setval_viewport(VkCommandBuffer cmd_buffer, uint32_t w, uint32_t h);
-    void cmd_setval_view_matrix(VkCommandBuffer cmd_buffer, Matrix4 view);
-    void cmd_setval_projection_matrix(VkCommandBuffer cmd_buffer, Matrix4 projection);
-    void cmd_setval_model_matrix(VkCommandBuffer cmd_buffer, Matrix4 model);
+    void cmd_setval_view_matrix(VkCommandBuffer cmd_buffer, Mat4 view);
+    void cmd_setval_projection_matrix(VkCommandBuffer cmd_buffer, Mat4 projection);
+    void cmd_setval_model_matrix(VkCommandBuffer cmd_buffer, Mat4 model);
     void cmd_draw_list(VkCommandBuffer cmd_buffer);
 
 private:
     RenderDevice *rd;
 
     struct Transform {
-        Matrix4 m;
-        Matrix4 v;
-        Matrix4 p;
+        Mat4 m;
+        Mat4 v;
+        Mat4 p;
     } transform;
 
     VkDescriptorSetLayout descriptor_set_layout;

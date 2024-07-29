@@ -37,13 +37,13 @@ RenderObject::~RenderObject()
 
 void RenderObject::update()
 {
-    Matrix4 rotate(1.0f);
-    Matrix4 scale(1.0f);
-    Matrix4 translate(1.0f);
+    Mat4 rotate(1.0f);
+    Mat4 scale(1.0f);
+    Mat4 translate(1.0f);
 
-    rotate = glm::rotate(rotate, glm::radians(rotation.x), Vector3(1.0f, 0.0f, 0.0f));
-    rotate = glm::rotate(rotate, glm::radians(rotation.y), Vector3(0.0f, 1.0f, 0.0f));
-    rotate = glm::rotate(rotate, glm::radians(rotation.z), Vector3(0.0f, 0.0f, 1.0f));
+    rotate = glm::rotate(rotate, glm::radians(rotation.x), Vec3(1.0f, 0.0f, 0.0f));
+    rotate = glm::rotate(rotate, glm::radians(rotation.y), Vec3(0.0f, 1.0f, 0.0f));
+    rotate = glm::rotate(rotate, glm::radians(rotation.z), Vec3(0.0f, 0.0f, 1.0f));
 
     scale = glm::scale(scale, scaling);
 
@@ -96,16 +96,16 @@ RenderObject *RenderObject::load_assets_obj(const char *filename)
             const auto& index = shape.mesh.indices[i];
 
             // 获取顶点、纹理坐标和法线数据
-            Vector3 vertex = { attrib.vertices[3 * index.vertex_index + 0],
+            Vec3 vertex = { attrib.vertices[3 * index.vertex_index + 0],
                                attrib.vertices[3 * index.vertex_index + 1],
                                attrib.vertices[3 * index.vertex_index + 2] };
 
-            Vector2 texcoord = { index.texcoord_index >= 0 ?
+            Vec2 texcoord = { index.texcoord_index >= 0 ?
                                  attrib.texcoords[2 * index.texcoord_index + 0] : 0.0f,
                                  index.texcoord_index >= 0 ?
                                  attrib.texcoords[2 * index.texcoord_index + 1] : 0.0f };
 
-            Vector3 normal = { index.normal_index >= 0 ?
+            Vec3 normal = { index.normal_index >= 0 ?
                                attrib.normals[3 * index.normal_index + 0] : 0.0f,
                                index.normal_index >= 0 ?
                                attrib.normals[3 * index.normal_index + 1] : 0.0f,

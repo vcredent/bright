@@ -34,9 +34,9 @@ ObjLoader *ObjLoader::load(const char *filepath)
     std::ifstream file(filepath);
     EXIT_FAIL_COND_V(file.is_open(), ".obj loader open fil failed!");
 
-    std::vector<Vector3> vertices;
-    std::vector<Vector3> normals;
-    std::vector<Vector2> texcoords;
+    std::vector<Vec3> vertices;
+    std::vector<Vec3> normals;
+    std::vector<Vec2> texcoords;
     std::vector<Face> faces;
 
     std::string line;
@@ -46,21 +46,21 @@ ObjLoader *ObjLoader::load(const char *filepath)
         ss >> prefix;
 
         if (prefix == "v") {
-            Vector3 vertex;
+            Vec3 vertex;
             ss >> vertex.x >> vertex.y >> vertex.z;
             vertices.push_back(vertex);
             goto CONTINUE_TAG;
         }
 
         if (prefix == "vn") {
-            Vector3 normal;
+            Vec3 normal;
             ss >> normal.x >> normal.y >> normal.z;
             normals.push_back(normal);
             goto CONTINUE_TAG;
         }
 
         if (prefix == "vt") {
-            Vector2 texcoord;
+            Vec2 texcoord;
             ss >> texcoord.x >> texcoord.y;
             texcoords.push_back(texcoord);
             goto CONTINUE_TAG;

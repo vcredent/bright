@@ -32,9 +32,9 @@ public:
     ~ObjLoader() { /* do nothing... */ }
 
     struct Vertex {
-        Vector3 v;
-        Vector2 vt;
-        Vector3 vn;
+        Vec3 v;
+        Vec2 vt;
+        Vec3 vn;
     };
 
     struct Face {

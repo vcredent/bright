@@ -32,22 +32,22 @@ public:
     ~RenderObject();
 
     struct Mesh {
-        Vector3 vertex;
-        Vector2 texcoord;
-        Vector3 normal;
+        Vec3 vertex;
+        Vec2 texcoord;
+        Vec3 normal;
     };
 
     void update();
     void initialize(RenderDevice *v_rd);
 
-    V_FORCEINLINE Vector3 &get_object_position() { return position; }
-    V_FORCEINLINE Vector3 &get_object_rotation() { return rotation; }
-    V_FORCEINLINE Vector3 &get_object_scaling() { return scaling; }
-    V_FORCEINLINE Matrix4 &get_model_matrix() { return transform; }
+    V_FORCEINLINE Vec3 &get_object_position() { return position; }
+    V_FORCEINLINE Vec3 &get_object_rotation() { return rotation; }
+    V_FORCEINLINE Vec3 &get_object_scaling() { return scaling; }
+    V_FORCEINLINE Mat4 &get_model_matrix() { return transform; }
 
-    V_FORCEINLINE void set_object_position(Vector3 &v_position) { position = v_position; }
-    V_FORCEINLINE void set_object_rotation(Vector3 &v_rotation) { rotation = v_rotation; }
-    V_FORCEINLINE void set_object_scaling(Vector3 &v_scaling) { scaling = v_scaling; }
+    V_FORCEINLINE void set_object_position(Vec3 &v_position) { position = v_position; }
+    V_FORCEINLINE void set_object_rotation(Vec3 &v_rotation) { rotation = v_rotation; }
+    V_FORCEINLINE void set_object_scaling(Vec3 &v_scaling) { scaling = v_scaling; }
 
     void cmd_bind_vertex_buffer(VkCommandBuffer cmd_buffer);
     void cmd_bind_index_buffer(VkCommandBuffer cmd_buffer);
@@ -58,12 +58,12 @@ public:
 private:
     std::vector<Mesh> meshes;
     std::vector<uint32_t> indices;
-    Matrix4 transform = Matrix4(1.0f);
+    Mat4 transform = Mat4(1.0f);
     RenderDevice *rd;
 
-    Vector3 position = Vector3(0.0f);
-    Vector3 rotation = Vector3(0.0f);
-    Vector3 scaling = Vector3(1.0f);
+    Vec3 position = Vec3(0.0f);
+    Vec3 rotation = Vec3(0.0f);
+    Vec3 scaling = Vec3(1.0f);
 
     RenderDevice::Buffer *vertex_buffer = VK_NULL_HANDLE;
     RenderDevice::Buffer *index_buffer = VK_NULL_HANDLE;

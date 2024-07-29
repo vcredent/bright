@@ -98,21 +98,21 @@ void RendererGraphics::cmd_setval_viewport(VkCommandBuffer cmd_buffer, uint32_t 
     rd->cmd_setval_viewport(cmd_buffer, w, h);
 }
 
-void RendererGraphics::cmd_setval_view_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Matrix4 view)
+void RendererGraphics::cmd_setval_view_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 view)
 {
     transform.v = view;
     rd->write_buffer(transform_buffer, 0, sizeof(Transform), &transform);
     rd->write_descriptor_set_buffer(transform_buffer, descriptor_set);
 }
 
-void RendererGraphics::cmd_setval_projection_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Matrix4 projection)
+void RendererGraphics::cmd_setval_projection_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 projection)
 {
     transform.p = projection;
     rd->write_buffer(transform_buffer, 0, sizeof(Transform), &transform);
     rd->write_descriptor_set_buffer(transform_buffer, descriptor_set);
 }
 
-void RendererGraphics::cmd_setval_model_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Matrix4 model)
+void RendererGraphics::cmd_setval_model_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 model)
 {
     transform.m = model;
     rd->write_buffer(transform_buffer, 0, sizeof(Transform), &transform);
