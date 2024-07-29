@@ -29,6 +29,9 @@
 
 class Camera {
 public:
+    U_MEMNEW_ONLY Camera();
+    virtual ~Camera() = default;
+
     V_FORCEINLINE inline Vector3 get_position() { return position; }
     V_FORCEINLINE inline Vector3 get_world_right() { return world_right; }
     V_FORCEINLINE inline Vector3 get_world_up() { return world_up; }
