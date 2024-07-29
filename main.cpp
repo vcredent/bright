@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 
     viewport->set_window_resize_callback([](RegisterEventCallback *event, int w, int h) {
         event->pointer<RendererCanvas>("#CANVAS")->set_canvas_extent(w, h);
-        event->pointer<ProjectionCamera>("#CAMERA")->set_aspect_ratio(static_cast<float>(w) / static_cast<float>(h));
+        event->pointer<ProjectionCamera>("#CAMERA")->set_aspect_ratio((float) w / (float) h);
     });
 
     static bool show_demo_flag = true;
