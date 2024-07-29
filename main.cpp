@@ -92,7 +92,8 @@ int main(int argc, char **argv)
         RenderDevice::Texture2D *canvas_texture = canvas->cmd_end_canvas_render();
 
         /* render to window */
-        VkCommandBuffer window_cmd_buffer = screen->cmd_begin_screen_render();
+        VkCommandBuffer window_cmd_buffer;
+        screen->cmd_begin_screen_render(&window_cmd_buffer);
         {
             /* ImGui */
             imgui->cmd_begin_imgui_render(window_cmd_buffer);

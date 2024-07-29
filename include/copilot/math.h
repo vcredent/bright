@@ -26,6 +26,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <stdio.h>
 
 typedef glm::vec2 Vec2;
 typedef glm::vec3 Vec3;

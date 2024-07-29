@@ -37,7 +37,7 @@ public:
 
     void initialize(Window *v_focused_window);
 
-    VkCommandBuffer cmd_begin_screen_render();
+    VkCommandBuffer cmd_begin_screen_render(VkCommandBuffer *p_cmd_buffer);
     void cmd_end_screen_render(VkCommandBuffer cmd_buffer);
 
 private:

@@ -93,7 +93,7 @@ void RendererScreen::initialize(Window *v_focused_window)
     _create_swap_chain();
 }
 
-VkCommandBuffer RendererScreen::cmd_begin_screen_render()
+void RendererScreen::cmd_begin_screen_render(VkCommandBuffer *p_cmd_buffer)
 {
     _update_swap_chain();
     vkAcquireNextImageKHR(vk_device, window->swap_chain, UINT64_MAX, window->image_available_semaphore, nullptr, &acquire_next_index);
@@ -106,7 +106,7 @@ VkCommandBuffer RendererScreen::cmd_begin_screen_render()
     rect.extent = { window->width, window->height };
     rd->cmd_begin_render_pass(cmd_buffer, window->render_pass, window->swap_chain_resources[acquire_next_index].framebuffer, &rect);
 
-    return cmd_buffer;
+    *p_cmd_buffer = cmd_buffer;
 }
 
 void RendererScreen::cmd_end_screen_render(VkCommandBuffer cmd_buffer)
