@@ -50,6 +50,12 @@ public:
         VkDescriptorSetLayout *descriptor_set_layouts;
     };
 
+    struct PipelineCreateInfo {
+        VkRenderPass render_pass;
+        VkPolygonMode polygon;
+        VkPrimitiveTopology topology;
+    };
+
     struct Pipeline {
         VkPipeline pipeline;
         VkPipelineLayout layout;
@@ -96,7 +102,7 @@ public:
     void free_descriptor_set(VkDescriptorSet descriptor_set);
     void write_descriptor_set_buffer(Buffer *p_buffer, VkDescriptorSet descriptor_set);
 
-    Pipeline *create_graph_pipeline(VkRenderPass render_pass, ShaderInfo *p_shader_attribute);
+    Pipeline *create_graph_pipeline(PipelineCreateInfo *p_create_info, ShaderInfo *p_shader_info);
     void destroy_pipeline(Pipeline *p_pipeline);
 
     void cmd_buffer_begin(VkCommandBuffer cmd_buffer, VkCommandBufferUsageFlags usage);
@@ -105,6 +111,7 @@ public:
     void cmd_end_render_pass(VkCommandBuffer cmd_buffer);
     void cmd_bind_vertex_buffer(VkCommandBuffer cmd_buffer, Buffer *p_buffer);
     void cmd_bind_index_buffer(VkCommandBuffer cmd_buffer, VkIndexType type, Buffer *p_buffer);
+    void cmd_draw(VkCommandBuffer cmd_buffer, uint32_t vertex_count);
     void cmd_draw_indexed(VkCommandBuffer cmd_buffer, uint32_t index_count);
     void cmd_bind_graph_pipeline(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline);
     void cmd_buffer_submit(VkCommandBuffer cmd_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence);

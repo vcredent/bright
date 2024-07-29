@@ -50,6 +50,9 @@ int main(int argc, char **argv)
     RendererGraphics *graphics = memnew(RendererGraphics, rd);
     graphics->initialize(screen->get_render_pass());
 
+    RendererCoordinateAxis *coordinate_axis = memnew(RendererCoordinateAxis, rd);
+    coordinate_axis->initialize(screen->get_render_pass());
+
     RenderObject *object = RenderObject::load_assets_obj("../assets/cube.obj");
     graphics->push_render_object(object);
 

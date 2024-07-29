@@ -68,7 +68,13 @@ void RendererGraphics::initialize(VkRenderPass render_pass)
             /* descriptor_layouts= */ &descriptor_set_layout,
     };
 
-    pipeline = rd->create_graph_pipeline(render_pass, &shader_info);
+    RenderDevice::PipelineCreateInfo create_info = {
+            /* render_pass= */ render_pass,
+            /* polygon= */ VK_POLYGON_MODE_FILL,
+            /* topology= */ VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+    };
+
+    pipeline = rd->create_graph_pipeline(&create_info, &shader_info);
 }
 
 void RendererGraphics::push_render_object(RenderObject *object)

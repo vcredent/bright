@@ -360,7 +360,7 @@ void RenderDevice::write_descriptor_set_buffer(Buffer *p_buffer, VkDescriptorSet
     vkUpdateDescriptorSets(vk_device, 1, &write_info, 0, nullptr);
 }
 
-RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(VkRenderPass render_pass, ShaderInfo *p_shader_info)
+RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(PipelineCreateInfo *p_create_info, ShaderInfo *p_shader_info)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -413,7 +413,7 @@ RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(VkRenderPass render_
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
             /* pNext */ nextptr,
             /* flags */ no_flag_bits,
-            /* topology */ VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+            /* topology */ p_create_info->topology,
             /* primitiveRestartEnable */ VK_FALSE,
     };
 
@@ -445,7 +445,7 @@ RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(VkRenderPass render_
     rasterization_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterization_state_create_info.depthClampEnable = VK_FALSE;
     rasterization_state_create_info.rasterizerDiscardEnable = VK_FALSE;
-    rasterization_state_create_info.polygonMode = VK_POLYGON_MODE_FILL;
+    rasterization_state_create_info.polygonMode = p_create_info->polygon;
     rasterization_state_create_info.lineWidth = 1.0f;
     rasterization_state_create_info.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterization_state_create_info.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
@@ -520,7 +520,7 @@ RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(VkRenderPass render_
             /* pColorBlendState */ &color_blend_state_create_info,
             /* pDynamicState */ &dynamic_state_crate_info,
             /* layout */ vk_pipeline_layout,
-            /* renderPass */ render_pass,
+            /* renderPass */ p_create_info->render_pass,
             /* subpass */ 0,
             /* basePipelineHandle */ VK_NULL_HANDLE,
             /* basePipelineIndex */ -1,
@@ -628,6 +628,11 @@ void RenderDevice::cmd_bind_vertex_buffer(VkCommandBuffer cmd_buffer, RenderDevi
 void RenderDevice::cmd_bind_index_buffer(VkCommandBuffer cmd_buffer, VkIndexType type, RenderDevice::Buffer *p_buffer)
 {
     vkCmdBindIndexBuffer(cmd_buffer, p_buffer->vk_buffer, 0, type);
+}
+
+void RenderDevice::cmd_draw(VkCommandBuffer cmd_buffer, uint32_t vertex_count)
+{
+    vkCmdDraw(cmd_buffer, vertex_count, 1, 0, 0);
 }
 
 void RenderDevice::cmd_draw_indexed(VkCommandBuffer cmd_buffer, uint32_t index_count)
