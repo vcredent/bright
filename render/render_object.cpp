@@ -41,15 +41,16 @@ void RenderObject::update()
     Mat4 scale(1.0f);
     Mat4 translate(1.0f);
 
-    rotate = glm::rotate(rotate, glm::radians(rotation.x), Vec3(1.0f, 0.0f, 0.0f));
-    rotate = glm::rotate(rotate, glm::radians(rotation.y), Vec3(0.0f, 1.0f, 0.0f));
-    rotate = glm::rotate(rotate, glm::radians(rotation.z), Vec3(0.0f, 0.0f, 1.0f));
+    static float sensitivity = 8.0f;
+    rotate = glm::rotate(rotate, glm::radians(rotation.x * sensitivity), Vec3(1.0f, 0.0f, 0.0f));
+    rotate = glm::rotate(rotate, glm::radians(rotation.y * sensitivity), Vec3(0.0f, 1.0f, 0.0f));
+    rotate = glm::rotate(rotate, glm::radians(rotation.z * sensitivity), Vec3(0.0f, 0.0f, 1.0f));
 
     scale = glm::scale(scale, scaling);
 
     translate = glm::translate(translate, position);
 
-    transform = rotate * scale * translate;
+    transform = translate * scale * rotate;
 }
 
 void RenderObject::initialize(RenderDevice *v_rd)
