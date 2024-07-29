@@ -14,6 +14,6 @@ layout(binding = 0) uniform Transform {
 layout(location = 1) out vec3 v_normal;
 
 void main() {
-    v_normal = normal;
+    v_normal = normalize(transform.v * vec4(normal, 1.0f)).xyz;
     gl_Position = transform.p * transform.v * transform.m * vec4(vertex, 1.0f);
 }
