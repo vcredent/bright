@@ -57,13 +57,15 @@ int main(int argc, char **argv)
     imgui->initialize(screen);
 
     ProjectionCamera *camera = memnew(ProjectionCamera);
-    camera->set_position(Vector3(0.0f, 0.0f, -6.0f));
+    camera->set_position(Vector3(0.0f, 0.0f, 6.0f));
 
     RendererViewport *viewport = memnew(RendererViewport, "视口", imgui);
     viewport->add_window_user_pointer("#CANVAS", canvas);
+    viewport->add_window_user_pointer("#CAMERA", camera);
 
     viewport->set_window_resize_callback([](RegisterEventCallback *event, int w, int h) {
         event->pointer<RendererCanvas>("#CANVAS")->set_canvas_extent(w, h);
+        event->pointer<ProjectionCamera>("#CAMERA")->set_aspect_ratio((float) w / (float) h);
     });
 
     static bool show_demo_flag = true;
