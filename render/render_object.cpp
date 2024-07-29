@@ -37,7 +37,13 @@ RenderObject::~RenderObject()
 
 void RenderObject::update()
 {
-    transform = glm::translate(Matrix4(1.0f), position);
+    Matrix4 rotate(1.0f);
+    Matrix4 translate(1.0f);
+    Matrix4 scale(1.0f);
+
+    translate = glm::translate(translate, position);
+
+    transform = translate;
 }
 
 void RenderObject::initialize(RenderDevice *v_rd)

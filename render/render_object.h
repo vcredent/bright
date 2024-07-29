@@ -61,9 +61,9 @@ private:
     Matrix4 transform;
     RenderDevice *rd;
 
-    Vector3 position = Vector3(0.0f, 0.0f, 0.0f);
-    Vector3 rotation = Vector3(0.0f, 0.0f, 0.0f);
-    Vector3 scaling = Vector3(0.0f, 0.0f, 0.0f);
+    Vector3 position = Vector3(1.0f);
+    Vector3 rotation = Vector3(1.0f);
+    Vector3 scaling = Vector3(1.0f);
 
     RenderDevice::Buffer *vertex_buffer = VK_NULL_HANDLE;
     RenderDevice::Buffer *index_buffer = VK_NULL_HANDLE;

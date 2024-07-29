@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 
     viewport->set_window_resize_callback([](RegisterEventCallback *event, int w, int h) {
         event->pointer<RendererCanvas>("#CANVAS")->set_canvas_extent(w, h);
-        event->pointer<ProjectionCamera>("#CAMERA")->set_aspect_ratio((float) w / (float) h);
+        event->pointer<ProjectionCamera>("#CAMERA")->set_aspect_ratio(static_cast<float>(w) / static_cast<float>(h));
     });
 
     static bool show_demo_flag = true;
@@ -103,6 +103,22 @@ int main(int argc, char **argv)
                     viewport->cmd_draw_image(canvas_texture);
                 }
                 viewport->cmd_end_viewport_render();
+
+                imgui->cmd_begin_window("模型参数");
+                {
+                    Vector3 position = object->get_object_position();
+                    imgui->cmd_drag_float3("平移: ", glm::value_ptr(position), 0.01f);
+                    object->set_object_position(position);
+
+                    Vector3 rotation = object->get_object_rotation();
+                    imgui->cmd_drag_float3("旋转: ", glm::value_ptr(rotation), 0.01f);
+                    object->set_object_rotation(rotation);
+
+                    Vector3 scaling = object->get_object_scaling();
+                    imgui->cmd_drag_float3("缩放: ", glm::value_ptr(scaling), 0.01f);
+                    object->set_object_scaling(scaling);
+                }
+                imgui->cmd_end_window();
 
                 imgui->cmd_begin_window("摄像机参数");
                 {
