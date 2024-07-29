@@ -618,6 +618,23 @@ void RenderDevice::cmd_end_render_pass(VkCommandBuffer cmd_buffer)
     vkCmdEndRenderPass(cmd_buffer);
 }
 
+void RenderDevice::cmd_bind_vertex_buffer(VkCommandBuffer cmd_buffer, RenderDevice::Buffer *p_buffer)
+{
+    VkBuffer buffers[] = { p_buffer->vk_buffer };
+    VkDeviceSize offsets[] = { 0 };
+    vkCmdBindVertexBuffers(cmd_buffer, 0, ARRAY_SIZE(buffers), buffers, offsets);
+}
+
+void RenderDevice::cmd_bind_index_buffer(VkCommandBuffer cmd_buffer, VkIndexType type, RenderDevice::Buffer *p_buffer)
+{
+    vkCmdBindIndexBuffer(cmd_buffer, p_buffer->vk_buffer, 0, type);
+}
+
+void RenderDevice::cmd_draw_indexed(VkCommandBuffer cmd_buffer, uint32_t index_count)
+{
+    vkCmdDrawIndexed(cmd_buffer, index_count, 1, 0, 0, 0);
+}
+
 void RenderDevice::cmd_bind_graph_pipeline(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline)
 {
     vkCmdBindPipeline(cmd_buffer, p_pipeline->bind_point, p_pipeline->pipeline);

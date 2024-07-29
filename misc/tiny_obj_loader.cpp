@@ -1,5 +1,5 @@
 /* ************************************************************************ */
-/* vk_mem_alloc.cpp                                                         */
+/* tiny_obj_loader.cpp                                                      */
 /* ************************************************************************ */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,5 +20,5 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ************************************************************************ */
-#define VMA_IMPLEMENTATION
-#include "vk_mem_alloc.h"
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <thirdparty/tinyobjloader/tiny_obj_loader.h>

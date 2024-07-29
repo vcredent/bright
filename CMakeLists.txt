@@ -45,17 +45,21 @@ add_executable(${PROGRAM_NAME}
     drivers/render_device.cpp
     platform/window.cpp
     platform/win32/render_device_context_win32.cpp
+    model/obj.cpp
     render/camera/camera.cpp
     render/camera/controller.cpp
     render/camera/projection_camera.cpp
     render/renderer_imgui.cpp
     render/renderer_canvas.cpp
     render/renderer_screen.cpp
+    render/render_object.cpp
+    render/renderer_graphics.cpp
     render/gui/renderer_viewport.cpp
+    misc/vk_mem_alloc.cpp
+    misc/tiny_obj_loader.cpp
     # ============================ #
     #        implementation        #
     # ============================ #
-    thirdparty/vma/vk_mem_alloc.cpp
     thirdparty/imgui/imgui.cpp
     thirdparty/imgui/imgui_draw.cpp
     thirdparty/imgui/imgui_demo.cpp

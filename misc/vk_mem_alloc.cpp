@@ -1,5 +1,5 @@
 /* ************************************************************************ */
-/* typedefs.h                                                               */
+/* vk_mem_alloc.cpp                                                         */
 /* ************************************************************************ */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,18 +20,5 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ************************************************************************ */
-#ifndef _TYPEDEFS_H_
-#define _TYPEDEFS_H_
-
-#define stackalloc() {/* 0 */}
-
-#define V_FORCEINLINE __attribute__((__always_inline__))
-#define U_MAYBE_UNUSED __attribute__((unused))
-#define U_ASSERT_ONLY U_MAYBE_UNUSED
-#define U_MEMNEW_ONLY U_MAYBE_UNUSED
-#define ARRAY_SIZE(a) ( sizeof(a) / sizeof(a[0]) )
-
-// std::string to const char *
-#define getpchar(str) ( str.c_str() )
-
-#endif /* _TYPEDEFS_H_ */
+#define VMA_IMPLEMENTATION
+#include <thirdparty/vma/vk_mem_alloc.h>

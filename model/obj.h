@@ -1,9 +1,9 @@
-/* ************************************************************************ */
-/* typedefs.h                                                               */
-/* ************************************************************************ */
+/* ======================================================================== */
+/* obj.h                                                                    */
+/* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
-/* ************************************************************************ */
+/* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
 /*                                                                          */
@@ -15,23 +15,43 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
-/* ************************************************************************ */
-#ifndef _TYPEDEFS_H_
-#define _TYPEDEFS_H_
+/* ======================================================================== */
+#ifndef _FORMAT_OBJ_H_
+#define _FORMAT_OBJ_H_
 
-#define stackalloc() {/* 0 */}
+#include <copilot/math.h>
+#include <copilot/typedefs.h>
+#include <vector>
 
-#define V_FORCEINLINE __attribute__((__always_inline__))
-#define U_MAYBE_UNUSED __attribute__((unused))
-#define U_ASSERT_ONLY U_MAYBE_UNUSED
-#define U_MEMNEW_ONLY U_MAYBE_UNUSED
-#define ARRAY_SIZE(a) ( sizeof(a) / sizeof(a[0]) )
+class ObjLoader {
+public:
+    ~ObjLoader() { /* do nothing... */ }
 
-// std::string to const char *
-#define getpchar(str) ( str.c_str() )
+    struct Vertex {
+        Vector3 v;
+        Vector2 vt;
+        Vector3 vn;
+    };
 
-#endif /* _TYPEDEFS_H_ */
+    struct Face {
+        std::vector<int> vertices;
+    };
+
+    static ObjLoader *load(const char *filepath);
+    static void destroy(ObjLoader *loader);
+
+    const std::vector<Vertex> &get_obj_vertices() const { return vertices; }
+    const std::vector<Face> &get_obj_faces() const { return faces; }
+
+private:
+    U_MEMNEW_ONLY ObjLoader() { /* do nothing... */ }
+
+    std::vector<Vertex> vertices;
+    std::vector<Face> faces;
+};
+
+#endif /* _FORMAT_OBJ_H_ */

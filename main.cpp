@@ -28,29 +28,7 @@
 #include "render/renderer_canvas.h"
 #include "render/renderer_screen.h"
 #include "render/gui/renderer_viewport.h"
-
-struct Vertex {
-    Vector3 position;
-    Vector3 color;
-    glm::vec2 texCoord;
-};
-
-struct MVPMatrix {
-    glm::mat4 m;
-    glm::mat4 v;
-    glm::mat4 p;
-};
-
-const std::vector<Vertex> vertices = {
-        {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        {{0.5f,  -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{0.5f,  0.5f,  0.0f},  {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-        {{-0.5f, 0.5f,  0.0f},  {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-};
-
-const std::vector<uint32_t> indices = {
-        0, 1, 2, 2, 3, 0
-};
+#include "render/renderer_graphics.h"
 
 int main(int argc, char **argv)
 {
@@ -63,58 +41,17 @@ int main(int argc, char **argv)
     RenderDevice *rd;
     rd = rdc->load_render_device();
 
-    VkVertexInputBindingDescription binds[] = {
-            { 0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX  }
-    };
-
-    VkVertexInputAttributeDescription attributes[] = {
-            { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) },
-            { 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color) },
-            { 2, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, texCoord) },
-    };
-
-    VkDescriptorSetLayoutBinding descriptor_layout_binds[] = {
-            { 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, VK_NULL_HANDLE },
-    };
-
-    RenderDevice::Buffer *mvp_matrix_buffer;
-    mvp_matrix_buffer = rd->create_buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(MVPMatrix));
-
-    VkDescriptorSetLayout descriptor_layout;
-    rd->create_descriptor_set_layout(ARRAY_SIZE(descriptor_layout_binds), descriptor_layout_binds, &descriptor_layout);
-
-    VkDescriptorSet mvp_descriptor;
-    rd->allocate_descriptor_set(descriptor_layout, &mvp_descriptor);
-
-    RenderDevice::Buffer *vertex_buffer;
-    size_t vertices_buf_size = std::size(vertices) * sizeof(Vertex);
-    vertex_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, vertices_buf_size);
-    rd->write_buffer(vertex_buffer, 0, vertices_buf_size, (void *) std::data(vertices));
-
-    RenderDevice::Buffer *index_buffer;
-    size_t index_buffer_size = std::size(indices) * sizeof(uint32_t);
-    index_buffer = rd->create_buffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, index_buffer_size);
-    rd->write_buffer(index_buffer, 0, index_buffer_size, (void *) std::data(indices));
-
     RendererScreen *screen = memnew(RendererScreen, rd);
     screen->initialize(window);
 
-    RenderDevice::ShaderInfo shader_info = {
-            /* vertex= */ "../shader/vertex.glsl.spv",
-            /* fragment= */ "../shader/fragment.glsl.spv",
-            /* attribute_count= */ ARRAY_SIZE(attributes),
-            /* attributes= */ attributes,
-            /* bind_count= */ ARRAY_SIZE(binds),
-            /* binds= */ binds,
-            /* descriptor_count= */ 1,
-            /* descriptor_layouts= */ &descriptor_layout,
-    };
-
-    RenderDevice::Pipeline *pipeline;
-    pipeline = rd->create_graph_pipeline(screen->get_render_pass(), &shader_info);
-
     RendererCanvas *canvas = memnew(RendererCanvas, rd);
     canvas->initialize();
+
+    RendererGraphics *graphics = memnew(RendererGraphics, rd);
+    graphics->initialize(screen->get_render_pass());
+
+    RenderObject *object = RenderObject::load_assets_obj("../assets/cube.obj");
+    graphics->push_render_object(object);
 
     RendererImGui *imgui = memnew(RendererImGui, rd);
     imgui->initialize(screen);
@@ -140,21 +77,14 @@ int main(int argc, char **argv)
         VkCommandBuffer canvas_cmd_buffer;
         canvas->cmd_begin_canvas_render(&canvas_cmd_buffer);
         {
-            MVPMatrix mvp;
-            mvp.m = glm::translate(Matrix4(1.0f), Vector3(0.0f, 0.0f, 0.0f));
-            mvp.v = camera->get_view_matrix();
-            mvp.p = camera->get_projection_matrix();
-            rd->write_buffer(mvp_matrix_buffer, 0, sizeof(MVPMatrix), &mvp);
-
-            rd->cmd_bind_graph_pipeline(canvas_cmd_buffer, pipeline);
-            rd->cmd_bind_descriptor_set(canvas_cmd_buffer, pipeline, mvp_descriptor);
-            rd->write_descriptor_set_buffer(mvp_matrix_buffer, mvp_descriptor);
-            rd->cmd_setval_viewport(canvas_cmd_buffer, canvas->get_canvas_width(), canvas->get_canvas_height());
-
-            VkDeviceSize offset = 0;
-            vkCmdBindVertexBuffers(canvas_cmd_buffer, 0, 1, &vertex_buffer->vk_buffer, &offset);
-            vkCmdBindIndexBuffer(canvas_cmd_buffer, index_buffer->vk_buffer, 0, VK_INDEX_TYPE_UINT32);
-            vkCmdDrawIndexed(canvas_cmd_buffer, std::size(indices), 1, 0, 0, 0);
+            graphics->cmd_begin_graphics_render(canvas_cmd_buffer);
+            {
+                graphics->cmd_setval_viewport(canvas_cmd_buffer, canvas->get_canvas_width(), canvas->get_canvas_height());
+                graphics->cmd_setval_view_matrix(canvas_cmd_buffer, camera->get_view_matrix());
+                graphics->cmd_setval_projection_matrix(canvas_cmd_buffer, camera->get_projection_matrix());
+                graphics->cmd_draw_list(canvas_cmd_buffer);
+            }
+            graphics->cmd_end_graphics_render(canvas_cmd_buffer);
         }
         RenderDevice::Texture2D *canvas_texture = canvas->cmd_end_canvas_render();
 
@@ -200,17 +130,13 @@ int main(int argc, char **argv)
         screen->cmd_end_screen_render(window_cmd_buffer);
     }
 
+    memdel(object);
+    memdel(graphics);
     memdel(viewport);
     memdel(camera);
     memdel(screen);
     memdel(canvas);
     memdel(imgui);
-    rd->destroy_buffer(mvp_matrix_buffer);
-    rd->destroy_buffer(index_buffer);
-    rd->destroy_buffer(vertex_buffer);
-    rd->destroy_pipeline(pipeline);
-    rd->free_descriptor_set(mvp_descriptor);
-    rd->destroy_descriptor_set_layout(descriptor_layout);
     rdc->destroy_render_device(rd);
     memdel(window);
 

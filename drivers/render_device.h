@@ -103,7 +103,9 @@ public:
     void cmd_buffer_end(VkCommandBuffer cmd_buffer);
     void cmd_begin_render_pass(VkCommandBuffer cmd_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect);
     void cmd_end_render_pass(VkCommandBuffer cmd_buffer);
-    void cmd_bind_vertex_buffer(Buffer *p_buffer);
+    void cmd_bind_vertex_buffer(VkCommandBuffer cmd_buffer, Buffer *p_buffer);
+    void cmd_bind_index_buffer(VkCommandBuffer cmd_buffer, VkIndexType type, Buffer *p_buffer);
+    void cmd_draw_indexed(VkCommandBuffer cmd_buffer, uint32_t index_count);
     void cmd_bind_graph_pipeline(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline);
     void cmd_buffer_submit(VkCommandBuffer cmd_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence);
     void cmd_bind_descriptor_set(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor);
