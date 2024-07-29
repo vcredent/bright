@@ -38,12 +38,18 @@ RenderObject::~RenderObject()
 void RenderObject::update()
 {
     Matrix4 rotate(1.0f);
-    Matrix4 translate(1.0f);
     Matrix4 scale(1.0f);
+    Matrix4 translate(1.0f);
+
+    rotate = glm::rotate(rotate, glm::radians(rotation.x), Vector3(1.0f, 0.0f, 0.0f));
+    rotate = glm::rotate(rotate, glm::radians(rotation.y), Vector3(0.0f, 1.0f, 0.0f));
+    rotate = glm::rotate(rotate, glm::radians(rotation.z), Vector3(0.0f, 0.0f, 1.0f));
+
+    scale = glm::scale(scale, scaling);
 
     translate = glm::translate(translate, position);
 
-    transform = translate;
+    transform = rotate * scale * translate;
 }
 
 void RenderObject::initialize(RenderDevice *v_rd)

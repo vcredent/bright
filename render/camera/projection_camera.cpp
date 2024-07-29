@@ -35,13 +35,10 @@ ProjectionCamera::~ProjectionCamera()
 
 void ProjectionCamera::update()
 {
-    Matrix4 translation;
-    Matrix4 rotation;
-
-    translation = glm::translate(Matrix4(1.0f), position);
-    rotation = Matrix4(1.0f);
-
-    view_matrix = glm::inverse(translation * rotation);
+    Vector3 direction = glm::normalize(target - position);
+    Vector3 right = glm::normalize(glm::cross(direction, world_up));
+    Vector3 up = glm::cross(right, direction);
+    view_matrix = glm::lookAt(position, position + direction, up);
 
     projection_matrix = glm::perspective(fov, aspect_ratio, near, far);
     projection_matrix[1][1] *= -1;

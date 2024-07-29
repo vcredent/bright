@@ -27,15 +27,18 @@
 #include <stdexcept>
 #include <assert.h>
 
-#define EXIT_FAIL(...) do {            \
-    fprintf(stderr, __VA_ARGS__);      \
-    exit(1);                           \
+#define EXIT(status) exit(status)
+#define EXIT_ERR() EXIT(1)
+
+#define EXIT_FAIL(...) do {         \
+    fprintf(stderr, __VA_ARGS__);   \
+    EXIT(1);                        \
 } while(0)
 
-#define EXIT_FAIL_COND_V(retval, ...) do {  \
-    if (!(retval)) {                        \
-        EXIT_FAIL(__VA_ARGS__);             \
-    }                                       \
+#define EXIT_FAIL_COND_V(retval, ...) do {   \
+    if (!(retval)) {                         \
+        EXIT_FAIL(__VA_ARGS__);              \
+    }                                        \
 } while(0)
 
 enum Error {

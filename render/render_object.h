@@ -58,7 +58,7 @@ public:
 private:
     std::vector<Mesh> meshes;
     std::vector<uint32_t> indices;
-    Matrix4 transform;
+    Matrix4 transform = Matrix4(1.0f);
     RenderDevice *rd;
 
     Vector3 position = Vector3(0.0f);

@@ -46,9 +46,9 @@ private:
     RenderDevice *rd;
 
     struct Transform {
+        Matrix4 m;
         Matrix4 v;
         Matrix4 p;
-        Matrix4 m;
     } transform;
 
     VkDescriptorSetLayout descriptor_set_layout;
