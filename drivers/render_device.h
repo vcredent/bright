@@ -48,6 +48,8 @@ public:
         VkVertexInputBindingDescription *binds;
         uint32_t descriptor_count;
         VkDescriptorSetLayout *descriptor_set_layouts;
+        uint32_t push_const_count;
+        VkPushConstantRange *p_push_const;
     };
 
     struct PipelineCreateInfo {
@@ -117,6 +119,7 @@ public:
     void cmd_buffer_submit(VkCommandBuffer cmd_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence);
     void cmd_bind_descriptor_set(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor);
     void cmd_setval_viewport(VkCommandBuffer cmd_buffer , uint32_t w, uint32_t h);
+    void cmd_push_const(VkCommandBuffer cmd_buffer, RenderDevice::Pipeline *pipeline, VkShaderStageFlags shader_stage_flags, uint32_t offset, uint32_t size, void *p_values);
     void present(VkQueue queue, VkSwapchainKHR swap_chain, uint32_t index, VkSemaphore wait_semaphore);
 
 private:

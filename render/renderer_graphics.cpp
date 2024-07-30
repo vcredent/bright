@@ -56,6 +56,13 @@ void RendererGraphics::initialize(VkRenderPass render_pass)
     rd->allocate_descriptor_set(descriptor_set_layout, &descriptor_set);
 
     transform_buffer = rd->create_buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(Transform));
+    rd->write_descriptor_set_buffer(transform_buffer, descriptor_set);
+
+    VkPushConstantRange push_const_range = {
+            /* stageFlags= */ VK_SHADER_STAGE_VERTEX_BIT,
+            /* offset= */ 0,
+            /* size= */ sizeof(Mat4)
+    };
 
     RenderDevice::ShaderInfo shader_info = {
             /* vertex= */ "../shader/vertex.glsl.spv",
@@ -66,6 +73,8 @@ void RendererGraphics::initialize(VkRenderPass render_pass)
             /* binds= */ binds,
             /* descriptor_count= */ 1,
             /* descriptor_layouts= */ &descriptor_set_layout,
+            /* push_const_count= */ 1,
+            /* p_push_const= */ &push_const_range,
     };
 
     RenderDevice::PipelineCreateInfo create_info = {
@@ -102,29 +111,27 @@ void RendererGraphics::cmd_setval_view_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd
 {
     transform.v = view;
     rd->write_buffer(transform_buffer, 0, sizeof(Transform), &transform);
-    rd->write_descriptor_set_buffer(transform_buffer, descriptor_set);
 }
 
 void RendererGraphics::cmd_setval_projection_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 projection)
 {
     transform.p = projection;
     rd->write_buffer(transform_buffer, 0, sizeof(Transform), &transform);
-    rd->write_descriptor_set_buffer(transform_buffer, descriptor_set);
 }
 
 void RendererGraphics::cmd_setval_model_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 model)
 {
     transform.m = model;
     rd->write_buffer(transform_buffer, 0, sizeof(Transform), &transform);
-    rd->write_descriptor_set_buffer(transform_buffer, descriptor_set);
 }
 
 void RendererGraphics::cmd_draw_list(VkCommandBuffer cmd_buffer)
 {
     rd->cmd_bind_descriptor_set(cmd_buffer, pipeline, descriptor_set);
-    for (const auto &object: render_objects) {
+    for (auto &object: render_objects) {
         object->update();
-        cmd_setval_model_matrix(cmd_buffer, object->get_model_matrix());
+        Mat4 value = object->get_model_matrix();
+        rd->cmd_push_const(cmd_buffer, pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Mat4), &value);
         object->cmd_bind_vertex_buffer(cmd_buffer);
         object->cmd_bind_index_buffer(cmd_buffer);
         object->cmd_draw(cmd_buffer);

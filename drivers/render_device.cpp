@@ -370,8 +370,8 @@ RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(PipelineCreateInfo *
             /* flags */ no_flag_bits,
             /* setLayoutCount */ p_shader_info->descriptor_count,
             /* pSetLayouts */ p_shader_info->descriptor_set_layouts,
-            /* pushConstantRangeCount */ 0,
-            /* pPushConstantRanges */ nullptr,
+            /* pushConstantRangeCount */ p_shader_info->push_const_count,
+            /* pPushConstantRanges */ p_shader_info->p_push_const,
     };
 
     VkPipelineLayout vk_pipeline_layout;
@@ -689,6 +689,11 @@ void RenderDevice::cmd_setval_viewport(VkCommandBuffer cmd_buffer, uint32_t w, u
     scissor.offset = { 0, 0 };
     scissor.extent = { w, h };
     vkCmdSetScissor(cmd_buffer, 0, 1, &scissor);
+}
+
+void RenderDevice::cmd_push_const(VkCommandBuffer cmd_buffer, RenderDevice::Pipeline *pipeline, VkShaderStageFlags shader_stage_flags, uint32_t offset, uint32_t size, void *p_values)
+{
+    vkCmdPushConstants(cmd_buffer, pipeline->layout, shader_stage_flags, offset, size, p_values);
 }
 
 void RenderDevice::present(VkQueue queue, VkSwapchainKHR swap_chain, uint32_t index, VkSemaphore wait_semaphore)
