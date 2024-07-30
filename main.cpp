@@ -48,12 +48,12 @@ int main(int argc, char **argv)
     canvas->initialize();
 
     RendererGraphics *graphics = memnew(RendererGraphics, rd);
-    graphics->initialize(screen->get_render_pass());
+    graphics->initialize(canvas->get_render_pass());
 
     RenderObject *object = RenderObject::load_assets_obj("../assets/cube.obj");
     RenderObject *object1 = RenderObject::load_assets_obj("C:/Users/vcred/Desktop/monkey.obj");
-    graphics->push_render_object(object1);
     graphics->push_render_object(object);
+    graphics->push_render_object(object1);
 
     RendererImGui *imgui = memnew(RendererImGui, rd);
     imgui->initialize(screen);

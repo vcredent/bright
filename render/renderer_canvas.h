@@ -35,6 +35,7 @@ public:
     void set_canvas_extent(uint32_t v_width, uint32_t v_height);
     uint32_t get_canvas_width() { return width; }
     uint32_t get_canvas_height() { return height; }
+    VkRenderPass get_render_pass() { return render_pass; }
 
     void cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer);
     RenderDevice::Texture2D *cmd_end_canvas_render();
@@ -46,6 +47,7 @@ private:
     RenderDevice *rd;
     VkRenderPass render_pass;
     RenderDevice::Texture2D *texture;
+    RenderDevice::Texture2D *depth;
     VkFramebuffer framebuffer;
     VkSampler sampler;
     VkCommandBuffer canvas_cmd_buffer;

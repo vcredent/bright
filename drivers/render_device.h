@@ -109,7 +109,7 @@ public:
 
     void cmd_buffer_begin(VkCommandBuffer cmd_buffer, VkCommandBufferUsageFlags usage);
     void cmd_buffer_end(VkCommandBuffer cmd_buffer);
-    void cmd_begin_render_pass(VkCommandBuffer cmd_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect);
+    void cmd_begin_render_pass(VkCommandBuffer cmd_buffer, VkRenderPass render_pass, uint32_t clear_value_count, VkClearValue *p_clear_values, VkFramebuffer framebuffer, VkRect2D *p_rect);
     void cmd_end_render_pass(VkCommandBuffer cmd_buffer);
     void cmd_bind_vertex_buffer(VkCommandBuffer cmd_buffer, Buffer *p_buffer);
     void cmd_bind_index_buffer(VkCommandBuffer cmd_buffer, VkIndexType type, Buffer *p_buffer);

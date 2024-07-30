@@ -163,7 +163,7 @@ RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t h
                 },
             /* subresourceRange */
                 {
-                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                    .aspectMask = format == VK_FORMAT_D32_SFLOAT ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT,
                     .baseMipLevel = 0,
                     .levelCount = 1,
                     .baseArrayLayer = 0,
@@ -480,6 +480,14 @@ RenderDevice::Pipeline *RenderDevice::create_graphics_pipeline(PipelineCreateInf
     color_blend_attachment_state.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
     color_blend_attachment_state.alphaBlendOp = VK_BLEND_OP_ADD;
 
+    VkPipelineDepthStencilStateCreateInfo depth_stencil = {};
+    depth_stencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depth_stencil.depthTestEnable = VK_TRUE;
+    depth_stencil.depthWriteEnable = VK_TRUE;
+    depth_stencil.depthCompareOp = VK_COMPARE_OP_LESS;
+    depth_stencil.depthBoundsTestEnable = VK_FALSE;
+    depth_stencil.stencilTestEnable = VK_FALSE;
+
     VkPipelineColorBlendStateCreateInfo color_blend_state_create_info = {};
     color_blend_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     color_blend_state_create_info.logicOpEnable = VK_FALSE;
@@ -516,7 +524,7 @@ RenderDevice::Pipeline *RenderDevice::create_graphics_pipeline(PipelineCreateInf
             /* pViewportState */ &viewport_state_create_info,
             /* pRasterizationState */ &rasterization_state_create_info,
             /* pMultisampleState */ &multisample_state_create_info,
-            /* pDepthStencilState */ nullptr,
+            /* pDepthStencilState */ &depth_stencil,
             /* pColorBlendState */ &color_blend_state_create_info,
             /* pDynamicState */ &dynamic_state_crate_info,
             /* layout */ vk_pipeline_layout,
@@ -594,20 +602,16 @@ void RenderDevice::cmd_buffer_end(VkCommandBuffer cmd_buffer)
     vkEndCommandBuffer(cmd_buffer);
 }
 
-void RenderDevice::cmd_begin_render_pass(VkCommandBuffer cmd_buffer, VkRenderPass render_pass, VkFramebuffer framebuffer, VkRect2D *p_rect)
+void RenderDevice::cmd_begin_render_pass(VkCommandBuffer cmd_buffer, VkRenderPass render_pass, uint32_t clear_value_count, VkClearValue *p_clear_values, VkFramebuffer framebuffer, VkRect2D *p_rect)
 {
-    VkClearValue clear_color = {
-        0.10f, 0.10f, 0.10f, 1.0f
-    };
-
     VkRenderPassBeginInfo render_pass_begin_info = {
             /* sType */ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
             /* pNext */ nextptr,
             /* renderPass */ render_pass,
             /* framebuffer */ framebuffer,
             /* renderArea */ *p_rect,
-            /* clearValueCount */ 1,
-            /* pClearValues */ &clear_color,
+            /* clearValueCount */ clear_value_count,
+            /* pClearValues */ p_clear_values,
     };
 
     vkCmdBeginRenderPass(cmd_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
