@@ -34,6 +34,7 @@
 #include <copilot/error.h>
 #include <copilot/typedefs.h>
 #include <time.h>
+#include <vector>
 
 #define no_flag_bits         0
 #define nextptr              nullptr
@@ -57,6 +58,7 @@ public:
     VkQueue get_graph_queue() { return graph_queue; };
     VkCommandPool get_cmd_pool() { return cmd_pool; }
     VkFormat get_window_format() { return format; }
+    VkFormat find_supported_format(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
     void allocate_cmd_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_cmd_buffer);
     void free_cmd_buffer(VkCommandBuffer cmd_buffer);

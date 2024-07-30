@@ -25,7 +25,7 @@
 RendererCanvas::RendererCanvas(RenderDevice *p_device)
     : rd(p_device)
 {
-    /* do nothing... */
+    rdc = rd->get_device_context();
 }
 
 RendererCanvas::~RendererCanvas()
@@ -40,15 +40,18 @@ void RendererCanvas::initialize()
 {
     graph_queue = rd->get_device_context()->get_graph_queue();
 
+    std::vector<VkFormat> desred_depth_formats = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT };
+    depth_format = rdc->find_supported_format(desred_depth_formats ,VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+
     /* ************************ */
     /*        RenderPass        */
     /* ************************ */
-    VkAttachmentDescription attachment[] = {
+    VkAttachmentDescription attachments[] = {
             {
                 /* flags */ no_flag_bits,
                 /* format */ rd->get_surface_format(),
                 /* samples */ VK_SAMPLE_COUNT_1_BIT,
-                /* loadOp */VK_ATTACHMENT_LOAD_OP_CLEAR,
+                /* loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
                 /* storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
                 /* stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
                 /* stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
@@ -57,7 +60,7 @@ void RendererCanvas::initialize()
             },
             {
                 /* flags */ no_flag_bits,
-                /* format */ VK_FORMAT_D32_SFLOAT,
+                /* format */ depth_format,
                 /* samples */ VK_SAMPLE_COUNT_1_BIT,
                 /* loadOp */VK_ATTACHMENT_LOAD_OP_CLEAR,
                 /* storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
@@ -92,7 +95,7 @@ void RendererCanvas::initialize()
     subpass_dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     subpass_dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-    rd->create_render_pass(ARRAY_SIZE(attachment), attachment, 1, &subpass, 1, &subpass_dependency, &render_pass);
+    rd->create_render_pass(ARRAY_SIZE(attachments), attachments, 1, &subpass, 1, &subpass_dependency, &render_pass);
     rd->create_sampler(&sampler);
     rd->allocate_cmd_buffer(&canvas_cmd_buffer);
 
@@ -109,8 +112,8 @@ void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer)
     rd->cmd_buffer_begin(canvas_cmd_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
 
     VkClearValue clear_color[] = {
-            { 0.10f, 0.10f, 0.10f, 1.0f },
-            { 0.10f, 0.10f, 0.10f, 1.0f }
+            { 0.1f, 0.1f, 0.1f, 1.0f },
+            { 0.5f, 0.5f, 0.5f, 0.5f }
     };
 
     VkRect2D rect = {};
@@ -145,8 +148,9 @@ RenderDevice::Texture2D *RendererCanvas::cmd_end_canvas_render()
 
 void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
 {
-    depth = rd->create_texture(width, height, sampler, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-    texture = rd->create_texture(width, height, sampler, VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    depth = rd->create_texture(width, height, sampler, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    rd->transition_image_layout(depth, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+    texture = rd->create_texture(width, height, sampler, VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     rd->transition_image_layout(texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     VkImageView attachments[] = {

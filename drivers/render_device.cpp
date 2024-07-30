@@ -113,10 +113,10 @@ void RenderDevice::free_cmd_buffer(VkCommandBuffer cmd_buffer)
     vk_rdc->free_cmd_buffer(cmd_buffer);
 }
 
-RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t height, VkSampler sampler, VkFormat format, VkImageUsageFlags usage)
+RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t height, VkSampler sampler, VkFormat format, VkImageAspectFlags aspect_mask, VkImageUsageFlags usage)
 {
     VkResult U_ASSERT_ONLY err;
-    Texture2D *texture;
+    Texture2D *texture = VK_NULL_HANDLE;
 
     texture = (Texture2D *) imalloc(sizeof(Texture2D));
     texture->format = format;
@@ -163,7 +163,7 @@ RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t h
                 },
             /* subresourceRange */
                 {
-                    .aspectMask = format == VK_FORMAT_D32_SFLOAT ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT,
+                    .aspectMask = aspect_mask,
                     .baseMipLevel = 0,
                     .levelCount = 1,
                     .baseArrayLayer = 0,
@@ -264,24 +264,33 @@ void RenderDevice::transition_image_layout(Texture2D *p_texture, VkImageLayout n
     if (p_texture->image_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-        goto pipeline_barrier_create_end_tag;
+        goto PIPELINE_BARRIER_CREATE_END_TAG;
     }
 
     if (p_texture->image_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-        goto pipeline_barrier_create_end_tag;
+        goto PIPELINE_BARRIER_CREATE_END_TAG;
     }
 
     if (p_texture->image_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_HOST_READ_BIT;
-        goto pipeline_barrier_create_end_tag;
+        goto PIPELINE_BARRIER_CREATE_END_TAG;
+    }
+
+    if (p_texture->image_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        if (p_texture->format == VK_FORMAT_D32_SFLOAT_S8_UINT || p_texture->format == VK_FORMAT_D24_UNORM_S8_UINT)
+            barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+        barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        goto PIPELINE_BARRIER_CREATE_END_TAG;
     }
 
     throw std::invalid_argument("unsupported layout transition!");
 
-    pipeline_barrier_create_end_tag:
+PIPELINE_BARRIER_CREATE_END_TAG:
     vkCmdPipelineBarrier(
             one_time_cmd_buffer,
             sourceStage,
@@ -569,7 +578,7 @@ void RenderDevice::_initialize_descriptor_pool()
             { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         256 },
             { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 256 },
             { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 256 },
-            { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       256 }
+            { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       256 },
     };
 
     VkDescriptorPoolCreateInfo descriptor_pool_create_info = {

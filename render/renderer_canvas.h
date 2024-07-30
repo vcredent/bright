@@ -45,6 +45,7 @@ private:
     void _clean_up_canvas_texture();
 
     RenderDevice *rd;
+    RenderDeviceContext *rdc;
     VkRenderPass render_pass;
     RenderDevice::Texture2D *texture;
     RenderDevice::Texture2D *depth;
@@ -52,6 +53,7 @@ private:
     VkSampler sampler;
     VkCommandBuffer canvas_cmd_buffer;
     VkQueue graph_queue;
+    VkFormat depth_format;
 
     uint32_t width = 32;
     uint32_t height = 32;
