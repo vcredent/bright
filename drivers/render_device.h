@@ -31,7 +31,10 @@ public:
     RenderDevice(RenderDeviceContext *driver_context);
     ~RenderDevice();
 
-public:
+    RenderDeviceContext *get_device_context() { return vk_rdc; }
+    VkDescriptorPool get_descriptor_pool() { return descriptor_pool; }
+    VkFormat get_surface_format() { return vk_rdc->get_window_format(); }
+
     struct Buffer {
         VkBuffer vk_buffer;
         VkDeviceSize size;
@@ -39,30 +42,15 @@ public:
         VmaAllocationInfo allocation_info;
     };
 
-    struct ShaderInfo {
-        const char *vertex;
-        const char *fragment;
-        uint32_t attribute_count;
-        VkVertexInputAttributeDescription *attributes;
-        uint32_t bind_count;
-        VkVertexInputBindingDescription *binds;
-        uint32_t descriptor_count;
-        VkDescriptorSetLayout *descriptor_set_layouts;
-        uint32_t push_const_count;
-        VkPushConstantRange *p_push_const;
-    };
+    Buffer *create_buffer(VkBufferUsageFlags usage, VkDeviceSize size);
+    void destroy_buffer(Buffer *p_buffer);
+    void write_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
+    void read_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
 
-    struct PipelineCreateInfo {
-        VkRenderPass render_pass;
-        VkPolygonMode polygon;
-        VkPrimitiveTopology topology;
-    };
-
-    struct Pipeline {
-        VkPipeline pipeline;
-        VkPipelineLayout layout;
-        VkPipelineBindPoint bind_point;
-    };
+    void create_render_pass(uint32_t attachment_count, VkAttachmentDescription *p_attachments, uint32_t subpass_count, VkSubpassDescription *p_subpass, uint32_t dependency_count, VkSubpassDependency *p_dependencies, VkRenderPass *p_render_pass);
+    void destroy_render_pass(VkRenderPass render_pass);
+    void allocate_cmd_buffer(VkCommandBuffer *p_cmd_buffer);
+    void free_cmd_buffer(VkCommandBuffer cmd_buffer);
 
     struct Texture2D {
         VkImage image;
@@ -77,19 +65,6 @@ public:
         VkSampler sampler;
     };
 
-public:
-    RenderDeviceContext *get_device_context() { return vk_rdc; }
-    VkDescriptorPool get_descriptor_pool() { return descriptor_pool; }
-    VkFormat get_surface_format() { return vk_rdc->get_window_format(); }
-
-    Buffer *create_buffer(VkBufferUsageFlags usage, VkDeviceSize size);
-    void destroy_buffer(Buffer *p_buffer);
-    void write_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
-    void read_buffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
-    void create_render_pass(uint32_t attachment_count, VkAttachmentDescription *p_attachments, uint32_t subpass_count, VkSubpassDescription *p_subpass, uint32_t dependency_count, VkSubpassDependency *p_dependencies, VkRenderPass *p_render_pass);
-    void destroy_render_pass(VkRenderPass render_pass);
-    void allocate_cmd_buffer(VkCommandBuffer *p_cmd_buffer);
-    void free_cmd_buffer(VkCommandBuffer cmd_buffer);
     Texture2D *create_texture(uint32_t width, uint32_t height, VkSampler sampler, VkFormat format, VkImageUsageFlags usage);
     void destroy_texture(Texture2D *p_texture);
     void create_framebuffer(uint32_t width, uint32_t height, uint32_t image_view_count, VkImageView *p_image_view, VkRenderPass render_pass, VkFramebuffer *p_framebuffer);
@@ -104,7 +79,32 @@ public:
     void free_descriptor_set(VkDescriptorSet descriptor_set);
     void write_descriptor_set_buffer(Buffer *p_buffer, VkDescriptorSet descriptor_set);
 
-    Pipeline *create_graph_pipeline(PipelineCreateInfo *p_create_info, ShaderInfo *p_shader_info);
+    struct ShaderInfo {
+        const char *vertex;
+        const char *fragment;
+        uint32_t attribute_count;
+        VkVertexInputAttributeDescription *attributes;
+        uint32_t bind_count;
+        VkVertexInputBindingDescription *binds;
+        uint32_t descriptor_count;
+        VkDescriptorSetLayout *descriptor_set_layouts;
+        uint32_t push_const_count;
+        VkPushConstantRange *p_push_const_range;
+    };
+
+    struct PipelineCreateInfo {
+        VkRenderPass render_pass;
+        VkPolygonMode polygon;
+        VkPrimitiveTopology topology;
+    };
+
+    struct Pipeline {
+        VkPipeline pipeline;
+        VkPipelineLayout layout;
+        VkPipelineBindPoint bind_point;
+    };
+
+    Pipeline *create_graphics_pipeline(PipelineCreateInfo *p_create_info, ShaderInfo *p_shader_info);
     void destroy_pipeline(Pipeline *p_pipeline);
 
     void cmd_buffer_begin(VkCommandBuffer cmd_buffer, VkCommandBufferUsageFlags usage);

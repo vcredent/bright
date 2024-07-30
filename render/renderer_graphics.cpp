@@ -74,7 +74,7 @@ void RendererGraphics::initialize(VkRenderPass render_pass)
             /* descriptor_count= */ 1,
             /* descriptor_layouts= */ &descriptor_set_layout,
             /* push_const_count= */ 1,
-            /* p_push_const= */ &push_const_range,
+            /* p_push_const_range= */ &push_const_range,
     };
 
     RenderDevice::PipelineCreateInfo create_info = {
@@ -83,7 +83,7 @@ void RendererGraphics::initialize(VkRenderPass render_pass)
             /* topology= */ VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
     };
 
-    pipeline = rd->create_graph_pipeline(&create_info, &shader_info);
+    pipeline = rd->create_graphics_pipeline(&create_info, &shader_info);
 }
 
 void RendererGraphics::push_render_object(RenderObject *object)

@@ -360,7 +360,7 @@ void RenderDevice::write_descriptor_set_buffer(Buffer *p_buffer, VkDescriptorSet
     vkUpdateDescriptorSets(vk_device, 1, &write_info, 0, nullptr);
 }
 
-RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(PipelineCreateInfo *p_create_info, ShaderInfo *p_shader_info)
+RenderDevice::Pipeline *RenderDevice::create_graphics_pipeline(PipelineCreateInfo *p_create_info, ShaderInfo *p_shader_info)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -371,7 +371,7 @@ RenderDevice::Pipeline *RenderDevice::create_graph_pipeline(PipelineCreateInfo *
             /* setLayoutCount */ p_shader_info->descriptor_count,
             /* pSetLayouts */ p_shader_info->descriptor_set_layouts,
             /* pushConstantRangeCount */ p_shader_info->push_const_count,
-            /* pPushConstantRanges */ p_shader_info->p_push_const,
+            /* pPushConstantRanges */ p_shader_info->p_push_const_range,
     };
 
     VkPipelineLayout vk_pipeline_layout;
