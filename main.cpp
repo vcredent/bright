@@ -50,8 +50,10 @@ int main(int argc, char **argv)
     RendererGraphics *graphics = memnew(RendererGraphics, rd);
     graphics->initialize(canvas->get_render_pass());
 
-    RenderObject *object = RenderObject::load_assets_obj("../assets/cube.obj");
-    graphics->push_render_object(object);
+    RenderObject *object1 = RenderObject::load_assets_obj("../assets/cube.obj");
+    RenderObject *object2 = RenderObject::load_assets_obj("../assets/monkey.obj");
+    graphics->push_render_object(object1);
+    graphics->push_render_object(object2);
 
     RendererImGui *imgui = memnew(RendererImGui, rd);
     imgui->initialize(screen);
@@ -105,19 +107,35 @@ int main(int argc, char **argv)
                 }
                 viewport->cmd_end_viewport_render();
 
-                imgui->cmd_begin_window("模型参数");
+                imgui->cmd_begin_window("object-1");
                 {
-                    Vec3 position = object->get_object_position();
+                    Vec3 position = object1->get_object_position();
                     imgui->cmd_drag_float3("平移: ", glm::value_ptr(position), 0.01f);
-                    object->set_object_position(position);
+                    object1->set_object_position(position);
 
-                    Vec3 rotation = object->get_object_rotation();
+                    Vec3 rotation = object1->get_object_rotation();
                     imgui->cmd_drag_float3("旋转: ", glm::value_ptr(rotation), 0.01f);
-                    object->set_object_rotation(rotation);
+                    object1->set_object_rotation(rotation);
 
-                    Vec3 scaling = object->get_object_scaling();
+                    Vec3 scaling = object1->get_object_scaling();
                     imgui->cmd_drag_float3("缩放: ", glm::value_ptr(scaling), 0.01f);
-                    object->set_object_scaling(scaling);
+                    object1->set_object_scaling(scaling);
+                }
+                imgui->cmd_end_window();
+
+                imgui->cmd_begin_window("object-2");
+                {
+                    Vec3 position = object2->get_object_position();
+                    imgui->cmd_drag_float3("平移: ", glm::value_ptr(position), 0.01f);
+                    object2->set_object_position(position);
+
+                    Vec3 rotation = object2->get_object_rotation();
+                    imgui->cmd_drag_float3("旋转: ", glm::value_ptr(rotation), 0.01f);
+                    object2->set_object_rotation(rotation);
+
+                    Vec3 scaling = object2->get_object_scaling();
+                    imgui->cmd_drag_float3("缩放: ", glm::value_ptr(scaling), 0.01f);
+                    object2->set_object_scaling(scaling);
                 }
                 imgui->cmd_end_window();
 
@@ -150,7 +168,8 @@ int main(int argc, char **argv)
         screen->cmd_end_screen_render(window_cmd_buffer);
     }
 
-    memdel(object);
+    memdel(object1);
+    memdel(object2);
     memdel(graphics);
     memdel(viewport);
     memdel(camera);

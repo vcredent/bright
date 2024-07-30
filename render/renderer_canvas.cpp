@@ -21,6 +21,7 @@
 /*                                                                          */
 /* ======================================================================== */
 #include "renderer_canvas.h"
+#include <array>
 
 RendererCanvas::RendererCanvas(RenderDevice *p_device)
     : rd(p_device)
@@ -111,15 +112,14 @@ void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer)
 
     rd->cmd_buffer_begin(canvas_cmd_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
 
-    VkClearValue clear_color[] = {
-            { 0.1f, 0.1f, 0.1f, 1.0f },
-            { 0.5f, 0.5f, 0.5f, 0.5f }
-    };
+    std::array<VkClearValue, 2> clear_values = {};
+    clear_values[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
+    clear_values[1].depthStencil = { 1.0f, 0 };
 
     VkRect2D rect = {};
     rect.offset = { 0, 0 };
     rect.extent = { texture->width, texture->height };
-    rd->cmd_begin_render_pass(canvas_cmd_buffer, render_pass, ARRAY_SIZE(clear_color), clear_color, framebuffer, &rect);
+    rd->cmd_begin_render_pass(canvas_cmd_buffer, render_pass, std::size(clear_values), std::data(clear_values), framebuffer, &rect);
 
     *p_cmd_buffer = canvas_cmd_buffer;
 }
@@ -150,7 +150,7 @@ void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
 {
     depth = rd->create_texture(width, height, sampler, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     rd->transition_image_layout(depth, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-    texture = rd->create_texture(width, height, sampler, VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    texture = rd->create_texture(width, height, sampler, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     rd->transition_image_layout(texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     VkImageView attachments[] = {
