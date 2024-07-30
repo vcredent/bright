@@ -188,6 +188,8 @@ void RenderDevice::destroy_texture(Texture2D *p_texture)
 void
 RenderDevice::create_framebuffer(uint32_t width, uint32_t height, uint32_t image_view_count, VkImageView *p_image_view, VkRenderPass render_pass, VkFramebuffer *p_framebuffer)
 {
+    VkResult U_ASSERT_ONLY err;
+
     VkFramebufferCreateInfo framebuffer_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
             /* pNext */ nextptr,
@@ -200,7 +202,8 @@ RenderDevice::create_framebuffer(uint32_t width, uint32_t height, uint32_t image
             /* layers */ 1,
     };
 
-    vkCreateFramebuffer(vk_device, &framebuffer_create_info, allocation_callbacks, p_framebuffer);
+    err = vkCreateFramebuffer(vk_device, &framebuffer_create_info, allocation_callbacks, p_framebuffer);
+    assert(!err);
 }
 
 void RenderDevice::destroy_framebuffer(VkFramebuffer framebuffer)
@@ -487,6 +490,8 @@ RenderDevice::Pipeline *RenderDevice::create_graphics_pipeline(PipelineCreateInf
     depth_stencil.depthCompareOp = VK_COMPARE_OP_LESS;
     depth_stencil.depthBoundsTestEnable = VK_FALSE;
     depth_stencil.stencilTestEnable = VK_FALSE;
+    depth_stencil.minDepthBounds = 0.0f;
+    depth_stencil.maxDepthBounds = 1.0f;
 
     VkPipelineColorBlendStateCreateInfo color_blend_state_create_info = {};
     color_blend_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
