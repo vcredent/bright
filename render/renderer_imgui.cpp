@@ -314,16 +314,16 @@ void RendererImGui::_check_dragging_cursor()
     static ImGuiID  current_drag_item = 0x7FFFFFFF;
 
     ImGuiID item = ImGui::GetItemID();
-    bool active = ImGui::IsItemActive();
+    bool check_active = ImGui::IsItemActive() && ImGui::IsMouseDragging(0);
 
-    if (item == current_drag_item && !active) {
+    if (item == current_drag_item && !check_active) {
         is_dragging = false;
         cmd_show_cursor();
         current_drag_item = 0x7FFFFFFF;
         goto _CHECK_DRAGGING_CURSOR_RETURN_TAG;
     }
 
-    if (!is_dragging && active) {
+    if (!is_dragging && check_active) {
         is_dragging = true;
         current_drag_item = item;
         cmd_hide_cursor();
