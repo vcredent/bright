@@ -63,6 +63,7 @@ public:
         uint32_t height;
         VkFormat format;
         VkSampler sampler;
+        VkImageAspectFlags aspect_mask;
     };
 
     Texture2D *create_texture(uint32_t width, uint32_t height, VkSampler sampler, VkFormat format, VkImageAspectFlags aspect_mask, VkImageUsageFlags usage);

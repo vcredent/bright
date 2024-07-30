@@ -123,6 +123,7 @@ RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t h
     texture->width = width;
     texture->height = height;
     texture->sampler = sampler;
+    texture->aspect_mask = aspect_mask;
 
     VkImageCreateInfo image_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -252,7 +253,7 @@ void RenderDevice::transition_image_layout(Texture2D *p_texture, VkImageLayout n
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.image = p_texture->image;
-    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.aspectMask = p_texture->aspect_mask;
     barrier.subresourceRange.baseMipLevel = 0;
     barrier.subresourceRange.levelCount = 1;
     barrier.subresourceRange.baseArrayLayer = 0;
@@ -302,6 +303,13 @@ PIPELINE_BARRIER_CREATE_END_TAG:
     );
 
     cmd_buffer_end(one_time_cmd_buffer);
+    cmd_buffer_submit(one_time_cmd_buffer,
+                      0, VK_NULL_HANDLE,
+                      0, VK_NULL_HANDLE,
+                      VK_NULL_HANDLE,
+                      vk_rdc->get_graph_queue(),
+                      VK_NULL_HANDLE);
+    vkQueueWaitIdle(vk_rdc->get_graph_queue());
     free_cmd_buffer(one_time_cmd_buffer);
 
     p_texture->image_layout = new_layout;

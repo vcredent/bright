@@ -63,7 +63,7 @@ public:
 protected:
     Vec3 position = Vec3(0.0f, 0.0f, 3.0f);
     Vec3 world_right = Vec3(1.0f, 0.0f, 0.0f);
-    Vec3 world_up = Vec3(0.0f, 1.0f, 0.0f);
+    Vec3 world_up = Vec3(0.0f, -1.0f, 0.0f);
     Vec3 target = Vec3(0.0f, 0.0f, 0.0f);
 
     float pitch = 0.0f;
