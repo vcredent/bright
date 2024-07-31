@@ -49,17 +49,6 @@ Window::~Window()
     }
 }
 
-void *Window::get_user_pointer(const std::string &name)
-{
-    void *retval = nullptr;
-
-    auto search = window_user_pointers.find(name);
-    if (search != window_user_pointers.end())
-        retval = search->second;
-
-    return retval;
-}
-
 void Window::set_user_pointer(const std::string &name, void *pointer)
 {
     window_user_pointers.insert({ name, pointer });
@@ -129,6 +118,15 @@ void Window::set_window_cursor_position_callbacks(PFN_WindowCursorPositionCallba
     glfwSetCursorPosCallback(handle, [](GLFWwindow *glfw_window, double x, double y) {
         Window *window = (Window *) glfwGetWindowUserPointer(glfw_window);
         window->fnWindowCursorPositionCallback(window, x, y);
+    });
+}
+
+void Window::set_window_key_callbacks(PFN_WindowKeyCallback callback)
+{
+    fnWindowKeyCallback = callback;
+    glfwSetKeyCallback(handle, [](GLFWwindow *glfw_window, int key, int scancode, int action, int mods) {
+        Window *window = (Window *) glfwGetWindowUserPointer(glfw_window);
+        window->fnWindowKeyCallback(window, key, scancode, action, mods);
     });
 }
 

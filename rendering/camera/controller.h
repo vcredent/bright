@@ -25,15 +25,17 @@
 
 #include "camera.h"
 #include "event/inpdefs.h"
+#include "platform/window.h"
 
 class CameraController {
 public:
     CameraController(Camera *v_camera = NULL);
     ~CameraController();
 
-    virtual void on_event_mouse_button(int button, int action, int mods);
-    virtual void on_event_cursor(float x, float y);
-    virtual void on_update_camera();
+    virtual void on_event_mouse_button(Window *window, int button, int action, int mods) = 0;
+    virtual void on_event_cursor(Window *window, float x, float y) = 0;
+    virtual void on_event_key(Window *window, int key, int scancode, int action, int mods) = 0;
+    virtual void on_update_camera() = 0;
 
     void uncontinue() { continued = false; }
 

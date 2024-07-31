@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* controller.cpp                                                           */
+/* game_player_camera_controller.cpp                                        */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,19 +20,24 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "controller.h"
-#include <copilot/memalloc.h>
+#include "game_player_camera_controller.h"
 
-#include <iostream>
-
-CameraController::CameraController(Camera *v_camera)
-    : camera(v_camera)
+void GamePlayerCameraController::on_event_mouse_button(Window *window, int button, int action, int mods)
 {
-    /* do nothing... */
+
 }
 
-
-CameraController::~CameraController()
+void GamePlayerCameraController::on_event_cursor(Window *window, float x, float y)
 {
-    /* do nothing... */
+
+}
+
+void GamePlayerCameraController::on_event_key(Window *window, int key, int scancode, int action, int mods)
+{
+
+}
+
+void GamePlayerCameraController::on_update_camera()
+{
+
 }

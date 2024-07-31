@@ -48,6 +48,7 @@ add_executable(${PROGRAM_NAME}
     model/obj.cpp
     rendering/camera/camera.cpp
     rendering/camera/controller.cpp
+    rendering/camera/game_player_camera_controller.cpp
     rendering/camera/projection_camera.cpp
     rendering/renderer_imgui.cpp
     rendering/renderer_canvas.cpp

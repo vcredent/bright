@@ -34,6 +34,7 @@ typedef void (*PFN_WindowCloseCallback) (Window *window);
 typedef void (*PFN_WindowResizeCallback) (Window *window, int w, int h);
 typedef void (*PFN_WindowMouseButtonCallback) (Window *window, int button, int action, int mods);
 typedef void (*PFN_WindowCursorPositionCallback) (Window *window, float x, float y);
+typedef void (*PFN_WindowKeyCallback) (Window *window, int key, int scancode, int action, int mods);
 
 struct Rect2D {
     int w;
@@ -54,7 +55,18 @@ public:
       }
 #endif
 
-    void *get_user_pointer(const std::string& name);
+    template<typename T>
+    T *pointer(const std::string& name)
+      {
+        void *retval = nullptr;
+
+        auto search = window_user_pointers.find(name);
+        if (search != window_user_pointers.end())
+            retval = search->second;
+
+        return (T*) retval;
+      }
+
     void set_user_pointer(const std::string& name, void *pointer);
     void remove_user_pointer(const std::string& name);
 
@@ -69,6 +81,7 @@ public:
     void set_window_resize_callbacks(PFN_WindowResizeCallback callback);
     void set_window_mouse_button_callbacks(PFN_WindowMouseButtonCallback callback);
     void set_window_cursor_position_callbacks(PFN_WindowCursorPositionCallback callback);
+    void set_window_key_callbacks(PFN_WindowKeyCallback callback);
 
     bool is_close();
     bool is_visible() { return visible_flag; }
@@ -91,6 +104,7 @@ private:
     PFN_WindowResizeCallback fnWindowResizeCallback = NULL;
     PFN_WindowMouseButtonCallback fnWindowMouseButtonCallback = NULL;
     PFN_WindowCursorPositionCallback fnWindowCursorPositionCallback = NULL;
+    PFN_WindowKeyCallback fnWindowKeyCallback = NULL;
 };
 
 #endif /* _COPILOT_WINDOW_H_ */
