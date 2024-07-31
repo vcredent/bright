@@ -119,7 +119,7 @@ public:
             VkImageLayout new_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
             VkAccessFlags src_access_mask = 0;
             VkAccessFlags dst_access_mask = 0;
-        } image_memory_barrier;
+        } image;
     };
 
     void cmd_pipeline_barrier(VkCommandBuffer cmd_buffer, const PipelineMemoryBarrier *p_pipeline_memory_barrier);

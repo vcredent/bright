@@ -149,16 +149,16 @@ RenderDevice::Texture2D *RendererCanvas::cmd_end_canvas_render()
 void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
 {
     depth = rd->create_texture(width, height, sampler, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-    texture = rd->create_texture(width, height, sampler, VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    texture = rd->create_texture(width, height, sampler, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
     VkCommandBuffer cmd_buffer;
     rd->cmd_buffer_one_time_begin(&cmd_buffer);
     RenderDevice::PipelineMemoryBarrier barrier = {};
-    barrier.image_memory_barrier.texture = texture;
-    barrier.image_memory_barrier.src_access_mask = VK_ACCESS_NONE;
-    barrier.image_memory_barrier.dst_access_mask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_HOST_READ_BIT;
-    barrier.image_memory_barrier.old_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-    barrier.image_memory_barrier.new_image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    barrier.image.texture = texture;
+    barrier.image.src_access_mask = VK_ACCESS_NONE;
+    barrier.image.dst_access_mask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_HOST_READ_BIT;
+    barrier.image.old_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+    barrier.image.new_image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     rd->cmd_pipeline_barrier(cmd_buffer, &barrier);
     rd->cmd_buffer_one_time_end(cmd_buffer);
 

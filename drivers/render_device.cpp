@@ -590,14 +590,14 @@ void RenderDevice::cmd_pipeline_barrier(VkCommandBuffer cmd_buffer, const Pipeli
 {
     VkImageMemoryBarrier barrier = {};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    barrier.srcAccessMask = p_pipeline_memory_barrier->image_memory_barrier.src_access_mask;
-    barrier.dstAccessMask = p_pipeline_memory_barrier->image_memory_barrier.dst_access_mask;
-    barrier.oldLayout = p_pipeline_memory_barrier->image_memory_barrier.old_image_layout;
-    barrier.newLayout = p_pipeline_memory_barrier->image_memory_barrier.new_image_layout;
+    barrier.srcAccessMask = p_pipeline_memory_barrier->image.src_access_mask;
+    barrier.dstAccessMask = p_pipeline_memory_barrier->image.dst_access_mask;
+    barrier.oldLayout = p_pipeline_memory_barrier->image.old_image_layout;
+    barrier.newLayout = p_pipeline_memory_barrier->image.new_image_layout;
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.image = p_pipeline_memory_barrier->image_memory_barrier.texture->image;
-    barrier.subresourceRange.aspectMask = p_pipeline_memory_barrier->image_memory_barrier.texture->aspect_mask;
+    barrier.image = p_pipeline_memory_barrier->image.texture->image;
+    barrier.subresourceRange.aspectMask = p_pipeline_memory_barrier->image.texture->aspect_mask;
     barrier.subresourceRange.baseMipLevel = 0;
     barrier.subresourceRange.levelCount = 1;
     barrier.subresourceRange.baseArrayLayer = 0;
@@ -613,7 +613,7 @@ void RenderDevice::cmd_pipeline_barrier(VkCommandBuffer cmd_buffer, const Pipeli
             1, &barrier
     );
 
-    p_pipeline_memory_barrier->image_memory_barrier.texture->image_layout = barrier.newLayout;
+    p_pipeline_memory_barrier->image.texture->image_layout = barrier.newLayout;
 }
 
 void RenderDevice::cmd_end_render_pass(VkCommandBuffer cmd_buffer)
