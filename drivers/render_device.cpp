@@ -240,83 +240,7 @@ void RenderDevice::destroy_sampler(VkSampler sampler)
     vkDestroySampler(vk_device, sampler, allocation_callbacks);
 }
 
-void RenderDevice::transition_image_layout(Texture2D *p_texture, VkImageLayout old_layout, VkImageLayout new_layout)
-{
-    VkCommandBuffer one_time_cmd_buffer;
-    allocate_cmd_buffer(&one_time_cmd_buffer);
-    cmd_buffer_begin(one_time_cmd_buffer, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-
-    VkImageMemoryBarrier barrier = {};
-    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    barrier.oldLayout = old_layout;
-    barrier.newLayout = new_layout;
-    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.image = p_texture->image;
-    barrier.subresourceRange.aspectMask = p_texture->aspect_mask;
-    barrier.subresourceRange.baseMipLevel = 0;
-    barrier.subresourceRange.levelCount = 1;
-    barrier.subresourceRange.baseArrayLayer = 0;
-    barrier.subresourceRange.layerCount = 1;
-
-    VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-    VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-
-    if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
-        barrier.srcAccessMask = 0;
-        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-        goto PIPELINE_BARRIER_CREATE_END_TAG;
-    }
-
-    if (old_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
-        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-        goto PIPELINE_BARRIER_CREATE_END_TAG;
-    }
-
-    if ((old_layout == VK_IMAGE_LAYOUT_UNDEFINED  || old_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) && new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
-        barrier.srcAccessMask = 0;
-        barrier.dstAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_HOST_READ_BIT;
-        goto PIPELINE_BARRIER_CREATE_END_TAG;
-    }
-
-    if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
-        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-        if (p_texture->format == VK_FORMAT_D32_SFLOAT_S8_UINT || p_texture->format == VK_FORMAT_D24_UNORM_S8_UINT)
-            barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-        barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-        barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        goto PIPELINE_BARRIER_CREATE_END_TAG;
-    }
-
-    throw std::invalid_argument("unsupported layout transition!");
-
-PIPELINE_BARRIER_CREATE_END_TAG:
-    vkCmdPipelineBarrier(
-            one_time_cmd_buffer,
-            sourceStage,
-            destinationStage,
-            0,
-            0, nullptr,
-            0, nullptr,
-            1, &barrier
-    );
-
-    cmd_buffer_end(one_time_cmd_buffer);
-    cmd_buffer_submit(one_time_cmd_buffer,
-                      0, VK_NULL_HANDLE,
-                      0, VK_NULL_HANDLE,
-                      VK_NULL_HANDLE,
-                      vk_rdc->get_graph_queue(),
-                      VK_NULL_HANDLE);
-    vkQueueWaitIdle(vk_rdc->get_graph_queue());
-    free_cmd_buffer(one_time_cmd_buffer);
-
-    p_texture->image_layout = new_layout;
-}
-
-void
-RenderDevice::create_descriptor_set_layout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout)
+void RenderDevice::create_descriptor_set_layout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -337,8 +261,7 @@ void RenderDevice::destroy_descriptor_set_layout(VkDescriptorSetLayout descripto
     vkDestroyDescriptorSetLayout(vk_device, descriptor_set_layout, allocation_callbacks);
 }
 
-void
-RenderDevice::allocate_descriptor_set(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor_set)
+void RenderDevice::allocate_descriptor_set(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor_set)
 {
     VkDescriptorSetAllocateInfo descriptor_allocate_info = {
             /* sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -624,6 +547,30 @@ void RenderDevice::cmd_buffer_end(VkCommandBuffer cmd_buffer)
     vkEndCommandBuffer(cmd_buffer);
 }
 
+void RenderDevice::cmd_buffer_one_time_begin(VkCommandBuffer *p_cmd_buffer)
+{
+    VkCommandBuffer cmd_buffer;
+    allocate_cmd_buffer(&cmd_buffer);
+    cmd_buffer_begin(cmd_buffer, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+    *p_cmd_buffer = cmd_buffer;
+}
+
+void RenderDevice::cmd_buffer_one_time_end(VkCommandBuffer cmd_buffer)
+{
+    cmd_buffer_end(cmd_buffer);
+
+    VkQueue graph_queue = vk_rdc->get_graph_queue();
+    cmd_buffer_submit(cmd_buffer,
+        0, VK_NULL_HANDLE,
+        0, VK_NULL_HANDLE,
+        VK_NULL_HANDLE,
+        graph_queue,
+        VK_NULL_HANDLE);
+    vkQueueWaitIdle(graph_queue);
+
+    free_cmd_buffer(cmd_buffer);
+}
+
 void RenderDevice::cmd_begin_render_pass(VkCommandBuffer cmd_buffer, VkRenderPass render_pass, uint32_t clear_value_count, VkClearValue *p_clear_values, VkFramebuffer framebuffer, VkRect2D *p_rect)
 {
     VkRenderPassBeginInfo render_pass_begin_info = {
@@ -637,6 +584,36 @@ void RenderDevice::cmd_begin_render_pass(VkCommandBuffer cmd_buffer, VkRenderPas
     };
 
     vkCmdBeginRenderPass(cmd_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+}
+
+void RenderDevice::cmd_pipeline_barrier(VkCommandBuffer cmd_buffer, const PipelineMemoryBarrier *p_pipeline_memory_barrier)
+{
+    VkImageMemoryBarrier barrier = {};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.srcAccessMask = p_pipeline_memory_barrier->image_memory_barrier.src_access_mask;
+    barrier.dstAccessMask = p_pipeline_memory_barrier->image_memory_barrier.dst_access_mask;
+    barrier.oldLayout = p_pipeline_memory_barrier->image_memory_barrier.old_image_layout;
+    barrier.newLayout = p_pipeline_memory_barrier->image_memory_barrier.new_image_layout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = p_pipeline_memory_barrier->image_memory_barrier.texture->image;
+    barrier.subresourceRange.aspectMask = p_pipeline_memory_barrier->image_memory_barrier.texture->aspect_mask;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+
+    vkCmdPipelineBarrier(
+            cmd_buffer,
+            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+            0,
+            0, VK_NULL_HANDLE,
+            0, VK_NULL_HANDLE,
+            1, &barrier
+    );
+
+    p_pipeline_memory_barrier->image_memory_barrier.texture->image_layout = barrier.newLayout;
 }
 
 void RenderDevice::cmd_end_render_pass(VkCommandBuffer cmd_buffer)

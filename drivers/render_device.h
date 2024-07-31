@@ -72,7 +72,6 @@ public:
     void destroy_framebuffer(VkFramebuffer framebuffer);
     void create_sampler(VkSampler *p_sampler);
     void destroy_sampler(VkSampler sampler);
-    void transition_image_layout(Texture2D *p_texture, VkImageLayout old_layout, VkImageLayout new_layout);
 
     void create_descriptor_set_layout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout);
     void destroy_descriptor_set_layout(VkDescriptorSetLayout descriptor_set_layout);
@@ -110,6 +109,21 @@ public:
 
     void cmd_buffer_begin(VkCommandBuffer cmd_buffer, VkCommandBufferUsageFlags usage);
     void cmd_buffer_end(VkCommandBuffer cmd_buffer);
+    void cmd_buffer_one_time_begin(VkCommandBuffer *p_cmd_buffer);
+    void cmd_buffer_one_time_end(VkCommandBuffer cmd_buffer);
+
+    struct PipelineMemoryBarrier {
+        struct {
+            Texture2D *texture = VK_NULL_HANDLE;
+            VkImageLayout old_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+            VkImageLayout new_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+            VkAccessFlags src_access_mask = 0;
+            VkAccessFlags dst_access_mask = 0;
+        } image_memory_barrier;
+    };
+
+    void cmd_pipeline_barrier(VkCommandBuffer cmd_buffer, const PipelineMemoryBarrier *p_pipeline_memory_barrier);
+
     void cmd_begin_render_pass(VkCommandBuffer cmd_buffer, VkRenderPass render_pass, uint32_t clear_value_count, VkClearValue *p_clear_values, VkFramebuffer framebuffer, VkRect2D *p_rect);
     void cmd_end_render_pass(VkCommandBuffer cmd_buffer);
     void cmd_bind_vertex_buffer(VkCommandBuffer cmd_buffer, Buffer *p_buffer);
