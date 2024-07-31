@@ -23,12 +23,12 @@
 #include "platform/win32/render_device_context_win32.h"
 #include <vector>
 #include <chrono>
-#include "render/camera/projection_camera.h"
-#include "render/renderer_imgui.h"
-#include "render/renderer_canvas.h"
-#include "render/renderer_screen.h"
-#include "render/gui/renderer_viewport.h"
-#include "render/renderer_graphics.h"
+#include "rendering/camera/projection_camera.h"
+#include "rendering/renderer_imgui.h"
+#include "rendering/renderer_canvas.h"
+#include "rendering/renderer_screen.h"
+#include "rendering/gui/renderer_viewport.h"
+#include "rendering/renderer_graphics.h"
 
 int main(int argc, char **argv)
 {

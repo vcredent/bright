@@ -46,15 +46,15 @@ add_executable(${PROGRAM_NAME}
     platform/window.cpp
     platform/win32/render_device_context_win32.cpp
     model/obj.cpp
-    render/camera/camera.cpp
-    render/camera/controller.cpp
-    render/camera/projection_camera.cpp
-    render/renderer_imgui.cpp
-    render/renderer_canvas.cpp
-    render/renderer_screen.cpp
-    render/render_object.cpp
-    render/renderer_graphics.cpp
-    render/gui/renderer_viewport.cpp
+    rendering/camera/camera.cpp
+    rendering/camera/controller.cpp
+    rendering/camera/projection_camera.cpp
+    rendering/renderer_imgui.cpp
+    rendering/renderer_canvas.cpp
+    rendering/renderer_screen.cpp
+    rendering/render_object.cpp
+    rendering/renderer_graphics.cpp
+    rendering/gui/renderer_viewport.cpp
     misc/vk_mem_alloc.cpp
     misc/tiny_obj_loader.cpp
     # ============================ #
