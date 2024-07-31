@@ -196,9 +196,9 @@ void RendererImGui::cmd_end_viewport()
     ImGui::PopStyleVar();
 }
 
-void RendererImGui::cmd_same_line128()
+void RendererImGui::cmd_same_line64()
 {
-    ImGui::SameLine(128.0f);
+    ImGui::SameLine(64.0f);
 }
 
 void RendererImGui::cmd_draw_texture(ImTextureID texture, uint32_t width, uint32_t height)
@@ -208,42 +208,22 @@ void RendererImGui::cmd_draw_texture(ImTextureID texture, uint32_t width, uint32
 
 void RendererImGui::cmd_drag_float(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
-    ImGui::Text(label);
-    cmd_same_line128();
-    ImGui::PushID(label);
-    ImGui::DragFloat("", v, v_speed, v_min, v_max, format);
-    _check_dragging_cursor();
-    ImGui::PopID();
+    _drag_scalar_n(label, v, 1, v_speed, v_min, v_max, format);
 }
 
 void RendererImGui::cmd_drag_float2(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
-    ImGui::PushID(label);
-    ImGui::Text(label);
-    cmd_same_line128();
-    ImGui::DragFloat2("", v, v_speed, v_min, v_max, format);
-    _check_dragging_cursor();
-    ImGui::PopID();
+    _drag_scalar_n(label, v, 2, v_speed, v_min, v_max, format);
 }
 
 void RendererImGui::cmd_drag_float3(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
-    ImGui::PushID(label);
-    ImGui::Text(label);
-    cmd_same_line128();
-    ImGui::DragFloat3("", v, v_speed, v_min, v_max, format);
-    _check_dragging_cursor();
-    ImGui::PopID();
+    _drag_scalar_n(label, v, 3, v_speed, v_min, v_max, format);
 }
 
 void RendererImGui::cmd_drag_float4(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
-    ImGui::PushID(label);
-    ImGui::Text(label);
-    cmd_same_line128();
-    ImGui::DragFloat4("", v, v_speed, v_min, v_max, format);
-    _check_dragging_cursor();
-    ImGui::PopID();
+    _drag_scalar_n(label, v, 4, v_speed, v_min, v_max, format);
 }
 
 void RendererImGui::cmd_show_cursor()
@@ -254,6 +234,27 @@ void RendererImGui::cmd_show_cursor()
 void RendererImGui::cmd_hide_cursor()
 {
     screen->get_focused_window()->hide_cursor();
+}
+
+void RendererImGui::_drag_scalar_n(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format)
+{
+    assert(v_number <= 4);
+
+    ImGui::PushID(label);
+    ImGui::Indent(32.0f);
+    ImGui::Text(label);
+    ImGui::SameLine();
+
+    switch (v_number) {
+        case 1: ImGui::DragFloat("", v, v_speed, v_min, v_max, format);  break;
+        case 2: ImGui::DragFloat2("", v, v_speed, v_min, v_max, format); break;
+        case 3: ImGui::DragFloat3("", v, v_speed, v_min, v_max, format); break;
+        case 4: ImGui::DragFloat4("", v, v_speed, v_min, v_max, format); break;
+    }
+
+    _check_dragging_cursor();
+    ImGui::Unindent(32.0f);
+    ImGui::PopID();
 }
 
 void RendererImGui::_window_event_process(RendererImGui::EventCallbacks *callbacks)
