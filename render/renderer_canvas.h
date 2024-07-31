@@ -41,14 +41,14 @@ public:
     RenderDevice::Texture2D *cmd_end_canvas_render();
 
 private:
-    void _create_canvas_texture(uint32_t width, uint32_t height);
+    void _create_canvas_texture(uint32_t width, uint32_t height, bool initialize);
     void _clean_up_canvas_texture();
 
     RenderDevice *rd;
     RenderDeviceContext *rdc;
     VkRenderPass render_pass;
-    RenderDevice::Texture2D *texture;
-    RenderDevice::Texture2D *depth;
+    RenderDevice::Texture2D *texture = NULL;
+    RenderDevice::Texture2D *depth = NULL;
     VkFramebuffer framebuffer;
     VkSampler sampler;
     VkCommandBuffer canvas_cmd_buffer;

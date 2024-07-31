@@ -72,7 +72,7 @@ public:
     void destroy_framebuffer(VkFramebuffer framebuffer);
     void create_sampler(VkSampler *p_sampler);
     void destroy_sampler(VkSampler sampler);
-    void transition_image_layout(Texture2D *p_texture, VkImageLayout new_layout);
+    void transition_image_layout(Texture2D *p_texture, VkImageLayout old_layout, VkImageLayout new_layout);
 
     void create_descriptor_set_layout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout);
     void destroy_descriptor_set_layout(VkDescriptorSetLayout descriptor_set_layout);

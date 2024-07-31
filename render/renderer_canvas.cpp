@@ -100,14 +100,14 @@ void RendererCanvas::initialize()
     rd->create_sampler(&sampler);
     rd->allocate_cmd_buffer(&canvas_cmd_buffer);
 
-    _create_canvas_texture(32, 32);
+    _create_canvas_texture(width, height, true);
 }
 
 void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer)
 {
     if (texture->width != width || texture->height != height) {
         _clean_up_canvas_texture();
-        _create_canvas_texture(width, height);
+        _create_canvas_texture(width, height, false);
     }
 
     rd->cmd_buffer_begin(canvas_cmd_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
@@ -146,11 +146,11 @@ RenderDevice::Texture2D *RendererCanvas::cmd_end_canvas_render()
     return texture;
 }
 
-void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
+void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height, bool initialize)
 {
-    depth = rd->create_texture(width, height, sampler, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    depth = rd->create_texture(width, height, sampler, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     texture = rd->create_texture(width, height, sampler, VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-    rd->transition_image_layout(texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    rd->transition_image_layout(texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     VkImageView attachments[] = {
             texture->image_view,

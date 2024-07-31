@@ -240,7 +240,7 @@ void RenderDevice::destroy_sampler(VkSampler sampler)
     vkDestroySampler(vk_device, sampler, allocation_callbacks);
 }
 
-void RenderDevice::transition_image_layout(Texture2D *p_texture, VkImageLayout new_layout)
+void RenderDevice::transition_image_layout(Texture2D *p_texture, VkImageLayout old_layout, VkImageLayout new_layout)
 {
     VkCommandBuffer one_time_cmd_buffer;
     allocate_cmd_buffer(&one_time_cmd_buffer);
@@ -248,7 +248,7 @@ void RenderDevice::transition_image_layout(Texture2D *p_texture, VkImageLayout n
 
     VkImageMemoryBarrier barrier = {};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    barrier.oldLayout = p_texture->image_layout;
+    barrier.oldLayout = old_layout;
     barrier.newLayout = new_layout;
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -262,25 +262,25 @@ void RenderDevice::transition_image_layout(Texture2D *p_texture, VkImageLayout n
     VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
     VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
-    if (p_texture->image_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+    if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         goto PIPELINE_BARRIER_CREATE_END_TAG;
     }
 
-    if (p_texture->image_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+    if (old_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
         goto PIPELINE_BARRIER_CREATE_END_TAG;
     }
 
-    if (p_texture->image_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+    if ((old_layout == VK_IMAGE_LAYOUT_UNDEFINED  || old_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) && new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_HOST_READ_BIT;
         goto PIPELINE_BARRIER_CREATE_END_TAG;
     }
 
-    if (p_texture->image_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+    if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
         barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         if (p_texture->format == VK_FORMAT_D32_SFLOAT_S8_UINT || p_texture->format == VK_FORMAT_D24_UNORM_S8_UINT)
             barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
