@@ -100,14 +100,14 @@ void RendererCanvas::initialize()
     rd->create_sampler(&sampler);
     rd->allocate_cmd_buffer(&canvas_cmd_buffer);
 
-    _create_canvas_texture(width, height, true);
+    _create_canvas_texture(width, height);
 }
 
 void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer)
 {
     if (texture->width != width || texture->height != height) {
         _clean_up_canvas_texture();
-        _create_canvas_texture(width, height, false);
+        _create_canvas_texture(width, height);
     }
 
     rd->cmd_buffer_begin(canvas_cmd_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
