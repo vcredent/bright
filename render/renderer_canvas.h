@@ -41,7 +41,7 @@ public:
     RenderDevice::Texture2D *cmd_end_canvas_render();
 
 private:
-    void _create_canvas_texture(uint32_t width, uint32_t height, bool initialize);
+    void _create_canvas_texture(uint32_t width, uint32_t height);
     void _clean_up_canvas_texture();
 
     RenderDevice *rd;
