@@ -24,3 +24,4 @@
 cmake-build-debug
 cmake-build-run
 *.spv
+out
