@@ -27,7 +27,7 @@
 
 class ProjectionCamera : public Camera {
 public:
-    ProjectionCamera(float v_fov = 45.0f, float v_near = 1.0f, float v_far = 65.0f);
+    ProjectionCamera(float v_fov = 45.0f, float v_near = 1.0f, float v_far = 90.0f);
     ~ProjectionCamera();
 
     virtual void update() override final;

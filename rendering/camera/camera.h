@@ -79,7 +79,7 @@ protected:
 
     float fov = 1.0f;
     float near = 1.0f;
-    float far = 45.0f;
+    float far = 90.0f;
     float pitch = 0.0f;
     float yaw = -90.0f;
     float roll = 0.0f;
