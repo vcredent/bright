@@ -144,6 +144,19 @@ void RendererImGui::cmd_end_viewport()
     ImGui::PopStyleVar();
 }
 
+void RendererImGui::cmd_draw_text(const char *text, ...)
+{
+    va_list va;
+    va_start(va, text);
+    ImGui::TextV(text, va);
+    va_end(va);
+}
+
+void RendererImGui::cmd_draw_unformatted_text(const char *text)
+{
+    ImGui::TextUnformatted(text);
+}
+
 void RendererImGui::cmd_draw_texture(ImTextureID texture, uint32_t width, uint32_t height)
 {
     ImGui::Image(texture, ImVec2(width, height));
@@ -185,7 +198,7 @@ void RendererImGui::_drag_scalar_n(const char *label, float *v, int v_number, fl
 
     ImGui::PushID(label);
     ImGui::Indent(32.0f);
-    ImGui::Text(label);
+    cmd_draw_unformatted_text(label);
     ImGui::SameLine();
 
     switch (v_number) {
