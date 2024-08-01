@@ -25,7 +25,7 @@
 
 void GamePlayerCameraController::on_event_mouse_button(int button, int action, int mods)
 {
-
+    /* do nothing... */
 }
 
 void GamePlayerCameraController::on_event_cursor(float x, float y)
@@ -61,27 +61,12 @@ void GamePlayerCameraController::on_event_cursor(float x, float y)
 
 void GamePlayerCameraController::on_event_key(int key, int action)
 {
-    Vec3 position = camera->get_position();
-    Vec3 front = camera->get_front();
-    float speed = camera->get_speed();
-
-    static float last_time = 0.0f;
-    float current_time = (float)  glfwGetTime();
-    float delta_time = current_time - last_time;
-    last_time = current_time;
-
-    float velocity = speed * delta_time;
-
-    if (action) {
-        switch (key) {
-            case EVENT_INPUT_KEY_W: position += velocity * front; break;
-            case EVENT_INPUT_KEY_S: position -= velocity * front; break;
-            case EVENT_INPUT_KEY_A: position -= glm::normalize(glm::cross(front, camera->get_camera_up())) * velocity; break;
-            case EVENT_INPUT_KEY_D: position += glm::normalize(glm::cross(front, camera->get_camera_up())) * velocity; break;
-        }
+    switch (key) {
+        case EVENT_INPUT_KEY_W: press[EVENT_INPUT_KEY_W] = action; break;
+        case EVENT_INPUT_KEY_S: press[EVENT_INPUT_KEY_S] = action; break;
+        case EVENT_INPUT_KEY_A: press[EVENT_INPUT_KEY_A] = action; break;
+        case EVENT_INPUT_KEY_D: press[EVENT_INPUT_KEY_D] = action; break;
     }
-
-    camera->set_position(position);
 }
 
 void GamePlayerCameraController::on_event_scroll(float x, float y)
@@ -99,5 +84,27 @@ void GamePlayerCameraController::on_event_scroll(float x, float y)
 
 void GamePlayerCameraController::on_update_camera()
 {
+    Vec3 position = camera->get_position();
+    Vec3 front = camera->get_front();
+    float speed = camera->get_speed();
+
+    static float last_time = 0.0f;
+    float current_time = (float)  glfwGetTime();
+    float delta_time = current_time - last_time;
+    last_time = current_time;
+
+    float velocity = speed * delta_time;
+
+    if (press[EVENT_INPUT_KEY_W])
+        position += velocity * front;
+    if (press[EVENT_INPUT_KEY_S])
+        position -= velocity * front;
+    if (press[EVENT_INPUT_KEY_A])
+        position -= glm::normalize(glm::cross(front, camera->get_camera_up())) * velocity;
+    if (press[EVENT_INPUT_KEY_D])
+        position += glm::normalize(glm::cross(front, camera->get_camera_up())) * velocity;
+
+    camera->set_position(position);
+
     camera->update();
 }

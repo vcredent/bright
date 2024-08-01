@@ -63,17 +63,10 @@ void _update_camera()
 
     if (is_dragging) {
         // key button
-        if (window->getkey(GLFW_KEY_W))
-            game_player_controller->on_event_key(GLFW_KEY_W, GLFW_PRESS);
-
-        if (window->getkey(GLFW_KEY_S))
-            game_player_controller->on_event_key(GLFW_KEY_S, GLFW_PRESS);
-
-        if (window->getkey(GLFW_KEY_A))
-            game_player_controller->on_event_key(GLFW_KEY_A, GLFW_PRESS);
-
-        if (window->getkey(GLFW_KEY_D))
-            game_player_controller->on_event_key(GLFW_KEY_D, GLFW_PRESS);
+        game_player_controller->on_event_key(GLFW_KEY_W, window->getkey(GLFW_KEY_W));
+        game_player_controller->on_event_key(GLFW_KEY_S, window->getkey(GLFW_KEY_S));
+        game_player_controller->on_event_key(GLFW_KEY_A, window->getkey(GLFW_KEY_A));
+        game_player_controller->on_event_key(GLFW_KEY_D, window->getkey(GLFW_KEY_D));
 
         // mouse
         float xpos = 0.0f;

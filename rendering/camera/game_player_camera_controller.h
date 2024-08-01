@@ -32,6 +32,9 @@ public:
     virtual void on_event_key(int key, int action) override final;
     virtual void on_event_scroll(float x, float y) override final;
     virtual void on_update_camera() override final;
+
+private:
+    bool press[1024] = { 0 };
 };
 
 #endif /* _GAME_PLAYER_CAMERA_CONTROLLER_H_ */
