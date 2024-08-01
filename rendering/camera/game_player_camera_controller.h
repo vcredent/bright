@@ -30,6 +30,7 @@ public:
     virtual void on_event_mouse_button(int button, int action, int mods) override final;
     virtual void on_event_cursor(float x, float y) override final;
     virtual void on_event_key(int key, int action) override final;
+    virtual void on_event_scroll(float x, float y) override final;
     virtual void on_update_camera() override final;
 };
 

@@ -134,6 +134,16 @@ void Window::set_window_key_callbacks(PFN_WindowKeyCallback callback)
     });
 }
 
+void Window::set_window_scroll_callbacks(PFN_WindowScrollCallback callback)
+{
+    fnWindowScrollCallback = callback;
+    glfwSetScrollCallback(handle, [](GLFWwindow *glfw_window, double x, double y) {
+        Window *window = (Window *) glfwGetWindowUserPointer(glfw_window);
+        window->fnWindowScrollCallback(window, (float) x, (float) y);
+    });
+}
+
+
 bool Window::is_close()
 {
     return !glfwWindowShouldClose(handle);

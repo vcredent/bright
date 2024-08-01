@@ -38,6 +38,9 @@ public:
     V_FORCEINLINE inline Vec3& get_camera_up() { return up; }
     V_FORCEINLINE inline Vec3& get_target() { return target; }
     V_FORCEINLINE inline Vec3& get_front() { return front; }
+    V_FORCEINLINE inline float get_fov() { return fov; }
+    V_FORCEINLINE inline float get_near() { return near; }
+    V_FORCEINLINE inline float get_far() { return far; }
     V_FORCEINLINE inline float get_pitch() { return pitch; }
     V_FORCEINLINE inline float get_yaw() { return yaw; }
     V_FORCEINLINE inline float get_roll() { return roll; }
@@ -52,6 +55,9 @@ public:
     V_FORCEINLINE inline void set_world_up(Vec3 v_world_up) { world_up = v_world_up; }
     V_FORCEINLINE inline void set_target(Vec3 v_target) { target = v_target; }
     V_FORCEINLINE inline void set_front(Vec3 v_front) { front = v_front; }
+    V_FORCEINLINE inline void set_fov(float v_fov) { fov = v_fov; }
+    V_FORCEINLINE inline void set_near(float v_near) { near = v_near; }
+    V_FORCEINLINE inline void set_far(float v_far) { far = v_far; }
     V_FORCEINLINE inline void set_pitch(float v_pitch) { pitch = v_pitch; }
     V_FORCEINLINE inline void set_yaw(float v_yaw) { yaw = v_yaw; }
     V_FORCEINLINE inline void set_roll(float v_roll) { roll = v_roll; }
@@ -71,6 +77,9 @@ protected:
     Vec3 target = Vec3(0.0f, 0.0f, 0.0f);
     Vec3 front = Vec3(0.0f, 0.0f, -1.0f);
 
+    float fov = 1.0f;
+    float near = 1.0f;
+    float far = 45.0f;
     float pitch = 0.0f;
     float yaw = -90.0f;
     float roll = 0.0f;

@@ -43,6 +43,9 @@ CameraController *game_player_controller;
 RenderDevice::Texture2D *canvas_preview_texture;
 ImVec2 viewport_window_region = ImVec2(32.0f, 32.0f);
 
+static float mouse_scroll_xoffset = 0.0f;
+static float mouse_scroll_yoffset = 0.0f;
+
 void _update_camera()
 {
     // update camera
@@ -77,6 +80,9 @@ void _update_camera()
         float ypos = 0.0f;
         window->get_cursor_position(&xpos, &ypos);
         game_player_controller->on_event_cursor(xpos, ypos);
+
+        // scroll
+        game_player_controller->on_event_scroll(mouse_scroll_xoffset, mouse_scroll_yoffset);
     }
 
     game_player_controller->on_update_camera();
@@ -191,6 +197,11 @@ void initialize()
 {
     window = memnew(Window, "CopilotEngine", 1980, 1080);
 
+    window->set_window_scroll_callbacks([](Window *window, float x, float y) {
+        mouse_scroll_xoffset = x;
+        mouse_scroll_yoffset = y;
+    });
+
     rdc = memnew(RenderDeviceContextWin32, window);
     // initialize
     rdc->initialize();
@@ -226,6 +237,8 @@ int main(int argc, char **argv)
         window->poll_events();
         update();
         rendering();
+        mouse_scroll_xoffset = 0.0f;
+        mouse_scroll_yoffset = 0.0f;
     }
 
     memdel(object);

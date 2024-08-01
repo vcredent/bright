@@ -30,20 +30,7 @@ public:
     ProjectionCamera(float v_fov = 45.0f, float v_near = 1.0f, float v_far = 65.0f);
     ~ProjectionCamera();
 
-    V_FORCEINLINE float get_fov() { return fov; }
-    V_FORCEINLINE float get_near() { return near; }
-    V_FORCEINLINE float get_far() { return far; }
-
-    V_FORCEINLINE void set_fov(float v_fov) { fov = v_fov; }
-    V_FORCEINLINE void set_near(float v_near) { near = v_near; }
-    V_FORCEINLINE void set_far(float v_far) { far = v_far; }
-
     virtual void update() override final;
-
-private:
-    float fov;
-    float near;
-    float far;
 };
 
 #endif /* _PROJECTION_CAMERA_H_ */

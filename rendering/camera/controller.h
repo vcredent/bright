@@ -34,6 +34,7 @@ public:
     virtual void on_event_mouse_button(int button, int action, int mods) = 0;
     virtual void on_event_cursor(float x, float y) = 0;
     virtual void on_event_key(int key, int action) = 0;
+    virtual void on_event_scroll(float x, float y) = 0;
     virtual void on_update_camera() = 0;
 
     void uncontinual() { continual_dragging_flag = false; }

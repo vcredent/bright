@@ -23,9 +23,10 @@
 #include "projection_camera.h"
 
 ProjectionCamera::ProjectionCamera(float v_fov, float v_near, float v_far)
-    : fov(v_fov), near(v_near), far(v_far)
 {
-    /* do nothing... */
+   fov = v_fov;
+   near = v_near;
+   far = v_far;
 }
 
 ProjectionCamera::~ProjectionCamera()
@@ -42,6 +43,6 @@ void ProjectionCamera::update()
 
     view_matrix = glm::lookAt(position, position + front, world_up);
 
-    projection_matrix = glm::perspective(fov, aspect_ratio, near, far);
+    projection_matrix = glm::perspective(glm::radians(fov), aspect_ratio, near, far);
     projection_matrix[1][1] *= -1;
 }
