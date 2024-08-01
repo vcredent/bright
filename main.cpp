@@ -50,8 +50,7 @@ void rendering()
     {
         graphics->cmd_begin_graphics_render(canvas_cmd_buffer);
         {
-            graphics->cmd_setval_viewport(canvas_cmd_buffer, canvas->get_canvas_width(),
-                                          canvas->get_canvas_height());
+            graphics->cmd_setval_viewport(canvas_cmd_buffer, canvas->get_width(), canvas->get_height());
             graphics->cmd_setval_view_matrix(canvas_cmd_buffer, camera->get_view_matrix());
             graphics->cmd_setval_projection_matrix(canvas_cmd_buffer, camera->get_projection_matrix());
             graphics->cmd_draw_list(canvas_cmd_buffer);
@@ -72,7 +71,7 @@ void rendering()
             imgui->cmd_begin_viewport("视口");
             {
                 ImVec2 region = ImGui::GetContentRegionAvail();
-                canvas->set_canvas_extent(region.x, region.y);
+                canvas->set_extent(region.x, region.y);
 
                 static ImTextureID preview = NULL;
                 if (preview != NULL)
