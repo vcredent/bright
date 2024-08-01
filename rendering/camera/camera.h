@@ -85,7 +85,7 @@ protected:
     float roll = 0.0f;
     float aspect_ratio = 1.0f;
 
-    float speed = 2.5f;
+    float speed = 10.0f;
     float sensitivity = 0.05f;
 
     Mat4 view_matrix = Mat4(1.0f);
