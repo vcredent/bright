@@ -50,8 +50,7 @@ void rendering()
     {
         graphics->cmd_begin_graphics_render(canvas_cmd_buffer);
         {
-            graphics->cmd_setval_viewport(canvas_cmd_buffer, canvas->get_canvas_width(),
-                                          canvas->get_canvas_height());
+            graphics->cmd_setval_viewport(canvas_cmd_buffer, canvas->get_width(), canvas->get_height());
             graphics->cmd_setval_view_matrix(canvas_cmd_buffer, camera->get_view_matrix());
             graphics->cmd_setval_projection_matrix(canvas_cmd_buffer, camera->get_projection_matrix());
             graphics->cmd_draw_list(canvas_cmd_buffer);
@@ -72,7 +71,7 @@ void rendering()
             imgui->cmd_begin_viewport("视口");
             {
                 ImVec2 region = ImGui::GetContentRegionAvail();
-                canvas->set_canvas_extent(region.x, region.y);
+                canvas->set_extent(region.x, region.y);
 
                 static ImTextureID preview = NULL;
                 if (preview != NULL)
@@ -82,6 +81,20 @@ void rendering()
                 imgui->cmd_draw_texture(preview, canvas_preview_texture->width, canvas_preview_texture->height);
             }
             imgui->cmd_end_viewport();
+
+            imgui->cmd_begin_window("测试");
+            {
+                static float x;
+                static Vec2 vec2;
+                static Vec3 vec3;
+                static Vec4 vec4;
+
+                imgui->cmd_drag_float("vec1", &x, 0.01f);
+                imgui->cmd_drag_float2("vec2", glm::value_ptr(vec2), 0.01f);
+                imgui->cmd_drag_float3("vec3", glm::value_ptr(vec3), 0.01f);
+                imgui->cmd_drag_float4("vec4", glm::value_ptr(vec4), 0.01f);
+            }
+            imgui->cmd_end_window();
 
             imgui->cmd_begin_window("object");
             {

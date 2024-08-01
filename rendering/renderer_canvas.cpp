@@ -124,7 +124,7 @@ void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer)
     *p_cmd_buffer = canvas_cmd_buffer;
 }
 
-void RendererCanvas::set_canvas_extent(uint32_t v_width, uint32_t v_height)
+void RendererCanvas::set_extent(uint32_t v_width, uint32_t v_height)
 {
     width  = v_width;
     height = v_height;

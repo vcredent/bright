@@ -32,9 +32,9 @@ public:
 
     void initialize();
 
-    void set_canvas_extent(uint32_t v_width, uint32_t v_height);
-    uint32_t get_canvas_width() { return width; }
-    uint32_t get_canvas_height() { return height; }
+    void set_extent(uint32_t v_width, uint32_t v_height);
+    uint32_t get_width() { return width; }
+    uint32_t get_height() { return height; }
     VkRenderPass get_render_pass() { return render_pass; }
 
     void cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer);
