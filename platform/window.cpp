@@ -49,11 +49,6 @@ Window::~Window()
     }
 }
 
-void Window::set_user_pointer(const std::string &name, void *pointer)
-{
-    window_user_pointers.insert({ name, pointer });
-}
-
 void Window::get_size(Rect2D *p_rect)
 {
     glfwGetWindowSize(handle, &p_rect->w, &p_rect->h);
@@ -62,11 +57,6 @@ void Window::get_size(Rect2D *p_rect)
 int Window::getkey(int key)
 {
     return glfwGetKey(handle, key);
-}
-
-void Window::remove_user_pointer(const std::string &name)
-{
-    window_user_pointers.erase(name);
 }
 
 void Window::set_visible(bool is_visible)

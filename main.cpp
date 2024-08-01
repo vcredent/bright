@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     RendererGraphics *graphics = memnew(RendererGraphics, rd);
     graphics->initialize(canvas->get_render_pass());
 
-    RenderObject *object = RenderObject::load_assets_obj("../assets/cube.obj");
+    RenderObject *object = RenderObject::load_assets_obj("../assets/.obj");
     graphics->push_render_object(object);
 
     RendererImGui *imgui = memnew(RendererImGui, rd);

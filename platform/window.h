@@ -60,15 +60,22 @@ public:
       {
         void *retval = nullptr;
 
-        auto search = window_user_pointers.find(name);
-        if (search != window_user_pointers.end())
+        auto search = pointers.find(name);
+        if (search != pointers.end())
             retval = search->second;
 
         return (T*) retval;
       }
 
-    void set_user_pointer(const std::string& name, void *pointer);
-    void remove_user_pointer(const std::string& name);
+    void add_user_pointer(const std::string& name, void *pointer)
+      {
+          pointers.insert({ name, pointer });
+      }
+
+    void remove_user_pointer(const std::string& name)
+      {
+        pointers.erase(name);
+      }
 
     void get_size(Rect2D *p_rect);
     void *get_native_window() { return handle; }
@@ -96,9 +103,8 @@ private:
     GLFWwindow *handle;
     bool visible_flag = true;
     bool full_screen_flag = false;
-    bool cursor_disabled_flag = false;
     Rect2D full_screen_rect;
-    std::unordered_map<std::string, void *> window_user_pointers;
+    std::unordered_map<std::string, void *> pointers;
 
     PFN_WindowCloseCallback fnWindowCloseCallback = NULL;
     PFN_WindowResizeCallback fnWindowResizeCallback = NULL;
