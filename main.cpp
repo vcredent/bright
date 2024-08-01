@@ -72,6 +72,7 @@ void rendering()
             {
                 ImVec2 region = ImGui::GetContentRegionAvail();
                 canvas->set_extent(region.x, region.y);
+                camera->set_aspect_ratio(region.x / region.y);
 
                 static ImTextureID preview = NULL;
                 if (preview != NULL)
