@@ -144,19 +144,6 @@ void RendererImGui::cmd_end_viewport()
     ImGui::PopStyleVar();
 }
 
-void RendererImGui::cmd_draw_text(const char *text, ...)
-{
-    va_list va;
-    va_start(va, text);
-    ImGui::TextV(text, va);
-    va_end(va);
-}
-
-void RendererImGui::cmd_draw_unformatted_text(const char *text)
-{
-    ImGui::TextUnformatted(text);
-}
-
 void RendererImGui::cmd_draw_texture(ImTextureID texture, uint32_t width, uint32_t height)
 {
     ImGui::Image(texture, ImVec2(width, height));
@@ -196,21 +183,46 @@ void RendererImGui::_drag_scalar_n(const char *label, float *v, int v_number, fl
 {
     assert(v_number <= 4);
 
+    ImGui::BeginGroup();
     ImGui::PushID(label);
     ImGui::Indent(32.0f);
-    cmd_draw_unformatted_text(label);
+    ImGui::TextUnformatted(label);
     ImGui::SameLine();
 
-    switch (v_number) {
-        case 1: ImGui::DragFloat("", v, v_speed, v_min, v_max, format);  break;
-        case 2: ImGui::DragFloat2("", v, v_speed, v_min, v_max, format); break;
-        case 3: ImGui::DragFloat3("", v, v_speed, v_min, v_max, format); break;
-        case 4: ImGui::DragFloat4("", v, v_speed, v_min, v_max, format); break;
+    static const char  *axis_labels[4] = { "X", "Y", "Z", "W" };
+    static const ImVec4 axis_colors[4] = {
+            ImVec4(1.0f, 0.0f, 0.0f, 1.0f), // R
+            ImVec4(0.0f, 1.0f, 0.0f, 1.0f), // G
+            ImVec4(0.0f, 0.4f, 1.0f, 1.0f), // B
+            ImVec4(1.0f, 1.0f, 1.0f, 1.0f), // W
+    };
+
+    if (v_number > 1) {
+        ImVec2 region = ImGui::GetContentRegionAvail();
+        float single_item_width = region.x * 0.65f / 3;
+        for (int i = 0; i < v_number; i++) {
+            const char *id = axis_labels[i];
+            ImGui::PushID(id);
+            ImGui::PushItemWidth(single_item_width);
+            ImGui::TextColored(axis_colors[i], axis_labels[i]);
+            ImGui::SameLine();
+            ImGui::DragFloat("", &v[i], v_speed, v_min, v_max, format);
+            _check_dragging_cursor();
+            ImGui::SameLine();
+            ImGui::PopItemWidth();
+            ImGui::PopID();
+        }
+        goto DRAG_SCALAR_N_END_TAG;
     }
 
+    // if v_number < 1
+    ImGui::DragFloat("", v, v_speed, v_min, v_max, format);
     _check_dragging_cursor();
+
+DRAG_SCALAR_N_END_TAG:
     ImGui::Unindent(32.0f);
     ImGui::PopID();
+    ImGui::EndGroup();
 }
 
 void RendererImGui::_check_dragging_cursor()

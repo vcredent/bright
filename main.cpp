@@ -82,6 +82,20 @@ void rendering()
             }
             imgui->cmd_end_viewport();
 
+            imgui->cmd_begin_window("测试");
+            {
+                static float x;
+                static Vec2 vec2;
+                static Vec3 vec3;
+                static Vec4 vec4;
+
+                imgui->cmd_drag_float("vec1", &x, 0.01f);
+                imgui->cmd_drag_float2("vec2", glm::value_ptr(vec2), 0.01f);
+                imgui->cmd_drag_float3("vec3", glm::value_ptr(vec3), 0.01f);
+                imgui->cmd_drag_float4("vec4", glm::value_ptr(vec4), 0.01f);
+            }
+            imgui->cmd_end_window();
+
             imgui->cmd_begin_window("object");
             {
                 Vec3 position = object->get_object_position();
