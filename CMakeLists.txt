@@ -55,7 +55,6 @@ add_executable(${PROGRAM_NAME}
     rendering/renderer_screen.cpp
     rendering/render_object.cpp
     rendering/renderer_graphics.cpp
-    rendering/gui/renderer_viewport.cpp
     misc/vk_mem_alloc.cpp
     misc/tiny_obj_loader.cpp
     # ============================ #

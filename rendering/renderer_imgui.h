@@ -29,13 +29,6 @@
 // std
 #include <unordered_map>
 
-class RegisterEventCallback;
-
-typedef void (*PFN_RegisterEventWindowCloseCallback) (RegisterEventCallback *event);
-typedef void (*PFN_RegisterEventWindowResizeCallback) (RegisterEventCallback *event, int w, int h);
-typedef void (*PFN_RegisterEventWindowMouseButtonCallback) (RegisterEventCallback *event, int button, int action, int mods);
-typedef void (*PFN_RegisterEventWindowCursorPositionCallback) (RegisterEventCallback *event, float x, float y);
-
 class RendererImGui {
 public:
     RendererImGui(RenderDevice *p_device);
@@ -45,15 +38,6 @@ public:
 
     ImTextureID create_texture(RenderDevice::Texture2D *p_texture);
     void destroy_texture(ImTextureID texture_id);
-
-    void register_event_window(const char *title, RegisterEventCallback *window);
-    void unregister_event_window(const char *title);
-    void register_window_user_pointer(const char *title, const char *name, void *pointer);
-    void register_window_resize_callback(const char *title, PFN_RegisterEventWindowResizeCallback fnEventWindowResizeCallback);
-    void register_window_mouse_button_callback(const char *title, PFN_RegisterEventWindowMouseButtonCallback fnEventWindowMouseButtonCallback);
-    void register_window_cursor_position_callback(const char *title, PFN_RegisterEventWindowCursorPositionCallback fnEventWindowCursorPositionCallback);
-
-    void *get_window_user_pointer(const char *title, const char *name);
 
     /* begin new gui frame */
     void cmd_begin_imgui_render(VkCommandBuffer cmd_buffer);
@@ -74,102 +58,12 @@ public:
     void cmd_hide_cursor();
 
 private:
-    struct EventCallbacks {
-        RegisterEventCallback *window;
-        std::unordered_map<const char *, void *> pointer = stackalloc();
-
-        struct {
-            uint32_t w;
-            uint32_t h;
-        } region;
-
-        struct {
-            bool button[5];
-            int  current_press_button = -1;
-        } mouse;
-
-        struct {
-            float x;
-            float y;
-        } cursor;
-
-        PFN_RegisterEventWindowResizeCallback fnRegisterEventWindowResizeCallback = NULL;
-        PFN_RegisterEventWindowMouseButtonCallback fnRegisterEventWindowMouseButtonCallback = NULL;
-        PFN_RegisterEventWindowCursorPositionCallback fnRegisterEventWindowCursorPositionCallback = NULL;
-    };
-
     void _drag_scalar_n(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format);
-    void _window_event_process(EventCallbacks *callbacks);
-    bool _check_event_callbacks(const char *title, EventCallbacks **p_callbacks);
     void _check_dragging_cursor(); // check the drag cursor is need show or hide.
     void _set_theme_embrace_the_darkness();
 
     RenderDevice *rd;
     RendererScreen *screen;
-
-    std::unordered_map<const char *, EventCallbacks> window_event_callbacks;
-};
-
-class RegisterEventCallback {
-public:
-    RegisterEventCallback(const char *v_title, RendererImGui *v_rd)
-            : title(v_title), rd(v_rd)
-      {
-        rd->register_event_window(title, this);
-      }
-
-    ~RegisterEventCallback()
-      {
-        /* do nothing... */
-      }
-
-    RendererImGui *get_renderer()
-      {
-        return rd;
-      }
-
-    const char *get_title()
-      {
-        return title;
-      }
-
-    void add_window_user_pointer(const char *name, void *pointer)
-      {
-        rd->register_window_user_pointer(title, name, pointer);
-      }
-
-    template<typename T>
-    T *pointer(const char *name)
-      {
-        return (T*) rd->get_window_user_pointer(title, name);
-      }
-
-    void set_window_resize_callback(PFN_RegisterEventWindowResizeCallback fnEventWindowResizeCallback)
-      {
-        rd->register_window_resize_callback(title, fnEventWindowResizeCallback);
-      }
-
-    void set_window_mouse_button_callback(PFN_RegisterEventWindowMouseButtonCallback fnEventWindowMouseButtonCallback)
-      {
-        rd->register_window_mouse_button_callback(title, fnEventWindowMouseButtonCallback);
-      }
-
-    void set_window_cursor_position_callback(PFN_RegisterEventWindowCursorPositionCallback fnEventWindowCursorPositionCallback)
-      {
-        rd->register_window_cursor_position_callback(title, fnEventWindowCursorPositionCallback);
-      }
-
-    void set_window_size(uint32_t w, uint32_t h)
-      {
-        width = w;
-        height = h;
-      }
-
-protected:
-    const char *title;
-    RendererImGui *rd;
-    uint32_t width  = 8;
-    uint32_t height = 8;
 };
 
 #endif /* _EDITOR_H_ */

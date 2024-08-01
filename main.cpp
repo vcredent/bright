@@ -28,7 +28,6 @@
 #include "rendering/renderer_imgui.h"
 #include "rendering/renderer_canvas.h"
 #include "rendering/renderer_screen.h"
-#include "rendering/gui/renderer_viewport.h"
 #include "rendering/renderer_graphics.h"
 
 int main(int argc, char **argv)
@@ -51,7 +50,7 @@ int main(int argc, char **argv)
     RendererGraphics *graphics = memnew(RendererGraphics, rd);
     graphics->initialize(canvas->get_render_pass());
 
-    RenderObject *object = RenderObject::load_assets_obj("../assets/.obj");
+    RenderObject *object = RenderObject::load_assets_obj("../assets/cube.obj");
     graphics->push_render_object(object);
 
     RendererImGui *imgui = memnew(RendererImGui, rd);
@@ -61,15 +60,6 @@ int main(int argc, char **argv)
     CameraController *game_player_controller = memnew(GamePlayerCameraController);
     game_player_controller->make_current_camera(camera);
     camera->set_position(Vec3(0.0f, 0.0f, 6.0f));
-
-    RendererViewport *viewport = memnew(RendererViewport, "视口", imgui);
-    viewport->add_window_user_pointer("#CANVAS", canvas);
-    viewport->add_window_user_pointer("#CAMERA", camera);
-
-    viewport->set_window_resize_callback([](RegisterEventCallback *event, int w, int h) {
-        event->pointer<RendererCanvas>("#CANVAS")->set_canvas_extent(w, h);
-        event->pointer<ProjectionCamera>("#CAMERA")->set_aspect_ratio((float) w / (float) h);
-    });
 
     static bool show_demo_flag = true;
 
@@ -102,11 +92,20 @@ int main(int argc, char **argv)
             imgui->cmd_begin_imgui_render(window_cmd_buffer);
             {
                 ImGui::ShowDemoWindow(&show_demo_flag);
-                viewport->cmd_begin_viewport_render();
+
+                imgui->cmd_begin_viewport("视口");
                 {
-                    viewport->cmd_draw_image(canvas_texture);
+                    ImVec2 region = ImGui::GetContentRegionAvail();
+                    canvas->set_canvas_extent(region.x, region.y);
+
+                    static ImTextureID preview = NULL;
+                    if (preview != NULL)
+                        imgui->destroy_texture(preview);
+
+                    preview = imgui->create_texture(canvas_texture);
+                    imgui->cmd_draw_texture(preview, canvas_texture->width, canvas_texture->height);
                 }
-                viewport->cmd_end_viewport_render();
+                imgui->cmd_end_viewport();
 
                 imgui->cmd_begin_window("object");
                 {
@@ -155,7 +154,6 @@ int main(int argc, char **argv)
 
     memdel(object);
     memdel(graphics);
-    memdel(viewport);
     memdel(camera);
     memdel(screen);
     memdel(canvas);
