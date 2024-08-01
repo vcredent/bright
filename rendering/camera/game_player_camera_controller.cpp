@@ -65,16 +65,19 @@ void GamePlayerCameraController::on_event_key(int key, int action)
     Vec3 front = camera->get_front();
     float speed = camera->get_speed();
 
-    static double last_time = 0.0f;
-    double current_time = glfwGetTime();
+    static float last_time = 0.0f;
+    float current_time = (float)  glfwGetTime();
     float delta_time = current_time - last_time;
+    last_time = current_time;
+
+    float velocity = speed * delta_time;
 
     if (action) {
         switch (key) {
-            case EVENT_INPUT_KEY_W: position += speed * front * delta_time; break;
-            case EVENT_INPUT_KEY_S: position -= speed * front * delta_time; break;
-            case EVENT_INPUT_KEY_A: position -= glm::normalize(glm::cross(front, camera->get_camera_up())) * speed * delta_time; break;
-            case EVENT_INPUT_KEY_D: position += glm::normalize(glm::cross(front, camera->get_camera_up())) * speed * delta_time; break;
+            case EVENT_INPUT_KEY_W: position += velocity * front * delta_time; break;
+            case EVENT_INPUT_KEY_S: position -= velocity * front * delta_time; break;
+            case EVENT_INPUT_KEY_A: position -= glm::normalize(glm::cross(front, camera->get_camera_up())) * velocity * delta_time; break;
+            case EVENT_INPUT_KEY_D: position += glm::normalize(glm::cross(front, camera->get_camera_up())) * velocity * delta_time; break;
         }
     }
 
