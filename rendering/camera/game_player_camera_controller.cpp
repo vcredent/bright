@@ -74,10 +74,10 @@ void GamePlayerCameraController::on_event_key(int key, int action)
 
     if (action) {
         switch (key) {
-            case EVENT_INPUT_KEY_W: position += velocity * front * delta_time; break;
-            case EVENT_INPUT_KEY_S: position -= velocity * front * delta_time; break;
-            case EVENT_INPUT_KEY_A: position -= glm::normalize(glm::cross(front, camera->get_camera_up())) * velocity * delta_time; break;
-            case EVENT_INPUT_KEY_D: position += glm::normalize(glm::cross(front, camera->get_camera_up())) * velocity * delta_time; break;
+            case EVENT_INPUT_KEY_W: position += velocity * front; break;
+            case EVENT_INPUT_KEY_S: position -= velocity * front; break;
+            case EVENT_INPUT_KEY_A: position -= glm::normalize(glm::cross(front, camera->get_camera_up())) * velocity; break;
+            case EVENT_INPUT_KEY_D: position += glm::normalize(glm::cross(front, camera->get_camera_up())) * velocity; break;
         }
     }
 
