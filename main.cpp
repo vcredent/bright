@@ -50,12 +50,12 @@ void _update_camera()
 {
     // update camera
     static bool is_dragging = false;
-    if (window->get_mouse_button(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    if (window->getkey(GLFW_KEY_F)) {
         is_dragging = true;
         window->hide_cursor();
     }
 
-    if (window->get_mouse_button(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && is_dragging) {
+    if (window->getkey(GLFW_KEY_ESCAPE) && is_dragging) {
         window->show_cursor();
         is_dragging = false;
         game_player_controller->uncontinual();

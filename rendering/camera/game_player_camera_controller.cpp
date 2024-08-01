@@ -83,10 +83,9 @@ void GamePlayerCameraController::on_event_key(int key, int action)
 
 void GamePlayerCameraController::on_event_scroll(float x, float y)
 {
-    printf("%f %f\n", x, y);
     float fov = camera->get_fov();
     if(fov >= 1.0f && fov <= 45.0f)
-        fov -= y;
+        fov -= y * 1.5;
     if(fov <= 1.0f)
         fov = 1.0f;
     if(fov >= 45.0f)
