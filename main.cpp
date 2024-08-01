@@ -29,6 +29,7 @@
 #include "rendering/renderer_canvas.h"
 #include "rendering/renderer_screen.h"
 #include "rendering/renderer_graphics.h"
+#include "rendering/renderer_axis_line.h"
 
 Window *window;
 RenderDeviceContext *rdc;
@@ -36,6 +37,7 @@ RenderDevice *rd;
 RendererScreen *screen;
 RendererCanvas *canvas;
 RendererGraphics *graphics;
+RendererAxisLine *axis_line;
 RenderObject *object;
 RendererImGui *imgui;
 ProjectionCamera *camera;
@@ -94,11 +96,18 @@ void rendering()
     VkCommandBuffer canvas_cmd_buffer;
     canvas->cmd_begin_canvas_render(&canvas_cmd_buffer);
     {
+        Mat4 projection, view;
+
+        projection = camera->get_projection_matrix();
+        view = camera->get_view_matrix();
+
+        axis_line->cmd_setval_viewport(canvas_cmd_buffer, canvas->get_width(), canvas->get_height());
+        axis_line->cmd_draw_line(canvas_cmd_buffer, projection, view);
         graphics->cmd_begin_graphics_render(canvas_cmd_buffer);
         {
             graphics->cmd_setval_viewport(canvas_cmd_buffer, canvas->get_width(), canvas->get_height());
-            graphics->cmd_setval_view_matrix(canvas_cmd_buffer, camera->get_view_matrix());
-            graphics->cmd_setval_projection_matrix(canvas_cmd_buffer, camera->get_projection_matrix());
+            graphics->cmd_setval_view_matrix(canvas_cmd_buffer, view);
+            graphics->cmd_setval_projection_matrix(canvas_cmd_buffer, projection);
             graphics->cmd_draw_list(canvas_cmd_buffer);
         }
         graphics->cmd_end_graphics_render(canvas_cmd_buffer);
@@ -178,6 +187,10 @@ void rendering()
                 float far = camera->get_far();
                 imgui->cmd_drag_float("远点: ", &far, 0.01f);
                 camera->set_far(far);
+
+                float speed = camera->get_speed();
+                imgui->cmd_drag_float("速度: ", &speed, 0.01f);
+                camera->set_speed(speed);
             }
             imgui->cmd_end_window();
         }
@@ -209,6 +222,9 @@ void initialize()
     graphics = memnew(RendererGraphics, rd);
     graphics->initialize(canvas->get_render_pass());
 
+    axis_line = memnew(RendererAxisLine, rd);
+    axis_line->initialize(canvas->get_render_pass());
+
     object = RenderObject::load_assets_obj("../assets/cube.obj");
     graphics->push_render_object(object);
 
@@ -235,6 +251,7 @@ int main(int argc, char **argv)
     }
 
     memdel(object);
+    memdel(axis_line);
     memdel(graphics);
     memdel(camera);
     memdel(screen);

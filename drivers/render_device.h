@@ -73,6 +73,7 @@ public:
     void create_sampler(VkSampler *p_sampler);
     void destroy_sampler(VkSampler sampler);
 
+
     void create_descriptor_set_layout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout);
     void destroy_descriptor_set_layout(VkDescriptorSetLayout descriptor_set_layout);
     void allocate_descriptor_set(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor_set);
