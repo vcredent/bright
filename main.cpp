@@ -41,6 +41,53 @@ RendererImGui *imgui;
 ProjectionCamera *camera;
 CameraController *game_player_controller;
 RenderDevice::Texture2D *canvas_preview_texture;
+ImVec2 viewport_window_region = ImVec2(32.0f, 32.0f);
+
+void _update_camera()
+{
+    // update camera
+    static bool is_dragging = false;
+    if (window->get_mouse_button(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+        is_dragging = true;
+        window->hide_cursor();
+    }
+
+    if (window->get_mouse_button(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && is_dragging) {
+        window->show_cursor();
+        is_dragging = false;
+        game_player_controller->uncontinual();
+    }
+
+    if (is_dragging) {
+        // key button
+        if (window->getkey(GLFW_KEY_W))
+            game_player_controller->on_event_key(GLFW_KEY_W, GLFW_PRESS);
+
+        if (window->getkey(GLFW_KEY_S))
+            game_player_controller->on_event_key(GLFW_KEY_S, GLFW_PRESS);
+
+        if (window->getkey(GLFW_KEY_A))
+            game_player_controller->on_event_key(GLFW_KEY_A, GLFW_PRESS);
+
+        if (window->getkey(GLFW_KEY_D))
+            game_player_controller->on_event_key(GLFW_KEY_D, GLFW_PRESS);
+
+        // mouse
+        float xpos = 0.0f;
+        float ypos = 0.0f;
+        window->get_cursor_position(&xpos, &ypos);
+        game_player_controller->on_event_cursor(xpos, ypos);
+    }
+
+    game_player_controller->on_update_camera();
+}
+
+void update()
+{
+    canvas->set_extent(viewport_window_region.x, viewport_window_region.y);
+    camera->set_aspect_ratio(viewport_window_region.x / viewport_window_region.y);
+    _update_camera();
+}
 
 void rendering()
 {
@@ -70,9 +117,7 @@ void rendering()
 
             imgui->cmd_begin_viewport("视口");
             {
-                ImVec2 region = ImGui::GetContentRegionAvail();
-                canvas->set_extent(region.x, region.y);
-                camera->set_aspect_ratio(region.x / region.y);
+                viewport_window_region = ImGui::GetContentRegionAvail();
 
                 static ImTextureID preview = NULL;
                 if (preview != NULL)
@@ -179,7 +224,7 @@ int main(int argc, char **argv)
     while (window->is_close()) {
         /* poll events */
         window->poll_events();
-        camera->update();
+        update();
         rendering();
     }
 

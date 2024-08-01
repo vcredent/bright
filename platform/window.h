@@ -80,6 +80,8 @@ public:
     void get_size(Rect2D *p_rect);
     void *get_native_window() { return handle; }
     int getkey(int key);
+    int get_mouse_button(int button);
+    void get_cursor_position(float *p_xpos, float *p_ypos);
 
     void set_visible(bool is_visible);
     void set_cursor_position(float x, float y);

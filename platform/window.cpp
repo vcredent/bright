@@ -59,6 +59,20 @@ int Window::getkey(int key)
     return glfwGetKey(handle, key);
 }
 
+int Window::get_mouse_button(int button)
+{
+    return glfwGetMouseButton(handle, button);
+}
+
+void Window::get_cursor_position(float *p_xpos, float *p_ypos)
+{
+    double x, y;
+    glfwGetCursorPos(handle, &x, &y);
+    *p_xpos = (float) x;
+    *p_ypos = (float) y;
+}
+
+
 void Window::set_visible(bool is_visible)
 {
     visible_flag = is_visible;

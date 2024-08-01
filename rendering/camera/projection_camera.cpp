@@ -35,13 +35,12 @@ ProjectionCamera::~ProjectionCamera()
 
 void ProjectionCamera::update()
 {
-    Mat4 translation;
-    Mat4 rotation;
+    front.x = -glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+    front.y = -glm::sin(glm::radians(pitch));
+    front.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+    front = glm::normalize(front);
 
-    translation = glm::translate(Mat4(1.0f), position);
-    rotation = Mat4(1.0f);
-
-    view_matrix = glm::inverse(translation * rotation);
+    view_matrix = glm::lookAt(position, position + front, world_up);
 
     projection_matrix = glm::perspective(fov, aspect_ratio, near, far);
     projection_matrix[1][1] *= -1;

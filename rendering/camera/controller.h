@@ -25,19 +25,18 @@
 
 #include "camera.h"
 #include "event/inpdefs.h"
-#include "platform/window.h"
 
 class CameraController {
 public:
     CameraController(Camera *v_camera = NULL);
     ~CameraController();
 
-    virtual void on_event_mouse_button(Window *window, int button, int action, int mods) = 0;
-    virtual void on_event_cursor(Window *window, float x, float y) = 0;
-    virtual void on_event_key(Window *window, int key, int scancode, int action, int mods) = 0;
+    virtual void on_event_mouse_button(int button, int action, int mods) = 0;
+    virtual void on_event_cursor(float x, float y) = 0;
+    virtual void on_event_key(int key, int action) = 0;
     virtual void on_update_camera() = 0;
 
-    void uncontinue() { continued = false; }
+    void uncontinual() { continual_dragging_flag = false; }
 
     V_FORCEINLINE inline void make_current_camera(Camera *v_camera) { camera = v_camera; }
     V_FORCEINLINE inline Camera *get_current_camera() { return camera; }
@@ -55,7 +54,7 @@ protected:
     };
 
     /* is first execute */
-    bool continued = false;
+    bool continual_dragging_flag = false;
 
     /* events */
     MouseEvent *mouse = NULL;

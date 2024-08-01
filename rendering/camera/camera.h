@@ -32,10 +32,12 @@ public:
     U_MEMNEW_ONLY Camera();
     virtual ~Camera() = default;
 
-    V_FORCEINLINE inline Vec3 get_position() { return position; }
-    V_FORCEINLINE inline Vec3 get_world_right() { return world_right; }
-    V_FORCEINLINE inline Vec3 get_world_up() { return world_up; }
-    V_FORCEINLINE inline Vec3 get_target() { return target; }
+    V_FORCEINLINE inline Vec3& get_position() { return position; }
+    V_FORCEINLINE inline Vec3& get_world_right() { return world_right; }
+    V_FORCEINLINE inline Vec3& get_world_up() { return world_up; }
+    V_FORCEINLINE inline Vec3& get_camera_up() { return up; }
+    V_FORCEINLINE inline Vec3& get_target() { return target; }
+    V_FORCEINLINE inline Vec3& get_front() { return front; }
     V_FORCEINLINE inline float get_pitch() { return pitch; }
     V_FORCEINLINE inline float get_yaw() { return yaw; }
     V_FORCEINLINE inline float get_roll() { return roll; }
@@ -49,14 +51,15 @@ public:
     V_FORCEINLINE inline void set_world_right(Vec3 v_world_right) { world_right = v_world_right; }
     V_FORCEINLINE inline void set_world_up(Vec3 v_world_up) { world_up = v_world_up; }
     V_FORCEINLINE inline void set_target(Vec3 v_target) { target = v_target; }
-    V_FORCEINLINE inline void set_pitch(float v_pitch) { pitch = glm::clamp(v_pitch, -89.0f, 89.0f); }
+    V_FORCEINLINE inline void set_front(Vec3 v_front) { front = v_front; }
+    V_FORCEINLINE inline void set_pitch(float v_pitch) { pitch = v_pitch; }
     V_FORCEINLINE inline void set_yaw(float v_yaw) { yaw = v_yaw; }
     V_FORCEINLINE inline void set_roll(float v_roll) { roll = v_roll; }
     V_FORCEINLINE inline void set_aspect_ratio(float v_aspect_ratio) { aspect_ratio = v_aspect_ratio; }
     V_FORCEINLINE inline void set_speed(float v_speed) { speed = v_speed; }
     V_FORCEINLINE inline void set_sensitivity(float v_sensitivity) { sensitivity = v_sensitivity; }
-    V_FORCEINLINE inline void get_view_matrix(Mat4 &v_view_matrix) { view_matrix = v_view_matrix; }
-    V_FORCEINLINE inline void get_projection_matrix(Mat4 &v_projection_matrix) { projection_matrix = v_projection_matrix; }
+    V_FORCEINLINE inline void set_view_matrix(Mat4 &v_view_matrix) { view_matrix = v_view_matrix; }
+    V_FORCEINLINE inline void set_projection_matrix(Mat4 &v_projection_matrix) { projection_matrix = v_projection_matrix; }
 
     virtual void update() = 0;
 
@@ -64,15 +67,17 @@ protected:
     Vec3 position = Vec3(0.0f, 0.0f, 3.0f);
     Vec3 world_right = Vec3(1.0f, 0.0f, 0.0f);
     Vec3 world_up = Vec3(0.0f, -1.0f, 0.0f);
+    Vec3 up = Vec3(0.0f, -1.0f, 0.0f);
     Vec3 target = Vec3(0.0f, 0.0f, 0.0f);
+    Vec3 front = Vec3(0.0f, 0.0f, -1.0f);
 
     float pitch = 0.0f;
     float yaw = -90.0f;
     float roll = 0.0f;
     float aspect_ratio = 1.0f;
 
-    float speed = 0.5f;
-    float sensitivity = 0.5f;
+    float speed = 0.005f;
+    float sensitivity = 0.05f;
 
     Mat4 view_matrix = Mat4(1.0f);
     Mat4 projection_matrix = Mat4(1.0f);
