@@ -64,7 +64,6 @@ public:
     void cmd_begin_viewport(const char *title);
     void cmd_end_viewport();
 
-    void cmd_same_line64();
     void cmd_draw_texture(ImTextureID texture, uint32_t width, uint32_t height);
     void cmd_drag_float(const char *label, float *v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
     void cmd_drag_float2(const char *label, float v[2], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
@@ -102,7 +101,7 @@ private:
     void _drag_scalar_n(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format);
     void _window_event_process(EventCallbacks *callbacks);
     bool _check_event_callbacks(const char *title, EventCallbacks **p_callbacks);
-    void _check_dragging_cursor();
+    void _check_dragging_cursor(); // check the drag cursor is need show or hide.
     void _set_theme_embrace_the_darkness();
 
     RenderDevice *rd;

@@ -196,11 +196,6 @@ void RendererImGui::cmd_end_viewport()
     ImGui::PopStyleVar();
 }
 
-void RendererImGui::cmd_same_line64()
-{
-    ImGui::SameLine(64.0f);
-}
-
 void RendererImGui::cmd_draw_texture(ImTextureID texture, uint32_t width, uint32_t height)
 {
     ImGui::Image(texture, ImVec2(width, height));
