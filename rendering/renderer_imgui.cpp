@@ -51,7 +51,7 @@ void RendererImGui::initialize(RendererScreen *p_screen)
     io.ConfigViewportsNoTaskBarIcon = true;
 
     // set default font.
-    io.Fonts->AddFontFromFileTTF("../resource/fonts/smiley-sans-v1.1.1/SmileySans-Oblique.ttf", 24.0f,
+    io.Fonts->AddFontFromFileTTF("../resource/fonts/Microsoft Yahei UI/Microsoft Yahei UI.ttf", 28.0f,
                                  nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
     io.FontDefault = io.Fonts->Fonts.back();
 
@@ -348,7 +348,7 @@ void RendererImGui::_set_theme_embrace_the_darkness()
     colors[ImGuiCol_TitleBgCollapsed]       = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
     colors[ImGuiCol_MenuBarBg]              = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
     colors[ImGuiCol_ScrollbarBg]            = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
-    colors[ImGuiCol_ScrollbarGrab]          = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
+    colors[ImGuiCol_ScrollbarGrab]          = ImVec4(0.58f, 0.58f, 0.58f, 0.54f);
     colors[ImGuiCol_ScrollbarGrabHovered]   = ImVec4(0.40f, 0.40f, 0.40f, 0.54f);
     colors[ImGuiCol_ScrollbarGrabActive]    = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
     colors[ImGuiCol_CheckMark]              = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
@@ -398,7 +398,7 @@ void RendererImGui::_set_theme_embrace_the_darkness()
     style.TouchExtraPadding                 = ImVec2(0.00f, 0.00f);
     style.IndentSpacing                     = 25;
     style.ScrollbarSize                     = 15;
-    style.GrabMinSize                       = 10;
+    style.GrabMinSize                       = 16;
     style.WindowBorderSize                  = 1;
     style.ChildBorderSize                   = 1;
     style.PopupBorderSize                   = 1;
@@ -407,7 +407,7 @@ void RendererImGui::_set_theme_embrace_the_darkness()
     style.WindowRounding                    = 7;
     style.ChildRounding                     = 4;
     style.FrameRounding                     = 3;
-    style.PopupRounding                     = 4;
+    style.PopupRounding                     = 12;
     style.ScrollbarRounding                 = 9;
     style.GrabRounding                      = 3;
     style.LogSliderDeadzone                 = 4;
