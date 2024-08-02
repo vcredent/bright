@@ -36,9 +36,11 @@ public:
     uint32_t get_width() { return width; }
     uint32_t get_height() { return height; }
     VkRenderPass get_render_pass() { return render_pass; }
+    RenderDevice::Texture2D *get_canvas_texture() { return texture; }
+    RenderDevice::Texture2D *get_canvas_depth() { return depth; }
 
     void cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer);
-    RenderDevice::Texture2D *cmd_end_canvas_render();
+    void cmd_end_canvas_render();
 
 private:
     void _create_canvas_texture(uint32_t width, uint32_t height);

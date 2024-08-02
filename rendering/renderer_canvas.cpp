@@ -148,7 +148,7 @@ void RendererCanvas::set_extent(uint32_t v_width, uint32_t v_height)
     height = v_height;
 }
 
-RenderDevice::Texture2D *RendererCanvas::cmd_end_canvas_render()
+void RendererCanvas::cmd_end_canvas_render()
 {
     rd->cmd_end_render_pass(canvas_cmd_buffer);
     rd->cmd_buffer_end(canvas_cmd_buffer);
@@ -160,8 +160,6 @@ RenderDevice::Texture2D *RendererCanvas::cmd_end_canvas_render()
                           nullptr,
                           graph_queue,
                           nullptr);
-
-    return texture;
 }
 
 void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
@@ -171,18 +169,20 @@ void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
     msaa = rd->create_texture(width, height, rd->get_msaa_samples(), VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
     rd->bind_texture_sampler(texture, sampler);
-    rd->bind_texture_sampler(depth, sampler);
+    rd->bind_texture_sampler(depth, VK_NULL_HANDLE);
     rd->bind_texture_sampler(msaa, sampler);
 
     VkCommandBuffer cmd_buffer;
+
     rd->cmd_buffer_one_time_begin(&cmd_buffer);
-    RenderDevice::PipelineMemoryBarrier barrier = {};
-    barrier.image.texture = texture;
-    barrier.image.src_access_mask = VK_ACCESS_NONE;
-    barrier.image.dst_access_mask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_HOST_READ_BIT;
-    barrier.image.old_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-    barrier.image.new_image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    rd->cmd_pipeline_barrier(cmd_buffer, &barrier);
+    RenderDevice::PipelineMemoryBarrier texture_barrier;
+    texture_barrier.image.texture = texture;
+    texture_barrier.image.old_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+    texture_barrier.image.new_image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    texture_barrier.image.src_access_mask = 0;
+    texture_barrier.image.dst_access_mask = VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT;
+    rd->cmd_pipeline_barrier(cmd_buffer, &texture_barrier);
+
     rd->cmd_buffer_one_time_end(cmd_buffer);
 
     VkImageView attachments[] = {

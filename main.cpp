@@ -43,6 +43,7 @@ RendererImGui *imgui;
 ProjectionCamera *camera;
 CameraController *game_player_controller;
 RenderDevice::Texture2D *canvas_preview_texture;
+RenderDevice::Texture2D *canvas_depth_texture;
 ImVec2 viewport_window_region = ImVec2(32.0f, 32.0f);
 
 static float mouse_scroll_xoffset = 0.0f;
@@ -122,7 +123,9 @@ void rendering()
         }
         graphics->cmd_end_graphics_render(canvas_cmd_buffer);
     }
-    canvas_preview_texture = canvas->cmd_end_canvas_render();
+    canvas->cmd_end_canvas_render();
+    canvas_preview_texture = canvas->get_canvas_texture();
+    canvas_depth_texture = canvas->get_canvas_depth();
     double canvas_render_end_time = glfwGetTime();
 
     double screen_render_start_time = glfwGetTime();
@@ -143,8 +146,29 @@ void rendering()
                 if (preview != NULL)
                     imgui->destroy_texture(preview);
 
+                static ImTextureID depth = NULL;
+                if (depth != NULL)
+                    imgui->destroy_texture(depth);
+
                 preview = imgui->create_texture(canvas_preview_texture);
+                depth = imgui->create_texture(canvas_depth_texture);
+
                 imgui->cmd_draw_texture(preview, canvas_preview_texture->width, canvas_preview_texture->height);
+
+                ImGui::BeginGroup();
+                {
+                    ImVec2 position = ImGui::GetWindowPos();
+                    ImVec2 size = ImGui::GetWindowSize();
+
+                    ImVec2 offset = ImVec2(30.0f, 70.0f);
+                    ImVec2 tex_size = ImVec2((size.x * 0.1f) * 1.5f, (size.y * 0.1f) * 1.5f);
+
+                    ImVec2 depth_tex_pos = ImVec2(position.x + offset.x, position.y + size.y - tex_size.y - offset.y);
+
+                    ImDrawList *draw = ImGui::GetWindowDrawList();
+                    draw->AddImage(depth, depth_tex_pos, ImVec2(depth_tex_pos.x + tex_size.x, depth_tex_pos.y + tex_size.y));
+                }
+                ImGui::EndGroup();
             }
             imgui->cmd_end_viewport();
 
