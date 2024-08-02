@@ -120,6 +120,12 @@ void RendererCanvas::initialize()
     _create_canvas_texture(width, height);
 }
 
+void RendererCanvas::set_extent(uint32_t v_width, uint32_t v_height)
+{
+    width  = v_width;
+    height = v_height;
+}
+
 void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer)
 {
     if (texture->width != width || texture->height != height) {
@@ -142,12 +148,6 @@ void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer)
     *p_cmd_buffer = canvas_cmd_buffer;
 }
 
-void RendererCanvas::set_extent(uint32_t v_width, uint32_t v_height)
-{
-    width  = v_width;
-    height = v_height;
-}
-
 void RendererCanvas::cmd_end_canvas_render()
 {
     rd->cmd_end_render_pass(canvas_cmd_buffer);
@@ -160,6 +160,17 @@ void RendererCanvas::cmd_end_canvas_render()
                           nullptr,
                           graph_queue,
                           nullptr);
+
+    VkCommandBuffer cmd_buffer;
+    rd->cmd_buffer_one_time_begin(&cmd_buffer);
+    RenderDevice::PipelineMemoryBarrier barrier;
+    barrier.image.texture = depth;
+    barrier.image.old_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+    barrier.image.new_image_layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
+    barrier.image.src_access_mask = 0;
+    barrier.image.dst_access_mask = VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT;
+    rd->cmd_pipeline_barrier(cmd_buffer, &barrier);
+    rd->cmd_buffer_one_time_end(cmd_buffer);
 }
 
 void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
@@ -182,6 +193,7 @@ void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
     texture_barrier.image.new_image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     texture_barrier.image.src_access_mask = 0;
     texture_barrier.image.dst_access_mask = VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT;
+
     rd->cmd_pipeline_barrier(cmd_buffer, &texture_barrier);
 
     rd->cmd_buffer_one_time_end(cmd_buffer);

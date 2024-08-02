@@ -78,13 +78,14 @@ void RendererImGui::initialize(RendererScreen *p_screen)
     init_info.Queue = rdc->get_graph_queue();
     init_info.PipelineCache = VK_NULL_HANDLE;
     init_info.DescriptorPool = rd->get_descriptor_pool();
+    init_info.RenderPass = screen->get_render_pass();
     init_info.Subpass = 0;
     init_info.MinImageCount = screen->get_image_buffer_count();
     init_info.ImageCount = screen->get_image_buffer_count();
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
     init_info.Allocator = VK_NULL_HANDLE;
     init_info.CheckVkResultFn = VK_NULL_HANDLE;
-    ImGui_ImplVulkan_Init(&init_info, screen->get_render_pass());
+    ImGui_ImplVulkan_Init(&init_info);
 }
 
 ImTextureID RendererImGui::create_texture(RenderDevice::Texture2D *p_texture)
@@ -103,7 +104,7 @@ void RendererImGui::cmd_begin_imgui_render(VkCommandBuffer cmd_buffer)
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     // docking
-    ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode);
+    ImGui::DockSpaceOverViewport();
 }
 
 void RendererImGui::cmd_end_imgui_render(VkCommandBuffer cmd_buffer)

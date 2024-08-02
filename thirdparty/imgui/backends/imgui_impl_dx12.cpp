@@ -25,7 +25,7 @@
 
 // CHANGELOG
 // (minor and older changes stripped away, please see git history for details)
-//  2023-XX-XX: Platform: Added support for multiple windows via the ImGuiPlatformIO interface.
+//  2024-XX-XX: Platform: Added support for multiple windows via the ImGuiPlatformIO interface.
 //  2022-10-11: Using 'nullptr' instead of 'NULL' as per our switch to C++11.
 //  2021-06-29: Reorganized backend to pull data from a single structure to facilitate usage with multiple-contexts (all g_XXXX access changed to bd->XXXX).
 //  2021-05-19: DirectX12: Replaced direct access to ImDrawCmd::TextureId with a call to ImDrawCmd::GetTexID(). (will become a requirement)
@@ -565,16 +565,16 @@ bool    ImGui_ImplDX12_CreateDeviceObjects()
         staticSampler.RegisterSpace = 0;
         staticSampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-        D3D12_ROOT_SIGVECTRAFLUX_DESC desc = {};
+        D3D12_ROOT_SIGNATURE_DESC desc = {};
         desc.NumParameters = _countof(param);
         desc.pParameters = param;
         desc.NumStaticSamplers = 1;
         desc.pStaticSamplers = &staticSampler;
         desc.Flags =
-            D3D12_ROOT_SIGVECTRAFLUX_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-            D3D12_ROOT_SIGVECTRAFLUX_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-            D3D12_ROOT_SIGVECTRAFLUX_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-            D3D12_ROOT_SIGVECTRAFLUX_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+            D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+            D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+            D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+            D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
         // Load d3d12.dll and D3D12SerializeRootSignature() function address dynamically to facilitate using with D3D12On7.
         // See if any version of d3d12.dll is already loaded in the process. If so, give preference to that.
@@ -598,12 +598,12 @@ bool    ImGui_ImplDX12_CreateDeviceObjects()
                 return false;
         }
 
-        PFN_D3D12_SERIALIZE_ROOT_SIGVECTRAFLUX D3D12SerializeRootSignatureFn = (PFN_D3D12_SERIALIZE_ROOT_SIGVECTRAFLUX)::GetProcAddress(d3d12_dll, "D3D12SerializeRootSignature");
+        PFN_D3D12_SERIALIZE_ROOT_SIGNATURE D3D12SerializeRootSignatureFn = (PFN_D3D12_SERIALIZE_ROOT_SIGNATURE)::GetProcAddress(d3d12_dll, "D3D12SerializeRootSignature");
         if (D3D12SerializeRootSignatureFn == nullptr)
             return false;
 
         ID3DBlob* blob = nullptr;
-        if (D3D12SerializeRootSignatureFn(&desc, D3D_ROOT_SIGVECTRAFLUX_VERSION_1, &blob, nullptr) != S_OK)
+        if (D3D12SerializeRootSignatureFn(&desc, D3D_ROOT_SIGNATURE_VERSION_1, &blob, nullptr) != S_OK)
             return false;
 
         bd->pd3dDevice->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(), IID_PPV_ARGS(&bd->pRootSignature));
@@ -777,6 +777,7 @@ bool ImGui_ImplDX12_Init(ID3D12Device* device, int num_frames_in_flight, DXGI_FO
                          D3D12_CPU_DESCRIPTOR_HANDLE font_srv_cpu_desc_handle, D3D12_GPU_DESCRIPTOR_HANDLE font_srv_gpu_desc_handle)
 {
     ImGuiIO& io = ImGui::GetIO();
+    IMGUI_CHECKVERSION();
     IM_ASSERT(io.BackendRendererUserData == nullptr && "Already initialized a renderer backend!");
 
     // Setup backend capabilities flags
@@ -833,7 +834,7 @@ void ImGui_ImplDX12_Shutdown()
 void ImGui_ImplDX12_NewFrame()
 {
     ImGui_ImplDX12_Data* bd = ImGui_ImplDX12_GetBackendData();
-    IM_ASSERT(bd != nullptr && "Did you call ImGui_ImplDX12_Init()?");
+    IM_ASSERT(bd != nullptr && "Context or backend not initialized! Did you call ImGui_ImplDX12_Init()?");
 
     if (!bd->pPipelineState)
         ImGui_ImplDX12_CreateDeviceObjects();
@@ -899,7 +900,7 @@ static void ImGui_ImplDX12_CreateWindow(ImGuiViewport* viewport)
     sd1.SampleDesc.Quality = 0;
     sd1.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     sd1.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-    sd1.Scaling = DXGI_SCALING_STRETCH;
+    sd1.Scaling = DXGI_SCALING_NONE;
     sd1.Stereo = FALSE;
 
     IDXGIFactory4* dxgi_factory = nullptr;
