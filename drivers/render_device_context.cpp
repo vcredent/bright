@@ -78,7 +78,6 @@ RenderDeviceContext::RenderDeviceContext()
     err = vkEnumeratePhysicalDevices(instance, &gpu_count, physical_devices);
     assert(!err);
 
-    VkPhysicalDeviceProperties physical_device_properties;
     for (int i = 0; i < gpu_count; i++) {
         vkGetPhysicalDeviceProperties(physical_devices[i], &physical_device_properties);
         if (physical_device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
@@ -92,6 +91,8 @@ RenderDeviceContext::RenderDeviceContext()
 
     vkGetPhysicalDeviceProperties(physical_device, &physical_device_properties);
     vkGetPhysicalDeviceFeatures(physical_device, &physical_device_features);
+
+    max_msaa_sample_counts = find_max_msaa_sample_counts(physical_device_properties);
 }
 
 RenderDeviceContext::~RenderDeviceContext()

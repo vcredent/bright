@@ -59,6 +59,7 @@ public:
     VkCommandPool get_cmd_pool() { return cmd_pool; }
     VkFormat get_window_format() { return format; }
     VkFormat find_supported_format(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+    VkSampleCountFlagBits get_max_msaa_sample_counts() { return max_msaa_sample_counts; }
 
     void allocate_cmd_buffer(VkCommandBufferLevel level, VkCommandBuffer *p_cmd_buffer);
     void free_cmd_buffer(VkCommandBuffer cmd_buffer);
@@ -83,6 +84,7 @@ private:
     VmaAllocator allocator = VK_NULL_HANDLE;
     VkSurfaceCapabilitiesKHR capabilities;
     VkFormat format;
+    VkSampleCountFlagBits max_msaa_sample_counts = VK_SAMPLE_COUNT_1_BIT;
 };
 
 #endif /* _RENDERING_CONTEXT_DRIVER_VULKAN_H */

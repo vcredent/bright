@@ -34,6 +34,7 @@ public:
     RenderDeviceContext *get_device_context() { return vk_rdc; }
     VkDescriptorPool get_descriptor_pool() { return descriptor_pool; }
     VkFormat get_surface_format() { return vk_rdc->get_window_format(); }
+    VkSampleCountFlagBits get_msaa_samples() { return msaa_sample_counts; }
 
     struct Buffer {
         VkBuffer vk_buffer;
@@ -62,17 +63,17 @@ public:
         uint32_t width;
         uint32_t height;
         VkFormat format;
-        VkSampler sampler;
+        VkSampler sampler = VK_NULL_HANDLE;
         VkImageAspectFlags aspect_mask;
     };
 
-    Texture2D *create_texture(uint32_t width, uint32_t height, VkSampler sampler, VkFormat format, VkImageAspectFlags aspect_mask, VkImageUsageFlags usage);
+    Texture2D *create_texture(uint32_t width, uint32_t height, VkSampleCountFlagBits samples, VkFormat format, VkImageAspectFlags aspect_mask, VkImageUsageFlags usage);
     void destroy_texture(Texture2D *p_texture);
     void create_framebuffer(uint32_t width, uint32_t height, uint32_t image_view_count, VkImageView *p_image_view, VkRenderPass render_pass, VkFramebuffer *p_framebuffer);
     void destroy_framebuffer(VkFramebuffer framebuffer);
     void create_sampler(VkSampler *p_sampler);
     void destroy_sampler(VkSampler sampler);
-
+    void bind_texture_sampler(Texture2D *texture, VkSampler sampler);
 
     void create_descriptor_set_layout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout);
     void destroy_descriptor_set_layout(VkDescriptorSetLayout descriptor_set_layout);
@@ -97,6 +98,7 @@ public:
         VkRenderPass render_pass;
         VkPolygonMode polygon;
         VkPrimitiveTopology topology;
+        VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;
     };
 
     struct Pipeline {
@@ -145,6 +147,7 @@ private:
     VkDevice vk_device;
     VmaAllocator allocator;
     VkDescriptorPool descriptor_pool;
+    VkSampleCountFlagBits msaa_sample_counts;
 };
 
 #endif /* _RENDERING_DEVICE_DRIVER_VULKAN_H */

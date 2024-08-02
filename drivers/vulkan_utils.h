@@ -45,6 +45,38 @@ static VkSurfaceFormatKHR pick_surface_format(const VkSurfaceFormatKHR *surface_
     return surface_formats[0];
 }
 
+static VkSampleCountFlagBits find_max_msaa_sample_counts(VkPhysicalDeviceProperties properties)
+{
+    VkSampleCountFlags framebuffer_color_sample_count;
+    VkSampleCountFlags framebuffer_depth_sample_count;
+
+    framebuffer_color_sample_count = properties.limits.framebufferColorSampleCounts;
+    framebuffer_depth_sample_count = properties.limits.framebufferDepthSampleCounts;
+
+    VkSampleCountFlags counts =
+            std::min(framebuffer_color_sample_count, framebuffer_depth_sample_count);
+
+    if (counts & VK_SAMPLE_COUNT_64_BIT)
+        return VK_SAMPLE_COUNT_64_BIT;
+
+    if (counts & VK_SAMPLE_COUNT_32_BIT)
+        return VK_SAMPLE_COUNT_32_BIT;
+
+    if (counts & VK_SAMPLE_COUNT_16_BIT)
+        return VK_SAMPLE_COUNT_16_BIT;
+
+    if (counts & VK_SAMPLE_COUNT_8_BIT)
+        return VK_SAMPLE_COUNT_8_BIT;
+
+    if (counts & VK_SAMPLE_COUNT_4_BIT)
+        return VK_SAMPLE_COUNT_4_BIT;
+
+    if (counts & VK_SAMPLE_COUNT_2_BIT)
+        return VK_SAMPLE_COUNT_2_BIT;
+
+    return VK_SAMPLE_COUNT_1_BIT;
+}
+
 // load shader module form .spv file content.
 static VkShaderModule load_shader_module(VkDevice device, const char *name)
 {

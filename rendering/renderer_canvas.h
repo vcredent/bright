@@ -49,6 +49,7 @@ private:
     VkRenderPass render_pass;
     RenderDevice::Texture2D *texture = NULL;
     RenderDevice::Texture2D *depth = NULL;
+    RenderDevice::Texture2D *msaa = NULL;
     VkFramebuffer framebuffer;
     VkSampler sampler;
     VkCommandBuffer canvas_cmd_buffer;

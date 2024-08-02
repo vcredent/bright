@@ -59,6 +59,7 @@ void RendererAxisLine::initialize(VkRenderPass render_pass)
             /* render_pass= */ render_pass,
             /* polygon= */ VK_POLYGON_MODE_FILL,
             /* topology= */ VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
+            /* samples= */ rd->get_msaa_samples(),
     };
 
     pipeline = rd->create_graphics_pipeline(&create_info, &shader_info);

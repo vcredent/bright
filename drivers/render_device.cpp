@@ -29,6 +29,11 @@ RenderDevice::RenderDevice(RenderDeviceContext *driver_context)
     allocator = vk_rdc->get_allocator();
 
     _initialize_descriptor_pool();
+
+    msaa_sample_counts = vk_rdc->get_max_msaa_sample_counts();
+
+    // if sample counts > 4x，that default msaa samples set 4x otherwise 1x
+    msaa_sample_counts = msaa_sample_counts >= 4 ? VK_SAMPLE_COUNT_4_BIT : VK_SAMPLE_COUNT_1_BIT;
 }
 
 RenderDevice::~RenderDevice()
@@ -113,7 +118,7 @@ void RenderDevice::free_cmd_buffer(VkCommandBuffer cmd_buffer)
     vk_rdc->free_cmd_buffer(cmd_buffer);
 }
 
-RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t height, VkSampler sampler, VkFormat format, VkImageAspectFlags aspect_mask, VkImageUsageFlags usage)
+RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t height, VkSampleCountFlagBits samples, VkFormat format, VkImageAspectFlags aspect_mask, VkImageUsageFlags usage)
 {
     VkResult U_ASSERT_ONLY err;
     Texture2D *texture = VK_NULL_HANDLE;
@@ -122,7 +127,6 @@ RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t h
     texture->format = format;
     texture->width = width;
     texture->height = height;
-    texture->sampler = sampler;
     texture->aspect_mask = aspect_mask;
 
     VkImageCreateInfo image_create_info = {
@@ -134,7 +138,7 @@ RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t h
             /* extent */ { width, height, 1 },
             /* mipLevels */ 1,
             /* arrayLayers */ 1,
-            /* samples */ VK_SAMPLE_COUNT_1_BIT,
+            /* samples */ samples,
             /* tiling */ VK_IMAGE_TILING_OPTIMAL,
             /* usage */ usage,
             /* sharingMode */ VK_SHARING_MODE_EXCLUSIVE,
@@ -238,6 +242,11 @@ void RenderDevice::create_sampler(VkSampler *p_sampler)
 void RenderDevice::destroy_sampler(VkSampler sampler)
 {
     vkDestroySampler(vk_device, sampler, allocation_callbacks);
+}
+
+void RenderDevice::bind_texture_sampler(RenderDevice::Texture2D *texture, VkSampler sampler)
+{
+    texture->sampler = sampler;
 }
 
 void RenderDevice::create_descriptor_set_layout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout)
@@ -400,7 +409,7 @@ RenderDevice::Pipeline *RenderDevice::create_graphics_pipeline(PipelineCreateInf
     VkPipelineMultisampleStateCreateInfo multisample_state_create_info = {};
     multisample_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisample_state_create_info.sampleShadingEnable = VK_FALSE;
-    multisample_state_create_info.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    multisample_state_create_info.rasterizationSamples = p_create_info->samples;
     multisample_state_create_info.minSampleShading = 1.0f;
     multisample_state_create_info.pSampleMask = nullptr;
     multisample_state_create_info.alphaToCoverageEnable = VK_FALSE;

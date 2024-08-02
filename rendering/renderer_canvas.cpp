@@ -51,24 +51,35 @@ void RendererCanvas::initialize()
             {
                 /* flags */ no_flag_bits,
                 /* format */ rd->get_surface_format(),
-                /* samples */ VK_SAMPLE_COUNT_1_BIT,
+                /* samples */ rd->get_msaa_samples(),
                 /* loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
                 /* storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
                 /* stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
                 /* stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
                 /* initialLayout */ VK_IMAGE_LAYOUT_UNDEFINED,
-                /* finalLayout */ VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                /* finalLayout */ VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             },
             {
                 /* flags */ no_flag_bits,
                 /* format */ depth_format,
+                /* samples */ rd->get_msaa_samples(),
+                /* loadOp */VK_ATTACHMENT_LOAD_OP_CLEAR,
+                /* storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
+                /* stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                /* stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                /* initialLayout */ VK_IMAGE_LAYOUT_UNDEFINED,
+                /* finalLayout */ VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            },
+            {
+                /* flags */ no_flag_bits,
+                /* format */ rd->get_surface_format(),
                 /* samples */ VK_SAMPLE_COUNT_1_BIT,
                 /* loadOp */VK_ATTACHMENT_LOAD_OP_CLEAR,
                 /* storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
                 /* stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
                 /* stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
                 /* initialLayout */ VK_IMAGE_LAYOUT_UNDEFINED,
-                    /* finalLayout */ VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                /* finalLayout */ VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             }
     };
 
@@ -82,11 +93,17 @@ void RendererCanvas::initialize()
             /* layout= */ VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
     };
 
+    VkAttachmentReference color_resolve = {
+            /* attachment= */ 2,
+            /* layout= */ VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+    };
+
     VkSubpassDescription subpass = {};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &color_reference;
     subpass.pDepthStencilAttachment = &depth_reference;
+    subpass.pResolveAttachments = &color_resolve;
 
     VkSubpassDependency subpass_dependency = {};
     subpass_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -112,9 +129,10 @@ void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer)
 
     rd->cmd_buffer_begin(canvas_cmd_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
 
-    std::array<VkClearValue, 2> clear_values = {};
+    std::array<VkClearValue, 3> clear_values = {};
     clear_values[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
     clear_values[1].depthStencil = { 1.0f, 0 };
+    clear_values[2].color = { 0.1f, 0.1f, 0.1f, 1.0f };;
 
     VkRect2D rect = {};
     rect.offset = { 0, 0 };
@@ -148,8 +166,13 @@ RenderDevice::Texture2D *RendererCanvas::cmd_end_canvas_render()
 
 void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
 {
-    depth = rd->create_texture(width, height, sampler, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-    texture = rd->create_texture(width, height, sampler, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    texture = rd->create_texture(width, height, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    depth = rd->create_texture(width, height, rd->get_msaa_samples(), depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    msaa = rd->create_texture(width, height, rd->get_msaa_samples(), VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+
+    rd->bind_texture_sampler(texture, sampler);
+    rd->bind_texture_sampler(depth, sampler);
+    rd->bind_texture_sampler(msaa, sampler);
 
     VkCommandBuffer cmd_buffer;
     rd->cmd_buffer_one_time_begin(&cmd_buffer);
@@ -163,8 +186,9 @@ void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
     rd->cmd_buffer_one_time_end(cmd_buffer);
 
     VkImageView attachments[] = {
-            texture->image_view,
+            msaa->image_view,
             depth->image_view,
+            texture->image_view,
     };
 
     rd->create_framebuffer(texture->width, texture->height, ARRAY_SIZE(attachments), attachments, render_pass, &framebuffer);
@@ -172,6 +196,7 @@ void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
 
 void RendererCanvas::_clean_up_canvas_texture()
 {
+    rd->destroy_texture(msaa);
     rd->destroy_texture(depth);
     rd->destroy_texture(texture);
     texture = VK_NULL_HANDLE;
