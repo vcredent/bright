@@ -150,6 +150,7 @@ void rendering()
 
             imgui->cmd_begin_window("object");
             {
+                ImGui::SeparatorText("变换");
                 Vec3 position = object->get_object_position();
                 imgui->cmd_drag_float3("平移: ", glm::value_ptr(position), 0.01f);
                 object->set_object_position(position);
@@ -183,8 +184,9 @@ void rendering()
             }
             imgui->cmd_end_window();
 
-            imgui->cmd_begin_window("摄像机参数");
+            imgui->cmd_begin_window("摄像机");
             {
+                ImGui::SeparatorText("变换");
                 Vec3 position = camera->get_position();
                 imgui->cmd_drag_float3("位置: ", glm::value_ptr(position), 0.01f);
                 camera->set_position(position);
