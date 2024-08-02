@@ -51,7 +51,7 @@ void RendererImGui::initialize(RendererScreen *p_screen)
     io.ConfigViewportsNoTaskBarIcon = true;
 
     // set default font.
-    io.Fonts->AddFontFromFileTTF("../resource/fonts/Microsoft Yahei UI/Microsoft Yahei UI.ttf", 28.0f,
+    io.Fonts->AddFontFromFileTTF("../resource/fonts/Microsoft Yahei UI/Microsoft Yahei UI.ttf", 18.0f,
                                  nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
     io.FontDefault = io.Fonts->Fonts.back();
 

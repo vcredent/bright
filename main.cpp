@@ -48,6 +48,15 @@ ImVec2 viewport_window_region = ImVec2(32.0f, 32.0f);
 static float mouse_scroll_xoffset = 0.0f;
 static float mouse_scroll_yoffset = 0.0f;
 
+struct DebugData {
+    int fps = 0;
+    std::vector<float> fps_data;
+    float canvas_render_time = 0.0f;
+    float screen_render_time = 0.0f;
+};
+
+static DebugData debug;
+
 void _update_camera()
 {
     // update camera
@@ -93,6 +102,7 @@ void update()
 void rendering()
 {
     /* render to canvas */
+    double canvas_render_start_time = glfwGetTime();
     VkCommandBuffer canvas_cmd_buffer;
     canvas->cmd_begin_canvas_render(&canvas_cmd_buffer);
     {
@@ -113,7 +123,9 @@ void rendering()
         graphics->cmd_end_graphics_render(canvas_cmd_buffer);
     }
     canvas_preview_texture = canvas->cmd_end_canvas_render();
+    double canvas_render_end_time = glfwGetTime();
 
+    double screen_render_start_time = glfwGetTime();
     VkCommandBuffer screen_cmd_buffer;
     screen->cmd_begin_screen_render(&screen_cmd_buffer);
     {
@@ -136,20 +148,6 @@ void rendering()
             }
             imgui->cmd_end_viewport();
 
-            imgui->cmd_begin_window("测试");
-            {
-                static float x;
-                static Vec2 vec2;
-                static Vec3 vec3;
-                static Vec4 vec4;
-
-                imgui->cmd_drag_float("vec1", &x, 0.01f);
-                imgui->cmd_drag_float2("vec2", glm::value_ptr(vec2), 0.01f);
-                imgui->cmd_drag_float3("vec3", glm::value_ptr(vec3), 0.01f);
-                imgui->cmd_drag_float4("vec4", glm::value_ptr(vec4), 0.01f);
-            }
-            imgui->cmd_end_window();
-
             imgui->cmd_begin_window("object");
             {
                 Vec3 position = object->get_object_position();
@@ -163,6 +161,25 @@ void rendering()
                 Vec3 scaling = object->get_object_scaling();
                 imgui->cmd_drag_float3("缩放: ", glm::value_ptr(scaling), 0.01f);
                 object->set_object_scaling(scaling);
+            }
+            imgui->cmd_end_window();
+
+            imgui->cmd_begin_window("调试");
+            {
+                ImGui::SeparatorText("高级信息");
+                ImGui::Indent(32.0f);
+                ImGui::Text("canvas render time: %.2fms", debug.canvas_render_time);
+                ImGui::Text("screen render time: %.2fms", debug.screen_render_time);
+                ImGui::Text("total render time: %.2fms", debug.canvas_render_time + debug.screen_render_time);
+                ImGui::Unindent(32.0f);
+
+                ImGui::SeparatorText("基础信息");
+                ImGui::Indent(32.0f);
+                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "fps: %d", debug.fps);
+                ImGui::Indent(12.0f);
+                ImGui::PlotLines("##", std::data(debug.fps_data), std::size(debug.fps_data), 0, NULL, 0.0f, 100.0f, ImVec2(0,64));
+                ImGui::Unindent(12.0f);
+                ImGui::Unindent(32.0f);
             }
             imgui->cmd_end_window();
 
@@ -197,6 +214,11 @@ void rendering()
         imgui->cmd_end_imgui_render(screen_cmd_buffer);
     }
     screen->cmd_end_screen_render(screen_cmd_buffer);
+    double screen_render_end_time = glfwGetTime();
+
+    // debug
+    debug.screen_render_time = (screen_render_end_time - screen_render_start_time) * 1000.0f;
+    debug.canvas_render_time = (canvas_render_end_time - canvas_render_start_time) * 1000.0f;
 }
 
 void initialize()
@@ -242,12 +264,24 @@ int main(int argc, char **argv)
     initialize();
 
     while (window->is_close()) {
+        double start_time = glfwGetTime();
         /* poll events */
         window->poll_events();
         update();
         rendering();
         mouse_scroll_xoffset = 0.0f;
         mouse_scroll_yoffset = 0.0f;
+
+        // render data
+        double end_time = glfwGetTime();
+        double frame = end_time - start_time; // to seconds
+        debug.fps = 60.0f / frame;
+
+        debug.fps_data.push_back(glm::radians((float) debug.fps));
+        if (std::size(debug.fps_data) > 120) {
+            debug.fps_data.erase(debug.fps_data.begin());
+        }
+
     }
 
     memdel(object);

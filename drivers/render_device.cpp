@@ -32,8 +32,8 @@ RenderDevice::RenderDevice(RenderDeviceContext *driver_context)
 
     msaa_sample_counts = vk_rdc->get_max_msaa_sample_counts();
 
-    // if sample counts > 4x，that default msaa samples set 4x otherwise 1x
-    msaa_sample_counts = msaa_sample_counts >= 4 ? VK_SAMPLE_COUNT_4_BIT : VK_SAMPLE_COUNT_1_BIT;
+    // if sample counts > 4x，that default msaa samples set 4x otherwise 2x
+    msaa_sample_counts = msaa_sample_counts >= 4 ? VK_SAMPLE_COUNT_4_BIT : VK_SAMPLE_COUNT_2_BIT;
 }
 
 RenderDevice::~RenderDevice()
