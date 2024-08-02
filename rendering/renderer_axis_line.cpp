@@ -48,8 +48,8 @@ void RendererAxisLine::initialize(VkRenderPass render_pass)
     rd->write_descriptor_set_buffer(uniform, descriptor_set);
 
     RenderDevice::ShaderInfo shader_info = {
-            "../shader/axis_line_vertex.glsl.spv",
-            "../shader/axis_line_fragment.glsl.spv",
+            "v_axis_line",
+            "f_axis_line",
             0, NULL,
             0, NULL,
             1, &descriptor_set_layout,

@@ -83,7 +83,11 @@ static VkShaderModule load_shader_module(VkDevice device, const char *name)
     char *buf;
     size_t size;
     VkResult U_ASSERT_ONLY err;
-    buf = io_read_bytecode(name, &size);
+
+    char path[255];
+    snprintf(path, sizeof(path), "../shader/%s.spv", name);
+
+    buf = io_read_bytecode(path, &size);
 
     VkShaderModuleCreateInfo shader_module_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
