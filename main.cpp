@@ -177,7 +177,7 @@ void rendering()
                 ImGui::Indent(32.0f);
                 ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "fps: %d", debug.fps);
                 ImGui::Indent(12.0f);
-                ImGui::PlotLines("##", std::data(debug.fps_data), std::size(debug.fps_data), 0, NULL, 0.0f, 100.0f, ImVec2(0,64));
+                ImGui::PlotLines("##", std::data(debug.fps_data), std::size(debug.fps_data), 0, NULL, 0.0f, 120.0f, ImVec2(0, 64));
                 ImGui::Unindent(12.0f);
                 ImGui::Unindent(32.0f);
             }
@@ -278,7 +278,7 @@ int main(int argc, char **argv)
         debug.fps = 60.0f / frame;
 
         debug.fps_data.push_back(glm::radians((float) debug.fps));
-        if (std::size(debug.fps_data) > 120) {
+        if (std::size(debug.fps_data) > 255) {
             debug.fps_data.erase(debug.fps_data.begin());
         }
 
