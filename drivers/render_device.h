@@ -82,16 +82,24 @@ public:
     void write_descriptor_set_buffer(Buffer *p_buffer, VkDescriptorSet descriptor_set);
 
     struct ShaderInfo {
-        const char *vertex;
-        const char *fragment;
-        uint32_t attribute_count;
-        VkVertexInputAttributeDescription *attributes;
-        uint32_t bind_count;
-        VkVertexInputBindingDescription *binds;
-        uint32_t descriptor_count;
-        VkDescriptorSetLayout *descriptor_set_layouts;
-        uint32_t push_const_count;
-        VkPushConstantRange *p_push_const_range;
+        const char *vertex = NULL;
+        const char *fragment = NULL;
+        uint32_t attribute_count = 0;
+        VkVertexInputAttributeDescription *attributes = NULL;
+        uint32_t bind_count = 0;
+        VkVertexInputBindingDescription *binds = NULL;
+        uint32_t descriptor_set_layout_count = 0;
+        VkDescriptorSetLayout *p_descriptor_set_layouts = NULL;
+        uint32_t push_const_count = 0;
+        VkPushConstantRange *p_push_const_range = NULL;
+    };
+
+    struct ComputeShaderInfo {
+        const char *compute = NULL;
+        uint32_t descriptor_set_layout_count = 0;
+        VkDescriptorSetLayout *p_descriptor_set_layouts = NULL;
+        uint32_t push_const_count = 0;
+        VkPushConstantRange *p_push_const_range = NULL;
     };
 
     struct PipelineCreateInfo {
@@ -108,6 +116,7 @@ public:
     };
 
     Pipeline *create_graphics_pipeline(PipelineCreateInfo *p_create_info, ShaderInfo *p_shader_info);
+    Pipeline *create_compute_pipeline(ComputeShaderInfo *p_shader_info);
     void destroy_pipeline(Pipeline *p_pipeline);
 
     void cmd_buffer_begin(VkCommandBuffer cmd_buffer, VkCommandBufferUsageFlags usage);
@@ -133,7 +142,7 @@ public:
     void cmd_bind_index_buffer(VkCommandBuffer cmd_buffer, VkIndexType type, Buffer *p_buffer);
     void cmd_draw(VkCommandBuffer cmd_buffer, uint32_t vertex_count);
     void cmd_draw_indexed(VkCommandBuffer cmd_buffer, uint32_t index_count);
-    void cmd_bind_graph_pipeline(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline);
+    void cmd_bind_pipeline(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline);
     void cmd_buffer_submit(VkCommandBuffer cmd_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence);
     void cmd_bind_descriptor_set(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor);
     void cmd_setval_viewport(VkCommandBuffer cmd_buffer , uint32_t w, uint32_t h);

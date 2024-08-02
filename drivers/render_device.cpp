@@ -320,8 +320,8 @@ RenderDevice::Pipeline *RenderDevice::create_graphics_pipeline(PipelineCreateInf
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
             /* pNext */ nextptr,
             /* flags */ no_flag_bits,
-            /* setLayoutCount */ p_shader_info->descriptor_count,
-            /* pSetLayouts */ p_shader_info->descriptor_set_layouts,
+            /* setLayoutCount */ p_shader_info->descriptor_set_layout_count,
+            /* pSetLayouts */ p_shader_info->p_descriptor_set_layouts,
             /* pushConstantRangeCount */ p_shader_info->push_const_count,
             /* pPushConstantRanges */ p_shader_info->p_push_const_range,
     };
@@ -534,6 +534,42 @@ void RenderDevice::_initialize_descriptor_pool()
     assert(!err);
 }
 
+RenderDevice::Pipeline *RenderDevice::create_compute_pipeline(RenderDevice::ComputeShaderInfo *p_shader_info)
+{
+    Pipeline *pipeline = (Pipeline *) imalloc(sizeof(Pipeline));
+    pipeline->bind_point = VK_PIPELINE_BIND_POINT_COMPUTE;
+
+    VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
+            /* sType= */ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+            /* pNext= */ nextptr,
+            /* flags= */ no_flag_bits,
+            /* setLayoutCount= */ p_shader_info->descriptor_set_layout_count,
+            /* pSetLayouts= */ p_shader_info->p_descriptor_set_layouts,
+            /* pushConstantRangeCount= */ p_shader_info->push_const_count,
+            /* pPushConstantRanges= */ p_shader_info->p_push_const_range,
+    };
+    vkCreatePipelineLayout(vk_device, &pipeline_layout_create_info, allocation_callbacks, &pipeline->layout);
+
+    VkShaderModule compute_shader_module;
+    compute_shader_module = load_shader_module(vk_device, p_shader_info->compute);
+
+    VkPipelineShaderStageCreateInfo shader_stage_create_info = {};
+    shader_stage_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    shader_stage_create_info.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+    shader_stage_create_info.module = compute_shader_module;
+    shader_stage_create_info.pName = "main";
+
+    VkComputePipelineCreateInfo pipeline_create_info = {};
+    pipeline_create_info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+    pipeline_create_info.stage = shader_stage_create_info;
+    pipeline_create_info.layout = pipeline->layout;
+
+    vkCreateComputePipelines(vk_device, VK_NULL_HANDLE, 1, &pipeline_create_info, VK_NULL_HANDLE, &pipeline->pipeline);
+    vkDestroyShaderModule(vk_device, compute_shader_module, allocation_callbacks);
+
+    return pipeline;
+}
+
 void RenderDevice::destroy_pipeline(Pipeline *p_pipeline)
 {
     vkDestroyPipelineLayout(vk_device, p_pipeline->layout, allocation_callbacks);
@@ -652,7 +688,7 @@ void RenderDevice::cmd_draw_indexed(VkCommandBuffer cmd_buffer, uint32_t index_c
     vkCmdDrawIndexed(cmd_buffer, index_count, 1, 0, 0, 0);
 }
 
-void RenderDevice::cmd_bind_graph_pipeline(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline)
+void RenderDevice::cmd_bind_pipeline(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline)
 {
     vkCmdBindPipeline(cmd_buffer, p_pipeline->bind_point, p_pipeline->pipeline);
 }

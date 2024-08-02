@@ -169,12 +169,13 @@ void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
     msaa = rd->create_texture(width, height, rd->get_msaa_samples(), VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
     rd->bind_texture_sampler(texture, sampler);
-    rd->bind_texture_sampler(depth, VK_NULL_HANDLE);
+    rd->bind_texture_sampler(depth, sampler);
     rd->bind_texture_sampler(msaa, sampler);
 
     VkCommandBuffer cmd_buffer;
 
     rd->cmd_buffer_one_time_begin(&cmd_buffer);
+
     RenderDevice::PipelineMemoryBarrier texture_barrier;
     texture_barrier.image.texture = texture;
     texture_barrier.image.old_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;

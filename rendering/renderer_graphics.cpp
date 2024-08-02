@@ -95,7 +95,7 @@ void RendererGraphics::push_render_object(RenderObject *object)
 
 void RendererGraphics::cmd_begin_graphics_render(VkCommandBuffer cmd_buffer)
 {
-    rd->cmd_bind_graph_pipeline(cmd_buffer, pipeline);
+    rd->cmd_bind_pipeline(cmd_buffer, pipeline);
 }
 
 void RendererGraphics::cmd_end_graphics_render(VkCommandBuffer cmd_buffer)
