@@ -10,10 +10,10 @@ vec3 vertices[4] = {
 };
 
 // in
-layout(set = 0, binding = 0) uniform Matrix {
-    mat4 projection;
-    mat4 view;
-} matrix;
+layout(set = 0, binding = 0) uniform Transform {
+    mat4 p;
+    mat4 v;
+} transform;
 
 // out
 layout(location = 0) out vec4 color;
@@ -28,5 +28,5 @@ void main()
     color = is_direction_x ? vec4(1.0f, 0.3f, 0.3f, 1.0f) :
                              vec4(0.3f, 1.0f, 0.3f, 1.0f);
 
-    gl_Position = matrix.projection * matrix.view * vec4(vertex, 1.0f);
+    gl_Position = transform.p * transform.v * vec4(vertex, 1.0f);
 }
