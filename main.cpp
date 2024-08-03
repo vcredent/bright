@@ -140,8 +140,6 @@ void rendering()
 
             imgui->cmd_begin_viewport("视口");
             {
-                viewport_window_region = ImGui::GetContentRegionAvail();
-
                 static ImTextureID preview = NULL;
                 if (preview != NULL)
                     imgui->destroy_texture(preview);
@@ -153,22 +151,25 @@ void rendering()
                 preview = imgui->create_texture(canvas_preview_texture);
                 depth = imgui->create_texture(canvas_depth_texture);
 
-                imgui->cmd_draw_texture(preview, canvas_preview_texture->width, canvas_preview_texture->height);
+                // Main image
+                {
+                    viewport_window_region = ImGui::GetContentRegionAvail();
+                    imgui->cmd_draw_texture(preview, canvas_preview_texture->width, canvas_preview_texture->height);
+                }
 
-                ImGui::BeginGroup();
+                // Depth image
                 {
                     ImVec2 position = ImGui::GetWindowPos();
                     ImVec2 size = ImGui::GetWindowSize();
 
                     ImVec2 offset = ImVec2(30.0f, 70.0f);
-                    ImVec2 tex_size = ImVec2((size.x * 0.1f) * 1.5f, (size.y * 0.1f) * 1.5f);
+                    ImVec2 tex_size = ImVec2((size.x * 0.1f) * 1.3f, (size.y * 0.1f) * 1.3f);
 
                     ImVec2 depth_tex_pos = ImVec2(position.x + offset.x, position.y + size.y - tex_size.y - offset.y);
 
                     ImDrawList *draw = ImGui::GetWindowDrawList();
                     draw->AddImage(depth, depth_tex_pos, ImVec2(depth_tex_pos.x + tex_size.x, depth_tex_pos.y + tex_size.y));
                 }
-                ImGui::EndGroup();
             }
             imgui->cmd_end_viewport();
 
