@@ -78,5 +78,6 @@ void RendererAxisLine::cmd_draw_line(VkCommandBuffer cmd_buffer, Mat4 projection
     rd->cmd_bind_pipeline(cmd_buffer, pipeline);
     rd->cmd_bind_descriptor_set(cmd_buffer, pipeline, descriptor_set);
     rd->write_buffer(uniform, 0, sizeof(Matrix), &matrix);
+    vkCmdSetLineWidth(cmd_buffer, 2.0f);
     rd->cmd_draw(cmd_buffer, 4);
 }

@@ -272,6 +272,9 @@ void RenderDeviceContext::_create_device()
             "VK_KHR_synchronization2"
     };
 
+    VkPhysicalDeviceFeatures features = {};
+    features.wideLines = VK_TRUE;
+
     VkDeviceCreateInfo device_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
             /* pNext */ nextptr,
@@ -282,7 +285,7 @@ void RenderDeviceContext::_create_device()
             /* ppEnabledLayerNames */ nullptr,
             /* enabledExtensionCount */ ARRAY_SIZE(extensions),
             /* ppEnabledExtensionNames */ extensions,
-            /* pEnabledFeatures */ nullptr,
+            /* pEnabledFeatures */ &features,
     };
 
     err = vkCreateDevice(physical_device, &device_create_info, allocation_callbacks, &device);

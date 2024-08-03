@@ -453,17 +453,20 @@ RenderDevice::Pipeline *RenderDevice::create_graphics_pipeline(PipelineCreateInf
     color_blend_state_create_info.blendConstants[2] = 0.0f;
     color_blend_state_create_info.blendConstants[3] = 0.0f;
 
-    VkDynamicState dynamic_state[] = {
+    std::vector<VkDynamicState> dynamics = {
             VK_DYNAMIC_STATE_VIEWPORT,
             VK_DYNAMIC_STATE_SCISSOR,
     };
+
+    if (p_create_info->line_width > 1.0f)
+        dynamics.push_back(VK_DYNAMIC_STATE_LINE_WIDTH);
 
     VkPipelineDynamicStateCreateInfo dynamic_state_crate_info = {
             /* sType= */ VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
             /* pNext= */ nextptr,
             /* flags= */ no_flag_bits,
-            /* dynamicStateCount= */ ARRAY_SIZE(dynamic_state),
-            /* pDynamicStates= */ dynamic_state,
+            /* dynamicStateCount= */ (uint32_t) std::size(dynamics),
+            /* pDynamicStates= */ std::data(dynamics),
     };
 
     VkGraphicsPipelineCreateInfo pipeline_create_info = {
