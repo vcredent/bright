@@ -160,23 +160,12 @@ void RendererCanvas::cmd_end_canvas_render()
                           nullptr,
                           graph_queue,
                           nullptr);
-
-    VkCommandBuffer cmd_buffer;
-    rd->cmd_buffer_one_time_begin(&cmd_buffer);
-    RenderDevice::PipelineMemoryBarrier barrier;
-    barrier.image.texture = depth;
-    barrier.image.old_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-    barrier.image.new_image_layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
-    barrier.image.src_access_mask = 0;
-    barrier.image.dst_access_mask = VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT;
-    rd->cmd_pipeline_barrier(cmd_buffer, &barrier);
-    rd->cmd_buffer_one_time_end(cmd_buffer);
 }
 
 void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
 {
     texture = rd->create_texture(width, height, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-    depth = rd->create_texture(width, height, rd->get_msaa_samples(), depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    depth = rd->create_texture(width, height, rd->get_msaa_samples(), depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     msaa = rd->create_texture(width, height, rd->get_msaa_samples(), VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
     rd->bind_texture_sampler(texture, sampler);
@@ -193,7 +182,6 @@ void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
     texture_barrier.image.new_image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     texture_barrier.image.src_access_mask = 0;
     texture_barrier.image.dst_access_mask = VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT;
-
     rd->cmd_pipeline_barrier(cmd_buffer, &texture_barrier);
 
     rd->cmd_buffer_one_time_end(cmd_buffer);
