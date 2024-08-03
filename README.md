@@ -29,8 +29,10 @@ if you use `Clion` IDE you can do nothing, just open project and run or debug. s
 -----------
 
 Preview Editor 1
+
 ![Preview1](https://github.com/vcredent/copilot/blob/master/document/references/editor-preview-1.png)
 
 Preview Editor 2
+
 ![Preview1](https://github.com/vcredent/copilot/blob/master/document/references/editor-preview-2.png)
 
