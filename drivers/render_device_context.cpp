@@ -23,6 +23,35 @@
 #include "render_device_context.h"
 #include <algorithm>
 
+const char *ignore_validation_error[] = {
+        "[ VUID-RuntimeSpirv-samples-08725 ]",
+        "[ VUID-VkWriteDescriptorSet-descriptorType-04150 ]",
+};
+
+int last_ignore_runtime_error_index = -1;
+
+#ifdef ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT
+VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT messageType,
+        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+        void* pUserData)
+{
+    const char *message = pCallbackData->pMessage;
+
+    // check ignore error.
+    for (uint32_t i = 0; i < ARRAY_SIZE(ignore_validation_error); i++) {
+        if (strstr(message, ignore_validation_error[i]) != NULL) {
+            goto VALIDATION_DEBUG_CALLBACK_END;
+        }
+    }
+
+    printf("%s\n", message);
+VALIDATION_DEBUG_CALLBACK_END:
+    return VK_FALSE;
+}
+#endif
+
 RenderDeviceContext::RenderDeviceContext()
 {
     VkResult U_ASSERT_ONLY err;
@@ -42,11 +71,16 @@ RenderDeviceContext::RenderDeviceContext()
 
     const char * extensions[] = {
             "VK_KHR_surface",
-            "VK_KHR_win32_surface"
+            "VK_KHR_win32_surface",
+#if defined(ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT)
+            "VK_EXT_debug_utils",
+#endif
     };
 
     const char * layers[] = {
-            "VK_LAYER_KHRONOS_validation" /* required install Vulkan SDK */
+#if defined(ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT)
+            "VK_LAYER_KHRONOS_validation",
+#endif
     };
 
     VkInstanceCreateInfo instance_create_info = {
@@ -62,6 +96,26 @@ RenderDeviceContext::RenderDeviceContext()
 
     err = vkCreateInstance(&instance_create_info, allocation_callbacks, &instance);
     assert(!err);
+
+    _load_proc_addr();
+
+    // ******************************************************** //
+    //                initialize debug messenger                //
+    // ******************************************************** //
+#ifdef ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT
+    VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = {};
+    messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    messenger_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                                            VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                                            VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    messenger_create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                                        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                                        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    messenger_create_info.pfnUserCallback = debugCallback;
+
+    err = fnCreateDebugUtilsMessengerEXT(instance, &messenger_create_info, allocation_callbacks, &messenger);
+    assert(!err);
+#endif
 
     // ******************************************************** //
     //                initialize physical device                //
@@ -100,6 +154,9 @@ RenderDeviceContext::~RenderDeviceContext()
     vmaDestroyAllocator(allocator);
     vkDestroyCommandPool(device, cmd_pool, allocation_callbacks);
     vkDestroyDevice(device, allocation_callbacks);
+#ifdef ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT
+    fnDestroyDebugUtilsMessengerExt(instance, messenger, allocation_callbacks);
+#endif
     vkDestroyInstance(instance, allocation_callbacks);
 }
 
@@ -185,6 +242,14 @@ void RenderDeviceContext::_initialize_window_arguments(VkSurfaceKHR surface)
     }
 
     free(queue_family_properties);
+}
+
+void RenderDeviceContext::_load_proc_addr()
+{
+#if defined(ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT)
+    fnCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    fnDestroyDebugUtilsMessengerExt = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+#endif
 }
 
 void RenderDeviceContext::_create_device()

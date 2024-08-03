@@ -40,6 +40,8 @@
 #define nextptr              nullptr
 #define allocation_callbacks nullptr
 
+#define ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT
+
 #include "vulkan_utils.h"
 
 // Render context driver of vulkan
@@ -68,12 +70,20 @@ protected:
     void _initialize_window_arguments(VkSurfaceKHR surface);
 
 private:
+#ifdef ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT
+        PFN_vkCreateDebugUtilsMessengerEXT fnCreateDebugUtilsMessengerEXT = VK_NULL_HANDLE;
+        PFN_vkDestroyDebugUtilsMessengerEXT fnDestroyDebugUtilsMessengerExt = VK_NULL_HANDLE;
+#endif
+
+    void _load_proc_addr();
     void _create_device();
     void _create_cmd_pool();
     void _create_vma_allocator();
-    void _create_swap_chain();
 
     VkInstance instance = VK_NULL_HANDLE;
+#ifdef ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT
+    VkDebugUtilsMessengerEXT messenger = VK_NULL_HANDLE;
+#endif
     VkPhysicalDevice physical_device = VK_NULL_HANDLE;
     VkPhysicalDeviceProperties physical_device_properties;
     VkPhysicalDeviceFeatures physical_device_features;
