@@ -46,7 +46,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         }
     }
 
-    printf("%s\n", message);
+    fprintf(stderr, "%s\n", message);
 VALIDATION_DEBUG_CALLBACK_END:
     return VK_FALSE;
 }
