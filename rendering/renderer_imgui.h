@@ -58,7 +58,6 @@ public:
     void cmd_hide_cursor();
 
 private:
-    void _drag_scalar_n(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format);
     void _check_dragging_cursor(); // check the drag cursor is need show or hide.
     void _set_theme_embrace_the_darkness();
 

@@ -24,6 +24,8 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
 
+static GLFWwindow *_window = NULL;
+
 void _DarkNavUITheme()
 {
     ImVec4* colors = ImGui::GetStyle().Colors;
@@ -108,6 +110,32 @@ void _DarkNavUITheme()
     style.TabRounding                       = 4;
 }
 
+void _CheckDraggingCursor()
+{
+    static bool     is_dragging = false;
+    static ImGuiID  current_drag_item = 0x7FFFFFFF;
+
+    ImGuiID item = ImGui::GetItemID();
+    bool check_active = ImGui::IsItemActive() && ImGui::IsMouseDragging(0);
+
+    if (item == current_drag_item && !check_active) {
+        is_dragging = false;
+        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        current_drag_item = 0x7FFFFFFF;
+        goto _CHECK_DRAGGING_CURSOR_RETURN_TAG;
+    }
+
+    if (!is_dragging && check_active) {
+        is_dragging = true;
+        current_drag_item = item;
+        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        goto _CHECK_DRAGGING_CURSOR_RETURN_TAG;
+    }
+
+    _CHECK_DRAGGING_CURSOR_RETURN_TAG:
+    /* do nothing.... */
+}
+
 namespace NavUI {
 
     void Initialize(InitializeInfo *p_initialize_info)
@@ -153,6 +181,8 @@ namespace NavUI {
         init_info.ImageCount = p_initialize_info->ImageCount;
         init_info.MSAASamples = p_initialize_info->MSAASamples;
         ImGui_ImplVulkan_Init(&init_info);
+
+        _window = p_initialize_info->window;
     }
 
     void Destroy()
@@ -194,6 +224,79 @@ namespace NavUI {
     void End()
     {
         ImGui::End();
+    }
+
+    void BeginViewport(const char *title)
+    {
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        Begin(title);
+    }
+
+    void EndViewport()
+    {
+        End();
+        ImGui::PopStyleVar();
+    }
+
+    void DrawTexture(NavTextureId v_texture, NavVec2 v_size)
+    {
+        ImGui::Image(v_texture, ImVec2(v_size.x, v_size.y));
+    }
+
+    void DragFloat(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+    {
+        DragScalarN(label, v, 3, v_speed, v_min, v_max, format);
+    }
+
+    void DragFloat3(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+    {
+        DragScalarN(label, v, 3, v_speed, v_min, v_max, format);
+    }
+
+    void DragScalarN(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format)
+    {
+        assert(v_number <= 4);
+
+        ImGui::BeginGroup();
+        ImGui::PushID(label);
+        ImGui::Indent(32.0f);
+        ImGui::TextUnformatted(label);
+        ImGui::SameLine();
+
+        static const char  *axis_labels[4] = { "X", "Y", "Z", "W" };
+        static const ImVec4 axis_colors[4] = {
+                ImVec4(1.0f, 0.0f, 0.0f, 1.0f), // R
+                ImVec4(0.0f, 1.0f, 0.0f, 1.0f), // G
+                ImVec4(0.0f, 0.4f, 1.0f, 1.0f), // B
+                ImVec4(1.0f, 1.0f, 1.0f, 1.0f), // W
+        };
+
+        if (v_number > 1) {
+            ImVec2 region = ImGui::GetContentRegionAvail();
+            float single_item_width = region.x * 0.65f / 3;
+            for (int i = 0; i < v_number; i++) {
+                const char *id = axis_labels[i];
+                ImGui::PushID(id);
+                ImGui::PushItemWidth(single_item_width);
+                ImGui::TextColored(axis_colors[i], axis_labels[i]);
+                ImGui::SameLine();
+                ImGui::DragFloat("", &v[i], v_speed, v_min, v_max, format);
+                _CheckDraggingCursor();
+                ImGui::SameLine();
+                ImGui::PopItemWidth();
+                ImGui::PopID();
+            }
+            goto DRAG_SCALAR_N_END_TAG;
+        }
+
+        // if v_number < 1
+        ImGui::DragFloat("", v, v_speed, v_min, v_max, format);
+        _CheckDraggingCursor();
+
+        DRAG_SCALAR_N_END_TAG:
+        ImGui::Unindent(32.0f);
+        ImGui::PopID();
+        ImGui::EndGroup();
     }
 
     NavTextureId AddTexture(VkSampler v_sampler, VkImageView v_image, VkImageLayout v_layout)
