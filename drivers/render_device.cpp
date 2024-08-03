@@ -398,7 +398,7 @@ RenderDevice::Pipeline *RenderDevice::create_graphics_pipeline(PipelineCreateInf
     rasterization_state_create_info.depthClampEnable = VK_FALSE;
     rasterization_state_create_info.rasterizerDiscardEnable = VK_FALSE;
     rasterization_state_create_info.polygonMode = p_create_info->polygon;
-    rasterization_state_create_info.lineWidth = 1.0f;
+    rasterization_state_create_info.lineWidth = p_create_info->line_width;
     rasterization_state_create_info.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterization_state_create_info.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterization_state_create_info.depthBiasEnable = VK_FALSE;

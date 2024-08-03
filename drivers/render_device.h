@@ -107,6 +107,7 @@ public:
         VkPolygonMode polygon;
         VkPrimitiveTopology topology;
         VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;
+        float line_width = 1.0f;
     };
 
     struct Pipeline {
