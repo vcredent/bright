@@ -22,8 +22,14 @@
 @REM /* ======================================================================== */
 @echo off
 
-glslc -fshader-stage=vert ./v_graph.glsl -o ./v_graph.spv
-glslc -fshader-stage=frag ./f_graph.glsl -o ./f_graph.spv
+@REM ----------------------- MER@
+@REM       graph shader      MER@
+@REM ----------------------- MER@
+glslc -fshader-stage=vert ./graph_vertex.glsl -o ./graph_vertex.spv
+glslc -fshader-stage=frag ./graph_fragment.glsl -o ./graph_fragment.spv
 
-glslc -fshader-stage=vert ./v_axis_line.glsl -o ./v_axis_line.spv
-glslc -fshader-stage=frag ./f_axis_line.glsl -o ./f_axis_line.spv
+@REM ----------------------- MER@
+@REM     axis line shader    MER@
+@REM ----------------------- MER@
+glslc -fshader-stage=vert ./axis_line_vertex.glsl -o ./axis_line_vertex.spv
+glslc -fshader-stage=frag ./axis_line_fragment.glsl -o ./axis_line_fragment.spv

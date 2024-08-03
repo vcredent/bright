@@ -65,8 +65,8 @@ void RendererGraphics::initialize(VkRenderPass render_pass)
     };
 
     RenderDevice::ShaderInfo shader_info = {
-            /* vertex= */ "v_graph",
-            /* fragment= */ "f_graph",
+            /* vertex= */ "graph_vertex",
+            /* fragment= */ "graph_fragment",
             /* attribute_count= */ ARRAY_SIZE(attributes),
             /* attributes= */ attributes,
             /* bind_count= */ ARRAY_SIZE(binds),
