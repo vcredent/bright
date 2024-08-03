@@ -105,17 +105,17 @@ void RendererImGui::cmd_draw_texture(ImTextureID texture, uint32_t width, uint32
 
 void RendererImGui::cmd_drag_float(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
-    NavUI::DragScalarN(label, v, 1, v_speed, v_min, v_max, format);
+    NavUI::DragFloat(label, v, v_speed, v_min, v_max, format);
 }
 
 void RendererImGui::cmd_drag_float2(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
-    NavUI::DragScalarN(label, v, 2, v_speed, v_min, v_max, format);
+    NavUI::DragFloat2(label, v, v_speed, v_min, v_max, format);
 }
 
 void RendererImGui::cmd_drag_float3(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
 {
-    NavUI::DragScalarN(label, v, 3, v_speed, v_min, v_max, format);
+    NavUI::DragFloat3(label, v, v_speed, v_min, v_max, format);
 }
 
 void RendererImGui::cmd_drag_float4(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)

@@ -248,9 +248,19 @@ namespace NavUI {
         DragScalarN(label, v, 3, v_speed, v_min, v_max, format);
     }
 
+    void DragFloat2(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+    {
+        DragScalarN(label, v, 2, v_speed, v_min, v_max, format);
+    }
+
     void DragFloat3(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
     {
         DragScalarN(label, v, 3, v_speed, v_min, v_max, format);
+    }
+
+    void DragFloat4(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
+    {
+        DragScalarN(label, v, 4, v_speed, v_min, v_max, format);
     }
 
     void DragScalarN(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format)

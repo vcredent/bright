@@ -65,7 +65,9 @@ namespace NavUI {
     void DrawTexture(NavTextureId v_texture, NavVec2 v_size);
 
     void DragFloat(const char *label, float *v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
+    void DragFloat2(const char *label, float v[2], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
     void DragFloat3(const char *label, float v[3], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
+    void DragFloat4(const char *label, float v[4], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
     void DragScalarN(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format);
 
     // vulkan
