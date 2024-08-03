@@ -1,13 +1,19 @@
 #version 450
 
-layout(location = 1) in vec3 normal;
+layout(location = 0) in vec3 object_color;
+layout(location = 1) in vec3 object_normal;
 
 // out
 layout(location = 0) out vec4 final_color;
 
-vec3 light_dir = vec3(-1.0f, -1.0f, -1.0f);
+const vec3 light_color = vec3(1.0, 1.0, 1.0);
+const vec3 light_direction = vec3(-1.0f, -1.0f, -1.0f);
 
 void main() {
-    float color = clamp(0.2f, dot(light_dir, normal), 1.0f);
-    final_color = vec4(color, color, color, 1.0f);
+    float diff = max(dot(object_normal, light_direction), 0.0f);
+
+    vec3 diffuse = diff * light_color;
+    vec3 light   = diffuse * object_color;
+
+    final_color = vec4(light, 1.0f);
 }
