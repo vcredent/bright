@@ -23,7 +23,7 @@
 #ifndef _EDITOR_H_
 #define _EDITOR_H_
 
-#include <imgui.h>
+#include <navui.h>
 #include "drivers/render_device.h"
 #include "renderer_screen.h"
 // std

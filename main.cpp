@@ -58,6 +58,8 @@ struct DebugData {
 
 static DebugData debug;
 
+#include <navui.h>
+
 void _update_camera()
 {
     // update camera

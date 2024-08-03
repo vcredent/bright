@@ -20,70 +20,29 @@
 #! limitations under the License.                                           !#
 #!                                                                          !#
 #! ======================================================================== !#
+set(LIBRARY_NAME navui)
 
-cmake_minimum_required(VERSION 3.26)
-project(copilot)
-
-set(CMAKE_CXX_STANDARD 23)
-set(PROGRAM_NAME copilot)
-
-set(INCLUDE_DIRS
-  "include"
-  "thirdparty"
+include_directories(SYSTEM
+  "imgui"
 )
 
-set(LINK_DIRS
-  "thirdparty/GLFW/lib-mingw-w64"
-  "thirdparty/vulkan"
+add_library(${LIBRARY_NAME} STATIC
+  "navui.cpp"
+  "imgui/imgui.cpp"
+  "imgui/imgui_draw.cpp"
+  "imgui/imgui_demo.cpp"
+  "imgui/imgui_tables.cpp"
+  "imgui/imgui_widgets.cpp"
+  "imgui/backends/imgui_impl_vulkan.cpp"
+  "imgui/backends/imgui_impl_glfw.cpp"
 )
 
-set(LINK_LIBS
-  "glfw3"
-  "vulkan-1"
-  "navui"
+target_link_libraries(${LIBRARY_NAME} PRIVATE graph_lib)
+
+target_include_directories(${LIBRARY_NAME} SYSTEM PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/imgui
+  ${CMAKE_CURRENT_SOURCE_DIR}/imgui
 )
 
-file(GLOB_RECURSE SOURCES
-  "main.cpp"
-  "drivers/*.cpp"
-  "platform/*.cpp"
-  "model/*.cpp"
-  "rendering/*.cpp"
-  "misc/*.cpp"
-  "thirdparty/vma/*.cpp"
-)
-
-link_directories(${LINK_DIRS})
-
-# definition global link libraries and includes
-add_library(graph_lib INTERFACE)
-target_link_libraries(graph_lib INTERFACE
-  "glfw3"
-  "vulkan-1"
-)
-target_include_directories(graph_lib INTERFACE "thirdparty")
-
-add_subdirectory(navui)
-
-add_executable(${PROGRAM_NAME}
-  "${SOURCES}"
-)
-
-target_include_directories(${PROGRAM_NAME}
-  SYSTEM PRIVATE ${INCLUDE_DIRS}
-)
-
-target_include_directories(${PROGRAM_NAME}
-  PRIVATE /
-)
-
-target_link_libraries(${PROGRAM_NAME}
-  PRIVATE ${LINK_LIBS}
-)
-
-add_custom_command(
-  TARGET ${PROGRAM_NAME}
-  POST_BUILD
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/shader
-  COMMAND ${CMAKE_SOURCE_DIR}/shader/compile
-)
+target_compile_options(${LIBRARY_NAME} PRIVATE -Wall)
