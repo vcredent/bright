@@ -27,57 +27,62 @@ project(copilot)
 set(CMAKE_CXX_STANDARD 23)
 set(PROGRAM_NAME copilot)
 
-include_directories(${PROGRAM_NAME} SYSTEM thirdparty)
-include_directories(${PROGRAM_NAME} SYSTEM thirdparty/vulkan/Include)
-include_directories(${PROGRAM_NAME} SYSTEM thirdparty/glfw/include)
-include_directories(${PROGRAM_NAME} SYSTEM thirdparty/imgui)
-include_directories(${PROGRAM_NAME} SYSTEM include)
-include_directories(${PROGRAM_NAME} /)
+set(INCLUDE_DIRS
+  "thirdparty"
+  "thirdparty/vulkan/Include"
+  "thirdparty/glfw/include"
+  "thirdparty/imgui"
+  "include"
+)
 
-link_directories(
-    thirdparty/vulkan
-    thirdparty/glfw/lib-mingw-w64
+set(LINK_LIBS
+  "glfw3"
+  "vulkan-1"
+)
+
+file(GLOB_RECURSE SOURCES
+  "main.cpp"
+  "drivers/*.cpp"
+  "platform/*.cpp"
+  "model/*.cpp"
+  "rendering/*.cpp"
+  "misc/*.cpp"
+)
+
+link_directories(${PROGRAM_NAME}
+  "thirdparty/vulkan"
+  "thirdparty/glfw/lib-mingw-w64"
 )
 
 add_executable(${PROGRAM_NAME}
-    main.cpp
-    drivers/render_device_context.cpp
-    drivers/render_device.cpp
-    platform/window.cpp
-    platform/win32/render_device_context_win32.cpp
-    model/obj.cpp
-    rendering/camera/camera.cpp
-    rendering/camera/controller.cpp
-    rendering/camera/game_player_camera_controller.cpp
-    rendering/camera/projection_camera.cpp
-    rendering/renderer_imgui.cpp
-    rendering/renderer_canvas.cpp
-    rendering/renderer_screen.cpp
-    rendering/render_object.cpp
-    rendering/renderer_graphics.cpp
-    rendering/renderer_axis_line.cpp
-    misc/vk_mem_alloc.cpp
-    misc/tiny_obj_loader.cpp
-    # ============================ #
-    #        implementation        #
-    # ============================ #
-    thirdparty/imgui/imgui.cpp
-    thirdparty/imgui/imgui_draw.cpp
-    thirdparty/imgui/imgui_demo.cpp
-    thirdparty/imgui/imgui_tables.cpp
-    thirdparty/imgui/imgui_widgets.cpp
-    thirdparty/imgui/backends/imgui_impl_vulkan.cpp
-    thirdparty/imgui/backends/imgui_impl_glfw.cpp
+  "${SOURCES}"
+  # ============================ #
+  #        implementation        #
+  # ============================ #
+  "thirdparty/imgui/imgui.cpp"
+  "thirdparty/imgui/imgui_draw.cpp"
+  "thirdparty/imgui/imgui_demo.cpp"
+  "thirdparty/imgui/imgui_tables.cpp"
+  "thirdparty/imgui/imgui_widgets.cpp"
+  "thirdparty/imgui/backends/imgui_impl_vulkan.cpp"
+  "thirdparty/imgui/backends/imgui_impl_glfw.cpp"
+)
+
+target_include_directories(${PROGRAM_NAME}
+  SYSTEM PRIVATE ${INCLUDE_DIRS}
+)
+
+target_include_directories(${PROGRAM_NAME}
+  PRIVATE /
 )
 
 target_link_libraries(${PROGRAM_NAME}
-    glfw3
-    vulkan-1
+  PRIVATE ${LINK_LIBS}
 )
 
 add_custom_command(
-    TARGET ${PROGRAM_NAME}
-    POST_BUILD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/shader
-    COMMAND ${CMAKE_SOURCE_DIR}/shader/compile
+  TARGET ${PROGRAM_NAME}
+  POST_BUILD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/shader
+  COMMAND ${CMAKE_SOURCE_DIR}/shader/compile
 )
