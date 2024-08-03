@@ -22,7 +22,6 @@
 /* ======================================================================== */
 #include "platform/win32/render_device_context_win32.h"
 #include <vector>
-#include <chrono>
 #include "rendering/camera/projection_camera.h"
 #include "rendering/camera/game_player_camera_controller.h"
 #include "rendering/renderer_imgui.h"
@@ -30,6 +29,7 @@
 #include "rendering/renderer_screen.h"
 #include "rendering/renderer_graphics.h"
 #include "rendering/renderer_axis_line.h"
+#include "utils/fps_counter.h"
 
 Window *window;
 RenderDeviceContext *rdc;
@@ -45,12 +45,12 @@ CameraController *game_player_controller;
 RenderDevice::Texture2D *canvas_preview_texture;
 RenderDevice::Texture2D *canvas_depth_texture;
 ImVec2 viewport_window_region = ImVec2(32.0f, 32.0f);
+FPSCounter fps_counter;
 
 static float mouse_scroll_xoffset = 0.0f;
 static float mouse_scroll_yoffset = 0.0f;
 
 struct DebugData {
-    int fps = 0;
     std::vector<float> fps_data;
     float canvas_render_time = 0.0f;
     float screen_render_time = 0.0f;
@@ -201,9 +201,9 @@ void rendering()
 
                 ImGui::SeparatorText("基础信息");
                 ImGui::Indent(32.0f);
-                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "fps: %d", debug.fps);
+                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "fps: %d", fps_counter.fps());
                 ImGui::Indent(12.0f);
-                ImGui::PlotLines("##", std::data(debug.fps_data), std::size(debug.fps_data), 0, NULL, 0.0f, 120.0f, ImVec2(0, 64));
+                ImGui::PlotLines("##", std::data(debug.fps_data), std::size(debug.fps_data), 0, NULL, 0.0f, 144.0f, ImVec2(0.0f, 32.0f));
                 ImGui::Unindent(12.0f);
                 ImGui::Unindent(32.0f);
             }
@@ -291,7 +291,7 @@ int main(int argc, char **argv)
     initialize();
 
     while (window->is_close()) {
-        double start_time = glfwGetTime();
+        fps_counter.update();
         /* poll events */
         window->poll_events();
         update();
@@ -301,10 +301,8 @@ int main(int argc, char **argv)
 
         // render data
         double end_time = glfwGetTime();
-        double frame = end_time - start_time; // to seconds
-        debug.fps = 60.0f / frame;
 
-        debug.fps_data.push_back(glm::radians((float) debug.fps));
+        debug.fps_data.push_back(fps_counter.fps());
         if (std::size(debug.fps_data) > 255) {
             debug.fps_data.erase(debug.fps_data.begin());
         }
