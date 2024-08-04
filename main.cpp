@@ -24,7 +24,7 @@
 #include <vector>
 #include "rendering/camera/projection_camera.h"
 #include "rendering/camera/game_player_camera_controller.h"
-#include "rendering/renderer_canvas.h"
+#include "rendering/renderer_scene.h"
 #include "rendering/renderer_screen.h"
 #include "rendering/renderer_graphics.h"
 #include "rendering/renderer_axis_line.h"
@@ -38,14 +38,14 @@ Window *window;
 RenderDeviceContext *rdc;
 RenderDevice *rd;
 RendererScreen *screen;
-RendererCanvas *canvas;
+RendererScene *scene;
 RendererGraphics *graphics;
 RendererAxisLine *axis_line;
 RenderObject *object;
 ProjectionCamera *camera;
 CameraController *game_player_controller;
-RenderDevice::Texture2D *canvas_preview_texture;
-RenderDevice::Texture2D *canvas_depth_texture;
+RenderDevice::Texture2D *scene_preview_texture;
+RenderDevice::Texture2D *scene_depth_texture;
 ImVec2 viewport_window_region = ImVec2(32.0f, 32.0f);
 FPSCounter fps_counter;
 
@@ -89,38 +89,38 @@ void _update_camera()
 
 void update()
 {
-    canvas->set_extent(viewport_window_region.x, viewport_window_region.y);
+    scene->set_extent(viewport_window_region.x, viewport_window_region.y);
     camera->set_aspect_ratio(viewport_window_region.x / viewport_window_region.y);
     _update_camera();
 }
 
 void rendering()
 {
-    /* render to canvas */
-    double canvas_render_start_time = glfwGetTime();
-    VkCommandBuffer canvas_cmd_buffer;
-    canvas->cmd_begin_canvas_render(&canvas_cmd_buffer);
+    /* render to scene */
+    double scene_render_start_time = glfwGetTime();
+    VkCommandBuffer scene_cmd_buffer;
+    scene->cmd_begin_scene_render(&scene_cmd_buffer);
     {
         Mat4 projection, view;
 
         projection = camera->get_projection_matrix();
         view = camera->get_view_matrix();
 
-        axis_line->cmd_setval_viewport(canvas_cmd_buffer, canvas->get_width(), canvas->get_height());
-        axis_line->cmd_draw_line(canvas_cmd_buffer, projection, view);
-        graphics->cmd_begin_graphics_render(canvas_cmd_buffer);
+        axis_line->cmd_setval_viewport(scene_cmd_buffer, scene->get_width(), scene->get_height());
+        axis_line->cmd_draw_line(scene_cmd_buffer, projection, view);
+        graphics->cmd_begin_graphics_render(scene_cmd_buffer);
         {
-            graphics->cmd_setval_viewport(canvas_cmd_buffer, canvas->get_width(), canvas->get_height());
-            graphics->cmd_setval_view_matrix(canvas_cmd_buffer, view);
-            graphics->cmd_setval_projection_matrix(canvas_cmd_buffer, projection);
-            graphics->cmd_draw_list(canvas_cmd_buffer);
+            graphics->cmd_setval_viewport(scene_cmd_buffer, scene->get_width(), scene->get_height());
+            graphics->cmd_setval_view_matrix(scene_cmd_buffer, view);
+            graphics->cmd_setval_projection_matrix(scene_cmd_buffer, projection);
+            graphics->cmd_draw_list(scene_cmd_buffer);
         }
-        graphics->cmd_end_graphics_render(canvas_cmd_buffer);
+        graphics->cmd_end_graphics_render(scene_cmd_buffer);
     }
-    canvas->cmd_end_canvas_render();
-    canvas_preview_texture = canvas->get_canvas_texture();
-    canvas_depth_texture = canvas->get_canvas_depth();
-    double canvas_render_end_time = glfwGetTime();
+    scene->cmd_end_scene_render();
+    scene_preview_texture = scene->get_scene_texture();
+    scene_depth_texture = scene->get_scene_depth();
+    double scene_render_end_time = glfwGetTime();
 
     double screen_render_start_time = glfwGetTime();
     VkCommandBuffer screen_cmd_buffer;
@@ -132,7 +132,7 @@ void rendering()
             static bool show_demo_flag = true;
             ImGui::ShowDemoWindow(&show_demo_flag);
 
-            naveditor::draw_scene_editor_ui(canvas_preview_texture, canvas_depth_texture, &viewport_window_region);
+            naveditor::draw_scene_editor_ui(scene_preview_texture, scene_depth_texture, &viewport_window_region);
 
             ImGui::Begin("object");
             {
@@ -161,7 +161,7 @@ void rendering()
 
     // debug
     naveditor::debugger->screen_render_time = (screen_render_end_time - screen_render_start_time) * 1000.0f;
-    naveditor::debugger->canvas_render_time = (canvas_render_end_time - canvas_render_start_time) * 1000.0f;
+    naveditor::debugger->scene_render_time = (scene_render_end_time - scene_render_start_time) * 1000.0f;
 }
 
 void initialize()
@@ -181,14 +181,14 @@ void initialize()
     screen = memnew(RendererScreen, rd);
     screen->initialize(window);
 
-    canvas = memnew(RendererCanvas, rd);
-    canvas->initialize();
+    scene = memnew(RendererScene, rd);
+    scene->initialize();
 
     graphics = memnew(RendererGraphics, rd);
-    graphics->initialize(canvas->get_render_pass());
+    graphics->initialize(scene->get_render_pass());
 
     axis_line = memnew(RendererAxisLine, rd);
-    axis_line->initialize(canvas->get_render_pass());
+    axis_line->initialize(scene->get_render_pass());
 
     object = RenderObject::load_obj("../assets/cube.obj");
     graphics->push_render_object(object);
@@ -235,7 +235,7 @@ int main(int argc, char **argv)
     memdel(graphics);
     memdel(camera);
     memdel(screen);
-    memdel(canvas);
+    memdel(scene);
     NavUI::Destroy();
     ((RenderDeviceContextWin32 *) rdc)->destroy_render_device(rd);
     memdel(rdc);

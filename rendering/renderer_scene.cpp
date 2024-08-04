@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_canvas.cpp                                                      */
+/* renderer_scene.cpp                                                       */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,24 +20,24 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "renderer_canvas.h"
+#include "renderer_scene.h"
 #include <array>
 
-RendererCanvas::RendererCanvas(RenderDevice *p_device)
+RendererScene::RendererScene(RenderDevice *p_device)
     : rd(p_device)
 {
     rdc = rd->get_device_context();
 }
 
-RendererCanvas::~RendererCanvas()
+RendererScene::~RendererScene()
 {
-    _clean_up_canvas_texture();
+    _clean_up_scene_texture();
     rd->destroy_sampler(sampler);
     rd->destroy_render_pass(render_pass);
-    rd->free_cmd_buffer(canvas_cmd_buffer);
+    rd->free_cmd_buffer(scene_cmd_buffer);
 }
 
-void RendererCanvas::initialize()
+void RendererScene::initialize()
 {
     graph_queue = rd->get_device_context()->get_graph_queue();
 
@@ -115,25 +115,25 @@ void RendererCanvas::initialize()
 
     rd->create_render_pass(ARRAY_SIZE(attachments), attachments, 1, &subpass, 1, &subpass_dependency, &render_pass);
     rd->create_sampler(&sampler);
-    rd->allocate_cmd_buffer(&canvas_cmd_buffer);
+    rd->allocate_cmd_buffer(&scene_cmd_buffer);
 
-    _create_canvas_texture(width, height);
+    _create_scene_texture(width, height);
 }
 
-void RendererCanvas::set_extent(uint32_t v_width, uint32_t v_height)
+void RendererScene::set_extent(uint32_t v_width, uint32_t v_height)
 {
     width  = v_width;
     height = v_height;
 }
 
-void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer)
+void RendererScene::cmd_begin_scene_render(VkCommandBuffer *p_cmd_buffer)
 {
     if (texture->width != width || texture->height != height) {
-        _clean_up_canvas_texture();
-        _create_canvas_texture(width, height);
+        _clean_up_scene_texture();
+        _create_scene_texture(width, height);
     }
 
-    rd->cmd_buffer_begin(canvas_cmd_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
+    rd->cmd_buffer_begin(scene_cmd_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
 
     std::array<VkClearValue, 3> clear_values = {};
     clear_values[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
@@ -143,18 +143,18 @@ void RendererCanvas::cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer)
     VkRect2D rect = {};
     rect.offset = { 0, 0 };
     rect.extent = { texture->width, texture->height };
-    rd->cmd_begin_render_pass(canvas_cmd_buffer, render_pass, std::size(clear_values), std::data(clear_values), framebuffer, &rect);
+    rd->cmd_begin_render_pass(scene_cmd_buffer, render_pass, std::size(clear_values), std::data(clear_values), framebuffer, &rect);
 
-    *p_cmd_buffer = canvas_cmd_buffer;
+    *p_cmd_buffer = scene_cmd_buffer;
 }
 
-void RendererCanvas::cmd_end_canvas_render()
+void RendererScene::cmd_end_scene_render()
 {
-    rd->cmd_end_render_pass(canvas_cmd_buffer);
-    rd->cmd_buffer_end(canvas_cmd_buffer);
+    rd->cmd_end_render_pass(scene_cmd_buffer);
+    rd->cmd_buffer_end(scene_cmd_buffer);
 
     // submit
-    rd->cmd_buffer_submit(canvas_cmd_buffer,
+    rd->cmd_buffer_submit(scene_cmd_buffer,
                           0, nullptr,
                           0, nullptr,
                           nullptr,
@@ -162,7 +162,7 @@ void RendererCanvas::cmd_end_canvas_render()
                           nullptr);
 }
 
-void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
+void RendererScene::_create_scene_texture(uint32_t width, uint32_t height)
 {
     texture = rd->create_texture(width, height, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     depth = rd->create_texture(width, height, rd->get_msaa_samples(), depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
@@ -195,7 +195,7 @@ void RendererCanvas::_create_canvas_texture(uint32_t width, uint32_t height)
     rd->create_framebuffer(texture->width, texture->height, ARRAY_SIZE(attachments), attachments, render_pass, &framebuffer);
 }
 
-void RendererCanvas::_clean_up_canvas_texture()
+void RendererScene::_clean_up_scene_texture()
 {
     rd->destroy_texture(msaa);
     rd->destroy_texture(depth);

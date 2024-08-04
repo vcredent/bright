@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_canvas.h                                                        */
+/* renderer_scene.h                                                         */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -25,10 +25,10 @@
 
 #include "drivers/render_device.h"
 
-class RendererCanvas {
+class RendererScene {
 public:
-    RendererCanvas(RenderDevice *p_device);
-   ~RendererCanvas();
+    RendererScene(RenderDevice *p_device);
+   ~RendererScene();
 
     void initialize();
 
@@ -36,15 +36,15 @@ public:
     uint32_t get_width() { return width; }
     uint32_t get_height() { return height; }
     VkRenderPass get_render_pass() { return render_pass; }
-    RenderDevice::Texture2D *get_canvas_texture() { return texture; }
-    RenderDevice::Texture2D *get_canvas_depth() { return depth; }
+    RenderDevice::Texture2D *get_scene_texture() { return texture; }
+    RenderDevice::Texture2D *get_scene_depth() { return depth; }
 
-    void cmd_begin_canvas_render(VkCommandBuffer *p_cmd_buffer);
-    void cmd_end_canvas_render();
+    void cmd_begin_scene_render(VkCommandBuffer *p_cmd_buffer);
+    void cmd_end_scene_render();
 
 private:
-    void _create_canvas_texture(uint32_t width, uint32_t height);
-    void _clean_up_canvas_texture();
+    void _create_scene_texture(uint32_t width, uint32_t height);
+    void _clean_up_scene_texture();
 
     RenderDevice *rd;
     RenderDeviceContext *rdc;
@@ -54,7 +54,7 @@ private:
     RenderDevice::Texture2D *msaa = NULL;
     VkFramebuffer framebuffer;
     VkSampler sampler;
-    VkCommandBuffer canvas_cmd_buffer;
+    VkCommandBuffer scene_cmd_buffer;
     VkQueue graph_queue;
     VkFormat depth_format;
 

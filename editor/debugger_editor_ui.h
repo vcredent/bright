@@ -33,7 +33,7 @@ namespace naveditor {
     struct DebuggerStructure {
         int fps;
         std::vector<float> fps_list;
-        float canvas_render_time = 0.0f;
+        float scene_render_time = 0.0f;
         float screen_render_time = 0.0f;
     };
 
@@ -55,9 +55,9 @@ namespace naveditor {
         {
             ImGui::SeparatorText("高级信息");
             ImGui::Indent(32.0f);
-            ImGui::Text("canvas render time: %.2fms", debugger->canvas_render_time);
+            ImGui::Text("canvas render time: %.2fms", debugger->scene_render_time);
             ImGui::Text("screen render time: %.2fms", debugger->screen_render_time);
-            ImGui::Text("total render time: %.2fms", debugger->canvas_render_time + debugger->screen_render_time);
+            ImGui::Text("total render time: %.2fms", debugger->scene_render_time + debugger->screen_render_time);
             ImGui::Unindent(32.0f);
 
             ImGui::SeparatorText("基础信息");

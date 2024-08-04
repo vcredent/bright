@@ -30,7 +30,7 @@ namespace naveditor {
 
     static void draw_scene_editor_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region)
     {
-        NavUI::BeginViewport("视口");
+        NavUI::BeginViewport("场景");
         {
             static ImTextureID preview = NULL;
             if (preview != NULL)
