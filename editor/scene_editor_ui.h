@@ -28,7 +28,7 @@
 
 namespace naveditor {
 
-    static void draw_viewport_editor_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region)
+    static void draw_scene_editor_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region)
     {
         NavUI::BeginViewport("视口");
         {

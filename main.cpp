@@ -32,7 +32,7 @@
 // editor ui
 #include "editor/camera_editor_ui.h"
 #include "editor/debugger_editor_ui.h"
-#include "editor/viewport_editor_ui.h"
+#include "editor/scene_editor_ui.h"
 
 Window *window;
 RenderDeviceContext *rdc;
@@ -132,7 +132,7 @@ void rendering()
             static bool show_demo_flag = true;
             ImGui::ShowDemoWindow(&show_demo_flag);
 
-            naveditor::draw_viewport_editor_ui(canvas_preview_texture, canvas_depth_texture, &viewport_window_region);
+            naveditor::draw_scene_editor_ui(canvas_preview_texture, canvas_depth_texture, &viewport_window_region);
 
             ImGui::Begin("object");
             {
