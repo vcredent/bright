@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_scene.h                                                         */
+/* scene_render_data.h                                                      */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,60 +20,54 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "renderer_scene.h"
+#ifndef _SCENE_RENDER_DATA_H_
+#define _SCENE_RENDER_DATA_H_
 
-RendererScene::RendererScene(RenderDevice *v_rd)
-{
-    rd = v_rd;
+#include "drivers/render_device.h"
+#include <copilot/math.h>
 
-    render_data = memnew(SceneRenderData, rd);
+class SceneRenderData {
+public:
+    U_MEMNEW_ONLY SceneRenderData(RenderDevice *v_rd);
+   ~SceneRenderData();
 
-    scene = memnew(RenderingScene, rd);
-    scene->initialize();
+    struct UniformBuffer {
+        Mat4 projection;
+        Mat4 view;
+    };
 
-    axisline = memnew(RenderingAxisLine, rd, render_data);
-    axisline->initialize(scene->get_render_pass());
+    // api
+    void set_render_data(uint32_t v_width,
+                         uint32_t v_height,
+                         const Mat4& projection,
+                         const Mat4& view);
 
-    graphics = memnew(RenderingGraphics, rd, render_data);
-    graphics->initialize(scene->get_render_pass());
-}
+    V_FORCEINLINE inline uint32_t get_scene_width() { return width; }
+    V_FORCEINLINE inline uint32_t get_scene_height() { return height; }
+    V_FORCEINLINE inline RenderDevice::Buffer *get_uniform_buffer() { return buffer; }
 
-RendererScene::~RendererScene()
-{
-    memdel(axisline);
-    memdel(graphics);
-    memdel(scene);
-    memdel(render_data);
-}
+    // static
+    V_FORCEINLINE inline static size_t GetUniformSize() { return sizeof(UniformBuffer); }
 
-void RendererScene::push_render_object(RenderObject *v_object)
-{
-    graphics->push_render_object(v_object);
-}
+    /* get descriptor bind zero. */
+    static VkDescriptorSetLayoutBinding GetDescriptorBindZero()
+      {
+        VkDescriptorSetLayoutBinding bind = {
+          /* binding= */ 0,
+          /* descriptorType= */ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+          /* descriptorCount= */ 1,
+          /* stageFlags= */ VK_SHADER_STAGE_VERTEX_BIT,
+          /* pImmutableSamplers= */ VK_NULL_HANDLE
+        };
+        return bind;
+      }
 
-void RendererScene::cmd_begin_scene_renderer(Camera *v_camera, uint32_t v_width, uint32_t v_height)
-{
-    scene->set_scene_extent(v_width, v_height);
-    scene->cmd_begin_scene_rendering(&scene_cmd_buffer);
+private:
+    RenderDevice *rd;
+    uint32_t width;
+    uint32_t height;
+    UniformBuffer uniform;
+    RenderDevice::Buffer *buffer;
+};
 
-    render_data->set_render_data(
-        v_width,
-        v_height,
-        v_camera->get_projection_matrix(),
-        v_camera->get_view_matrix()
-    );
-
-    axisline->cmd_draw_line(scene_cmd_buffer);
-    graphics->cmd_draw_list(scene_cmd_buffer);
-}
-
-void RendererScene::cmd_end_scene_renderer(RenderDevice::Texture2D **scene_texture, RenderDevice::Texture2D **scene_depth)
-{
-    scene->cmd_end_scene_rendering();
-
-    if (scene_texture != NULL)
-        *scene_texture = scene->get_scene_texture();
-
-    if (scene_depth != NULL)
-        *scene_depth = scene->get_scene_depth();
-}
+#endif /* _SCENE_RENDER_DATA_H_ */

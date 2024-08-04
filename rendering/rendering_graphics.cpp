@@ -22,8 +22,8 @@
 /* ======================================================================== */
 #include "rendering_graphics.h"
 
-RenderingGraphics::RenderingGraphics(RenderDevice *v_rd)
-    : rd(v_rd)
+RenderingGraphics::RenderingGraphics(RenderDevice *v_rd, SceneRenderData *v_render_data)
+    : rd(v_rd), render_data(v_render_data)
 {
     /* do nothing... */
 }
@@ -32,7 +32,6 @@ RenderingGraphics::~RenderingGraphics()
 {
     rd->destroy_descriptor_set_layout(descriptor_set_layout);
     rd->free_descriptor_set(descriptor_set);
-    rd->destroy_buffer(transform_buffer);
     rd->destroy_pipeline(pipeline);
 }
 
@@ -49,14 +48,12 @@ void RenderingGraphics::initialize(VkRenderPass render_pass)
     };
 
     VkDescriptorSetLayoutBinding descriptor_layout_binds[] = {
-            { 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, VK_NULL_HANDLE },
+            SceneRenderData::GetDescriptorBindZero(),
     };
 
     rd->create_descriptor_set_layout(ARRAY_SIZE(descriptor_layout_binds), descriptor_layout_binds, &descriptor_set_layout);
     rd->allocate_descriptor_set(descriptor_set_layout, &descriptor_set);
-
-    transform_buffer = rd->create_buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(Transform));
-    rd->write_descriptor_set_buffer(transform_buffer, descriptor_set);
+    rd->update_descriptor_buffer(render_data->get_uniform_buffer(), 0, descriptor_set);
 
     VkPushConstantRange push_const_range = {
             /* stageFlags= */ VK_SHADER_STAGE_VERTEX_BIT,
@@ -93,41 +90,10 @@ void RenderingGraphics::push_render_object(RenderObject *object)
     render_objects.push_back(object);
 }
 
-void RenderingGraphics::cmd_begin_graphics_render(VkCommandBuffer cmd_buffer)
-{
-    rd->cmd_bind_pipeline(cmd_buffer, pipeline);
-}
-
-void RenderingGraphics::cmd_end_graphics_render(VkCommandBuffer cmd_buffer)
-{
-    /* do nothing... */
-}
-
-void RenderingGraphics::cmd_setval_viewport(VkCommandBuffer cmd_buffer, uint32_t w, uint32_t h)
-{
-    rd->cmd_setval_viewport(cmd_buffer, w, h);
-}
-
-void RenderingGraphics::cmd_setval_view_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 view)
-{
-    transform.v = view;
-    rd->write_buffer(transform_buffer, 0, sizeof(Transform), &transform);
-}
-
-void RenderingGraphics::cmd_setval_projection_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 projection)
-{
-    transform.p = projection;
-    rd->write_buffer(transform_buffer, 0, sizeof(Transform), &transform);
-}
-
-void RenderingGraphics::cmd_setval_model_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 model)
-{
-    transform.m = model;
-    rd->write_buffer(transform_buffer, 0, sizeof(Transform), &transform);
-}
-
 void RenderingGraphics::cmd_draw_list(VkCommandBuffer cmd_buffer)
 {
+    rd->cmd_bind_pipeline(cmd_buffer, pipeline);
+    rd->cmd_setval_viewport(cmd_buffer, render_data->get_scene_width(), render_data->get_scene_height());
     rd->cmd_bind_descriptor_set(cmd_buffer, pipeline, descriptor_set);
     for (auto &object: render_objects) {
         object->update();

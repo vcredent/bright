@@ -24,29 +24,22 @@
 #define _RENDERER_AXIS_LINE_H_
 
 #include "drivers/render_device.h"
-#include <copilot/math.h>
+#include "scene_render_data.h"
 
 class RenderingAxisLine {
 public:
-    U_MEMNEW_ONLY RenderingAxisLine(RenderDevice *v_rd);
+    U_MEMNEW_ONLY RenderingAxisLine(RenderDevice *v_rd, SceneRenderData *v_render_data);
     ~RenderingAxisLine();
 
     void initialize(VkRenderPass render_pass);
 
-    void cmd_setval_viewport(VkCommandBuffer cmd_buffer, uint32_t w, uint32_t h);
-    void cmd_draw_line(VkCommandBuffer cmd_buffer, Mat4 projection, Mat4 mat4);
+    void cmd_draw_line(VkCommandBuffer cmd_buffer);
 
 private:
-
-    struct Matrix {
-        Mat4 projection;
-        Mat4 view;
-    } matrix;
-
     RenderDevice *rd;
+    SceneRenderData *render_data;
     VkDescriptorSetLayout descriptor_set_layout;
     VkDescriptorSet descriptor_set;
-    RenderDevice::Buffer *uniform;
     RenderDevice::Pipeline *pipeline;
 };
 

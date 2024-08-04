@@ -22,8 +22,8 @@
 /* ======================================================================== */
 #include "rendering_axis_line.h"
 
-RenderingAxisLine::RenderingAxisLine(RenderDevice *v_rd)
-    : rd(v_rd)
+RenderingAxisLine::RenderingAxisLine(RenderDevice *v_rd, SceneRenderData *v_render_data)
+    : rd(v_rd), render_data(v_render_data)
 {
     /* do nothing... */
 }
@@ -31,7 +31,6 @@ RenderingAxisLine::RenderingAxisLine(RenderDevice *v_rd)
 RenderingAxisLine::~RenderingAxisLine()
 {
     rd->destroy_pipeline(pipeline);
-    rd->destroy_buffer(uniform);
     rd->free_descriptor_set(descriptor_set);
     rd->destroy_descriptor_set_layout(descriptor_set_layout);
 }
@@ -39,13 +38,12 @@ RenderingAxisLine::~RenderingAxisLine()
 void RenderingAxisLine::initialize(VkRenderPass render_pass)
 {
     VkDescriptorSetLayoutBinding binds[] = {
-            { 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, VK_NULL_HANDLE },
+            SceneRenderData::GetDescriptorBindZero(),
     };
 
     rd->create_descriptor_set_layout(ARRAY_SIZE(binds), binds, &descriptor_set_layout);
     rd->allocate_descriptor_set(descriptor_set_layout, &descriptor_set);
-    uniform = rd->create_buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(Matrix));
-    rd->write_descriptor_set_buffer(uniform, descriptor_set);
+    rd->update_descriptor_buffer(render_data->get_uniform_buffer(), 0, descriptor_set);
 
     RenderDevice::ShaderInfo shader_info = {
             "axis_line_vertex",
@@ -66,18 +64,11 @@ void RenderingAxisLine::initialize(VkRenderPass render_pass)
     pipeline = rd->create_graphics_pipeline(&create_info, &shader_info);
 }
 
-void RenderingAxisLine::cmd_setval_viewport(VkCommandBuffer cmd_buffer, uint32_t w, uint32_t h)
+void RenderingAxisLine::cmd_draw_line(VkCommandBuffer cmd_buffer)
 {
-    rd->cmd_setval_viewport(cmd_buffer, w, h);
-}
-
-void RenderingAxisLine::cmd_draw_line(VkCommandBuffer cmd_buffer, Mat4 projection, Mat4 view)
-{
-    matrix.projection = projection;
-    matrix.view = view;
     rd->cmd_bind_pipeline(cmd_buffer, pipeline);
+    rd->cmd_setval_viewport(cmd_buffer, render_data->get_scene_width(), render_data->get_scene_height());
     rd->cmd_bind_descriptor_set(cmd_buffer, pipeline, descriptor_set);
-    rd->write_buffer(uniform, 0, sizeof(Matrix), &matrix);
     vkCmdSetLineWidth(cmd_buffer, 2.0f);
     rd->cmd_draw(cmd_buffer, 4);
 }

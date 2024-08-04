@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_scene.h                                                         */
+/* scene_render_data.cpp                                                    */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,60 +20,28 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "renderer_scene.h"
+#include "scene_render_data.h"
 
-RendererScene::RendererScene(RenderDevice *v_rd)
+SceneRenderData::SceneRenderData(RenderDevice *v_rd)
+    : rd(v_rd)
 {
-    rd = v_rd;
-
-    render_data = memnew(SceneRenderData, rd);
-
-    scene = memnew(RenderingScene, rd);
-    scene->initialize();
-
-    axisline = memnew(RenderingAxisLine, rd, render_data);
-    axisline->initialize(scene->get_render_pass());
-
-    graphics = memnew(RenderingGraphics, rd, render_data);
-    graphics->initialize(scene->get_render_pass());
+    buffer = rd->create_buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(UniformBuffer));
 }
 
-RendererScene::~RendererScene()
+SceneRenderData::~SceneRenderData()
 {
-    memdel(axisline);
-    memdel(graphics);
-    memdel(scene);
-    memdel(render_data);
+    rd->destroy_buffer(buffer);
 }
 
-void RendererScene::push_render_object(RenderObject *v_object)
+void SceneRenderData::set_render_data(uint32_t v_width,
+                                      uint32_t v_height,
+                                      const Mat4 &projection,
+                                      const Mat4 &view)
 {
-    graphics->push_render_object(v_object);
-}
+    width = v_width;
+    height = v_height;
+    uniform.projection = projection;
+    uniform.view = view;
 
-void RendererScene::cmd_begin_scene_renderer(Camera *v_camera, uint32_t v_width, uint32_t v_height)
-{
-    scene->set_scene_extent(v_width, v_height);
-    scene->cmd_begin_scene_rendering(&scene_cmd_buffer);
-
-    render_data->set_render_data(
-        v_width,
-        v_height,
-        v_camera->get_projection_matrix(),
-        v_camera->get_view_matrix()
-    );
-
-    axisline->cmd_draw_line(scene_cmd_buffer);
-    graphics->cmd_draw_list(scene_cmd_buffer);
-}
-
-void RendererScene::cmd_end_scene_renderer(RenderDevice::Texture2D **scene_texture, RenderDevice::Texture2D **scene_depth)
-{
-    scene->cmd_end_scene_rendering();
-
-    if (scene_texture != NULL)
-        *scene_texture = scene->get_scene_texture();
-
-    if (scene_depth != NULL)
-        *scene_depth = scene->get_scene_depth();
+    rd->write_buffer(buffer, 0, sizeof(UniformBuffer), &uniform);
 }

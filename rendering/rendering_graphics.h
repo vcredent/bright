@@ -24,36 +24,22 @@
 #define _RENDERER_GRAPHICS_H_
 
 #include "render_object.h"
+#include "scene_render_data.h"
 
 class RenderingGraphics {
 public:
-    U_MEMNEW_ONLY RenderingGraphics(RenderDevice *v_rd);
+    U_MEMNEW_ONLY RenderingGraphics(RenderDevice *v_rd, SceneRenderData *v_render_data);
     ~RenderingGraphics();
 
     void initialize(VkRenderPass render_pass);
     void push_render_object(RenderObject *object);
-
-    void cmd_begin_graphics_render(VkCommandBuffer cmd_buffer);
-    void cmd_end_graphics_render(VkCommandBuffer cmd_buffer);
-
-    void cmd_setval_viewport(VkCommandBuffer cmd_buffer, uint32_t w, uint32_t h);
-    void cmd_setval_view_matrix(VkCommandBuffer cmd_buffer, Mat4 view);
-    void cmd_setval_projection_matrix(VkCommandBuffer cmd_buffer, Mat4 projection);
-    void cmd_setval_model_matrix(VkCommandBuffer cmd_buffer, Mat4 model);
     void cmd_draw_list(VkCommandBuffer cmd_buffer);
 
 private:
     RenderDevice *rd;
-
-    struct Transform {
-        Mat4 m;
-        Mat4 v;
-        Mat4 p;
-    } transform;
-
+    SceneRenderData *render_data;
     VkDescriptorSetLayout descriptor_set_layout;
     VkDescriptorSet descriptor_set;
-    RenderDevice::Buffer *transform_buffer;
     RenderDevice::Pipeline *pipeline;
 
     std::vector<RenderObject *> render_objects;

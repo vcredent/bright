@@ -31,7 +31,7 @@
 
 class RendererScene {
 public:
-    RendererScene(RenderDevice *v_rd);
+    U_MEMNEW_ONLY RendererScene(RenderDevice *v_rd);
    ~RendererScene();
 
     // api
@@ -41,10 +41,10 @@ public:
 
 private:
     RenderDevice *rd;
+    SceneRenderData *render_data;
     RenderingScene *scene;
     RenderingAxisLine *axisline;
     RenderingGraphics *graphics;
-
     VkCommandBuffer scene_cmd_buffer;
 };
 
