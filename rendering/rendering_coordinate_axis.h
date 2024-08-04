@@ -26,14 +26,14 @@
 #include "drivers/render_device.h"
 #include "scene_render_data.h"
 
-class RenderingAxisLine {
+class RenderingCoordinateAxis {
 public:
-    U_MEMNEW_ONLY RenderingAxisLine(RenderDevice *v_rd, SceneRenderData *v_render_data);
-    ~RenderingAxisLine();
+    U_MEMNEW_ONLY RenderingCoordinateAxis(RenderDevice *v_rd, SceneRenderData *v_render_data);
+    ~RenderingCoordinateAxis();
 
     void initialize(VkRenderPass render_pass);
 
-    void cmd_draw_line(VkCommandBuffer cmd_buffer);
+    void cmd_draw_coordinate_axis(VkCommandBuffer cmd_buffer);
 
 private:
     RenderDevice *rd;

@@ -31,7 +31,7 @@ RendererScene::RendererScene(RenderDevice *v_rd)
     scene = memnew(RenderingScene, rd);
     scene->initialize();
 
-    axisline = memnew(RenderingAxisLine, rd, render_data);
+    axisline = memnew(RenderingCoordinateAxis, rd, render_data);
     axisline->initialize(scene->get_render_pass());
 
     graphics = memnew(RenderingGraphics, rd, render_data);
@@ -63,8 +63,8 @@ void RendererScene::cmd_begin_scene_renderer(Camera *v_camera, uint32_t v_width,
         v_camera->get_view_matrix()
     );
 
-    axisline->cmd_draw_line(scene_cmd_buffer);
-    graphics->cmd_draw_list(scene_cmd_buffer);
+    axisline->cmd_draw_coordinate_axis(scene_cmd_buffer);
+    graphics->cmd_draw_object_list(scene_cmd_buffer);
 }
 
 void RendererScene::cmd_end_scene_renderer(RenderDevice::Texture2D **scene_texture, RenderDevice::Texture2D **scene_depth)

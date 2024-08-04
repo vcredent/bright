@@ -20,22 +20,22 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "rendering_axis_line.h"
+#include "rendering_coordinate_axis.h"
 
-RenderingAxisLine::RenderingAxisLine(RenderDevice *v_rd, SceneRenderData *v_render_data)
+RenderingCoordinateAxis::RenderingCoordinateAxis(RenderDevice *v_rd, SceneRenderData *v_render_data)
     : rd(v_rd), render_data(v_render_data)
 {
     /* do nothing... */
 }
 
-RenderingAxisLine::~RenderingAxisLine()
+RenderingCoordinateAxis::~RenderingCoordinateAxis()
 {
     rd->destroy_pipeline(pipeline);
     rd->free_descriptor_set(descriptor_set);
     rd->destroy_descriptor_set_layout(descriptor_set_layout);
 }
 
-void RenderingAxisLine::initialize(VkRenderPass render_pass)
+void RenderingCoordinateAxis::initialize(VkRenderPass render_pass)
 {
     VkDescriptorSetLayoutBinding binds[] = {
             SceneRenderData::GetDescriptorBindZero(),
@@ -46,8 +46,8 @@ void RenderingAxisLine::initialize(VkRenderPass render_pass)
     rd->update_descriptor_set_buffer(render_data->get_uniform_buffer(), 0, descriptor_set);
 
     RenderDevice::ShaderInfo shader_info = {
-            "axis_line_vertex",
-            "axis_line_fragment",
+            "coordinate_axis_vertex",
+            "coordinate_axis_fragment",
             0, NULL,
             0, NULL,
             1, &descriptor_set_layout,
@@ -64,7 +64,7 @@ void RenderingAxisLine::initialize(VkRenderPass render_pass)
     pipeline = rd->create_graphics_pipeline(&create_info, &shader_info);
 }
 
-void RenderingAxisLine::cmd_draw_line(VkCommandBuffer cmd_buffer)
+void RenderingCoordinateAxis::cmd_draw_coordinate_axis(VkCommandBuffer cmd_buffer)
 {
     rd->cmd_bind_pipeline(cmd_buffer, pipeline);
     rd->cmd_setval_viewport(cmd_buffer, render_data->get_scene_width(), render_data->get_scene_height());

@@ -33,7 +33,7 @@ public:
 
     void initialize(VkRenderPass render_pass);
     void push_render_object(RenderObject *object);
-    void cmd_draw_list(VkCommandBuffer cmd_buffer);
+    void cmd_draw_object_list(VkCommandBuffer cmd_buffer);
 
 private:
     RenderDevice *rd;

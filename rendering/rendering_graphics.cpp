@@ -90,7 +90,7 @@ void RenderingGraphics::push_render_object(RenderObject *object)
     render_objects.push_back(object);
 }
 
-void RenderingGraphics::cmd_draw_list(VkCommandBuffer cmd_buffer)
+void RenderingGraphics::cmd_draw_object_list(VkCommandBuffer cmd_buffer)
 {
     rd->cmd_bind_pipeline(cmd_buffer, pipeline);
     rd->cmd_setval_viewport(cmd_buffer, render_data->get_scene_width(), render_data->get_scene_height());

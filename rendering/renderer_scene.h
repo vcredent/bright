@@ -26,7 +26,7 @@
 #include "drivers/render_device.h"
 #include "camera/camera.h"
 #include "rendering_scene.h"
-#include "rendering_axis_line.h"
+#include "rendering_coordinate_axis.h"
 #include "rendering_graphics.h"
 
 class RendererScene {
@@ -43,7 +43,7 @@ private:
     RenderDevice *rd;
     SceneRenderData *render_data;
     RenderingScene *scene;
-    RenderingAxisLine *axisline;
+    RenderingCoordinateAxis *axisline;
     RenderingGraphics *graphics;
     VkCommandBuffer scene_cmd_buffer;
 };

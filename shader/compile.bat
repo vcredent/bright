@@ -28,8 +28,8 @@
 glslc -fshader-stage=vert ./graph_vertex.glsl -o ./graph_vertex.spv
 glslc -fshader-stage=frag ./graph_fragment.glsl -o ./graph_fragment.spv
 
-@REM ----------------------- MER@
-@REM     axis line shader    MER@
-@REM ----------------------- MER@
-glslc -fshader-stage=vert ./axis_line_vertex.glsl -o ./axis_line_vertex.spv
-glslc -fshader-stage=frag ./axis_line_fragment.glsl -o ./axis_line_fragment.spv
+@REM ----------------------------- MER@
+@REM     coordinate line shader    MER@
+@REM ----------------------------- MER@
+glslc -fshader-stage=vert ./coordinate_axis_vertex.glsl -o ./coordinate_axis_vertex.spv
+glslc -fshader-stage=frag ./coordinate_axis_fragment.glsl -o ./coordinate_axis_fragment.spv
