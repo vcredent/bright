@@ -67,18 +67,11 @@ void RenderObject::initialize(RenderDevice *v_rd)
     rd->write_buffer(index_buffer, 0, index_buffer_size, std::data(indices));
 }
 
-void RenderObject::cmd_bind_vertex_buffer(VkCommandBuffer cmd_buffer)
+void RenderObject::cmd_draw(VkCommandBuffer cmd_buffer, RenderDevice::Pipeline *pipeline)
 {
     rd->cmd_bind_vertex_buffer(cmd_buffer, vertex_buffer);
-}
-
-void RenderObject::cmd_bind_index_buffer(VkCommandBuffer cmd_buffer)
-{
     rd->cmd_bind_index_buffer(cmd_buffer, VK_INDEX_TYPE_UINT32, index_buffer);
-}
-
-void RenderObject::cmd_draw(VkCommandBuffer cmd_buffer)
-{
+    rd->cmd_push_const(cmd_buffer, pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Mat4), &transform);
     rd->cmd_draw_indexed(cmd_buffer, std::size(indices));
 }
 
