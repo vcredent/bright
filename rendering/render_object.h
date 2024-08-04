@@ -49,6 +49,7 @@ public:
     V_FORCEINLINE void set_object_rotation(Vec3 &v_rotation) { rotation = v_rotation; }
     V_FORCEINLINE void set_object_scaling(Vec3 &v_scaling) { scaling = v_scaling; }
 
+    void cmd_bind(VkCommandBuffer cmd_buffer);
     void cmd_draw(VkCommandBuffer cmd_buffer, RenderDevice::Pipeline *pipeline);
 
     static RenderObject *load_obj(const char *filename);

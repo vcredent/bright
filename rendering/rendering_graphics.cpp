@@ -95,6 +95,8 @@ void RenderingGraphics::cmd_draw_object_list(VkCommandBuffer cmd_buffer)
     rd->cmd_bind_pipeline(cmd_buffer, pipeline);
     rd->cmd_setval_viewport(cmd_buffer, render_data->get_scene_width(), render_data->get_scene_height());
     rd->cmd_bind_descriptor_set(cmd_buffer, pipeline, descriptor_set);
-    for (auto &object: render_objects)
+
+    for (auto &object: render_objects) {
         object->cmd_draw(cmd_buffer, pipeline);
+    }
 }

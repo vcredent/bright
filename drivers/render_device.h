@@ -108,6 +108,9 @@ public:
         VkPrimitiveTopology topology;
         VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;
         float line_width = 1.0f;
+        VkBool32 blend_enable = VK_FALSE;
+        VkBlendFactor src_color_blend_factor = VK_BLEND_FACTOR_ONE;
+        VkBlendFactor dst_color_blend_factor = VK_BLEND_FACTOR_ZERO;
     };
 
     struct Pipeline {
