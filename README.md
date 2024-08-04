@@ -22,7 +22,15 @@ Some links to learning resource:
 - `CMake`
 - `Vulkan SDK`
 
-if you use `Clion` IDE you don't need to do anything, just open project and run or debug. so fucking simple!
+The IDE:
+
+- `CLion`
+
+    if you use `CLion` IDE you don't need to do anything, you can run the project directly after opening it.
+
+- `Visual Studio`
+
+    if you use `Visual Studio` i'm not sure if you can run the project directly opening it, maybe you should configure some environments or libraries. 
 
 ## Preview editor
 
