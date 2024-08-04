@@ -29,7 +29,10 @@
 #include "rendering/renderer_graphics.h"
 #include "rendering/renderer_axis_line.h"
 #include "utils/fps_counter.h"
-#include <navui.h>
+// editor ui
+#include "editor/camera_editor_ui.h"
+#include "editor/debugger_editor_ui.h"
+#include "editor/viewport_editor_ui.h"
 
 Window *window;
 RenderDeviceContext *rdc;
@@ -48,16 +51,6 @@ FPSCounter fps_counter;
 
 static float mouse_scroll_xoffset = 0.0f;
 static float mouse_scroll_yoffset = 0.0f;
-
-struct DebugData {
-    std::vector<float> fps_data;
-    float canvas_render_time = 0.0f;
-    float screen_render_time = 0.0f;
-};
-
-static DebugData debug;
-
-#include <navui.h>
 
 void _update_camera()
 {
@@ -139,40 +132,7 @@ void rendering()
             static bool show_demo_flag = true;
             ImGui::ShowDemoWindow(&show_demo_flag);
 
-            NavUI::BeginViewport("视口");
-            {
-                static ImTextureID preview = NULL;
-                if (preview != NULL)
-                    NavUI::RemoveTexture(preview);
-
-                static ImTextureID depth = NULL;
-                if (depth != NULL)
-                    NavUI::RemoveTexture(depth);
-
-                preview = NavUI::AddTexture(canvas_preview_texture->sampler, canvas_preview_texture->image_view, canvas_preview_texture->image_layout);
-                depth = NavUI::AddTexture(canvas_depth_texture->sampler, canvas_depth_texture->image_view, canvas_depth_texture->image_layout);
-
-                // Main image
-                {
-                    viewport_window_region = ImGui::GetContentRegionAvail();
-                    ImGui::Image(preview, ImVec2(canvas_preview_texture->width, canvas_preview_texture->height));
-                }
-
-                // Depth image
-                {
-                    ImVec2 position = ImGui::GetWindowPos();
-                    ImVec2 size = ImGui::GetWindowSize();
-
-                    ImVec2 offset = ImVec2(30.0f, 70.0f);
-                    ImVec2 tex_size = ImVec2((size.x * 0.1f) * 1.3f, (size.y * 0.1f) * 1.3f);
-
-                    ImVec2 depth_tex_pos = ImVec2(position.x + offset.x, position.y + size.y - tex_size.y - offset.y);
-
-                    ImDrawList *draw = ImGui::GetWindowDrawList();
-                    draw->AddImage(depth, depth_tex_pos, ImVec2(depth_tex_pos.x + tex_size.x, depth_tex_pos.y + tex_size.y));
-                }
-            }
-            NavUI::EndViewport();
+            naveditor::draw_viewport_editor_ui(canvas_preview_texture, canvas_depth_texture, &viewport_window_region);
 
             ImGui::Begin("object");
             {
@@ -191,53 +151,8 @@ void rendering()
             }
             ImGui::End();
 
-            ImGui::Begin("调试");
-            {
-                ImGui::SeparatorText("高级信息");
-                ImGui::Indent(32.0f);
-                ImGui::Text("canvas render time: %.2fms", debug.canvas_render_time);
-                ImGui::Text("screen render time: %.2fms", debug.screen_render_time);
-                ImGui::Text("total render time: %.2fms", debug.canvas_render_time + debug.screen_render_time);
-                ImGui::Unindent(32.0f);
-
-                ImGui::SeparatorText("基础信息");
-                ImGui::Indent(32.0f);
-                ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "fps: %d", fps_counter.fps());
-                ImGui::Indent(12.0f);
-                ImGui::PlotLines("##", std::data(debug.fps_data), std::size(debug.fps_data), 0, NULL, 0.0f, 144.0f, ImVec2(0.0f, 32.0f));
-                ImGui::Unindent(12.0f);
-                ImGui::Unindent(32.0f);
-            }
-            ImGui::End();
-
-            ImGui::Begin("摄像机");
-            {
-                ImGui::SeparatorText("变换");
-                Vec3 position = camera->get_position();
-                NavUI::DragFloat3("位置: ", glm::value_ptr(position), 0.01f);
-                camera->set_position(position);
-
-                Vec3 target = camera->get_target();
-                NavUI::DragFloat3("目标: ", glm::value_ptr(target), 0.01f);
-                camera->set_target(target);
-
-                float fov = camera->get_fov();
-                NavUI::DragFloat("景深: ", &fov, 0.01f);
-                camera->set_fov(fov);
-
-                float near = camera->get_near();
-                NavUI::DragFloat("近点: ", &near, 0.01f);
-                camera->set_near(near);
-
-                float far = camera->get_far();
-                NavUI::DragFloat("远点: ", &far, 0.01f);
-                camera->set_far(far);
-
-                float speed = camera->get_speed();
-                NavUI::DragFloat("速度: ", &speed, 0.01f);
-                camera->set_speed(speed);
-            }
-            ImGui::End();
+            naveditor::draw_debugger_editor_ui();
+            naveditor::draw_camera_editor_ui(camera);
         }
         NavUI::EndNewFrame(screen_cmd_buffer);
     }
@@ -245,8 +160,8 @@ void rendering()
     double screen_render_end_time = glfwGetTime();
 
     // debug
-    debug.screen_render_time = (screen_render_end_time - screen_render_start_time) * 1000.0f;
-    debug.canvas_render_time = (canvas_render_end_time - canvas_render_start_time) * 1000.0f;
+    naveditor::debugger->screen_render_time = (screen_render_end_time - screen_render_start_time) * 1000.0f;
+    naveditor::debugger->canvas_render_time = (canvas_render_end_time - canvas_render_start_time) * 1000.0f;
 }
 
 void initialize()
@@ -311,12 +226,10 @@ int main(int argc, char **argv)
         mouse_scroll_xoffset = 0.0f;
         mouse_scroll_yoffset = 0.0f;
 
-        // render data
-        double end_time = glfwGetTime();
-
-        debug.fps_data.push_back(fps_counter.fps());
-        if (std::size(debug.fps_data) > 255) {
-            debug.fps_data.erase(debug.fps_data.begin());
+        naveditor::debugger->fps = fps_counter.fps();
+        naveditor::debugger->fps_list.push_back(fps_counter.fps());
+        if (std::size(naveditor::debugger->fps_list) > 255) {
+            naveditor::debugger->fps_list.erase(naveditor::debugger->fps_list.begin());
         }
 
     }

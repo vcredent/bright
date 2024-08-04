@@ -1,9 +1,9 @@
-/* ************************************************************************ */
-/* memalloc.h                                                               */
-/* ************************************************************************ */
+/* ======================================================================== */
+/* debugger_editor_ui.h                                                     */
+/* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
-/* ************************************************************************ */
+/* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
 /*                                                                          */
@@ -15,34 +15,13 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
-/* ************************************************************************ */
-#ifndef _MEMALLOC_H_
-#define _MEMALLOC_H_
+/* ======================================================================== */
+#include "debugger_editor_ui.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <memory>
-
-/* use follow the memory allocate */
-#define _post_initialize(ptr) (ptr)
-
-// allocate memory and initialize members to zero,
-// the default malloc does not initialize members
-inline static void *imalloc(size_t size)
-{
-    void *ptr;
-
-    ptr = malloc(size);
-    memset(ptr, 0, size);
-
-    return _post_initialize(ptr);
+namespace naveditor {
+    std::shared_ptr<DebuggerStructure> debugger = std::make_shared<DebuggerStructure>();
 }
-
-#define memnew(obj, ...) _post_initialize(new obj(__VA_ARGS__))
-#define memdel(ptr) delete (ptr)
-
-#endif /* _MEMALLOC_H_ */

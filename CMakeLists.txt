@@ -45,6 +45,7 @@ set(LINK_LIBS
 file(GLOB_RECURSE SOURCES
   "main.cpp"
   "drivers/*.cpp"
+  "editor/*.cpp"
   "platform/*.cpp"
   "model/*.cpp"
   "rendering/*.cpp"
