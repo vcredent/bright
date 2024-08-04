@@ -226,11 +226,7 @@ int main(int argc, char **argv)
         mouse_scroll_xoffset = 0.0f;
         mouse_scroll_yoffset = 0.0f;
 
-        naveditor::debugger->fps = fps_counter.fps();
-        naveditor::debugger->fps_list.push_back(fps_counter.fps());
-        if (std::size(naveditor::debugger->fps_list) > 255) {
-            naveditor::debugger->fps_list.erase(naveditor::debugger->fps_list.begin());
-        }
+        naveditor::add_debugger_fps_value(fps_counter.fps());
 
     }
 

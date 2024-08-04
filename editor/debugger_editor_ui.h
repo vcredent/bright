@@ -26,6 +26,7 @@
 #include <navui.h>
 #include <vector>
 #include <copilot/memalloc.h>
+#include <copilot/typedefs.h>
 
 namespace naveditor {
 
@@ -37,6 +38,16 @@ namespace naveditor {
     };
 
     extern std::shared_ptr<DebuggerStructure> debugger;
+
+    // add fps value
+    static void add_debugger_fps_value(int fps)
+    {
+        debugger->fps = fps;
+        debugger->fps_list.push_back(fps);
+        if (std::size(debugger->fps_list) > 255) {
+            debugger->fps_list.erase(debugger->fps_list.begin());
+        }
+    }
 
     static void draw_debugger_editor_ui()
     {
