@@ -38,9 +38,8 @@ set(LINK_DIRS
 )
 
 set(LINK_LIBS
-  "glfw3"
-  "vulkan-1"
   "navui"
+  "glfw_vulkan_links"
 )
 
 file(GLOB_RECURSE SOURCES
@@ -56,12 +55,12 @@ file(GLOB_RECURSE SOURCES
 link_directories(${LINK_DIRS})
 
 # definition global link libraries and includes
-add_library(graph_lib INTERFACE)
-target_link_libraries(graph_lib INTERFACE
+add_library(glfw_vulkan_links INTERFACE)
+target_link_libraries(glfw_vulkan_links INTERFACE
   "glfw3"
   "vulkan-1"
 )
-target_include_directories(graph_lib INTERFACE "thirdparty")
+target_include_directories(glfw_vulkan_links INTERFACE "thirdparty")
 
 add_subdirectory(navui)
 

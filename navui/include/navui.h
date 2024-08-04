@@ -27,16 +27,7 @@
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
-typedef void *NavTextureId;
-
-struct NavVec2 {
-    float                                      x, y;
-    constexpr NavVec2()                      : x(0.0f), y(0.0f) { }
-    constexpr NavVec2(float v_x, float v_y)  : x(v_x), y(v_y) { }
-};
-
 namespace NavUI {
-
     struct InitializeInfo {
         GLFWwindow*                     window;
         VkInstance                      Instance;
@@ -62,18 +53,20 @@ namespace NavUI {
     void End();
     void BeginViewport(const char *title);
     void EndViewport();
-    void DrawTexture(NavTextureId v_texture, NavVec2 v_size);
+    void DrawTexture(ImTextureID v_texture, const ImVec2& v_size);
 
+    // widgets
     void DragFloat(const char *label, float *v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
     void DragFloat2(const char *label, float v[2], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
     void DragFloat3(const char *label, float v[3], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
     void DragFloat4(const char *label, float v[4], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
-    void DragScalarN(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format);
 
     // vulkan
-    NavTextureId AddTexture(VkSampler v_sampler, VkImageView v_image, VkImageLayout v_layout);
-    void RemoveTexture(NavTextureId v_texture);
+    ImTextureID AddTexture(VkSampler v_sampler, VkImageView v_image, VkImageLayout v_layout);
+    void RemoveTexture(ImTextureID v_texture);
 
+    // private
+    void _DragScalarN(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format);
 }
 
 #endif /* _PILOTUI_H_ */

@@ -37,7 +37,7 @@ add_library(${LIBRARY_NAME} STATIC
   "imgui/backends/imgui_impl_glfw.cpp"
 )
 
-target_link_libraries(${LIBRARY_NAME} PRIVATE graph_lib)
+target_link_libraries(${LIBRARY_NAME} PRIVATE glfw_vulkan_links)
 
 target_include_directories(${LIBRARY_NAME} SYSTEM PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include

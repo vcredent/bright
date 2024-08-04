@@ -24,12 +24,12 @@
 #include <vector>
 #include "rendering/camera/projection_camera.h"
 #include "rendering/camera/game_player_camera_controller.h"
-#include "rendering/renderer_imgui.h"
 #include "rendering/renderer_canvas.h"
 #include "rendering/renderer_screen.h"
 #include "rendering/renderer_graphics.h"
 #include "rendering/renderer_axis_line.h"
 #include "utils/fps_counter.h"
+#include <navui.h>
 
 Window *window;
 RenderDeviceContext *rdc;
@@ -39,7 +39,6 @@ RendererCanvas *canvas;
 RendererGraphics *graphics;
 RendererAxisLine *axis_line;
 RenderObject *object;
-RendererImGui *imgui;
 ProjectionCamera *camera;
 CameraController *game_player_controller;
 RenderDevice::Texture2D *canvas_preview_texture;
@@ -135,28 +134,28 @@ void rendering()
     screen->cmd_begin_screen_render(&screen_cmd_buffer);
     {
         /* ImGui */
-        imgui->cmd_begin_imgui_render(screen_cmd_buffer);
+        NavUI::BeginNewFrame(screen_cmd_buffer);
         {
             static bool show_demo_flag = true;
             ImGui::ShowDemoWindow(&show_demo_flag);
 
-            imgui->cmd_begin_viewport("视口");
+            NavUI::BeginViewport("视口");
             {
                 static ImTextureID preview = NULL;
                 if (preview != NULL)
-                    imgui->destroy_texture(preview);
+                    NavUI::RemoveTexture(preview);
 
                 static ImTextureID depth = NULL;
                 if (depth != NULL)
-                    imgui->destroy_texture(depth);
+                    NavUI::RemoveTexture(depth);
 
-                preview = imgui->create_texture(canvas_preview_texture);
-                depth = imgui->create_texture(canvas_depth_texture);
+                preview = NavUI::AddTexture(canvas_preview_texture->sampler, canvas_preview_texture->image_view, canvas_preview_texture->image_layout);
+                depth = NavUI::AddTexture(canvas_depth_texture->sampler, canvas_depth_texture->image_view, canvas_depth_texture->image_layout);
 
                 // Main image
                 {
                     viewport_window_region = ImGui::GetContentRegionAvail();
-                    imgui->cmd_draw_texture(preview, canvas_preview_texture->width, canvas_preview_texture->height);
+                    ImGui::Image(preview, ImVec2(canvas_preview_texture->width, canvas_preview_texture->height));
                 }
 
                 // Depth image
@@ -173,26 +172,26 @@ void rendering()
                     draw->AddImage(depth, depth_tex_pos, ImVec2(depth_tex_pos.x + tex_size.x, depth_tex_pos.y + tex_size.y));
                 }
             }
-            imgui->cmd_end_viewport();
+            NavUI::EndViewport();
 
-            imgui->cmd_begin_window("object");
+            ImGui::Begin("object");
             {
                 ImGui::SeparatorText("变换");
                 Vec3 position = object->get_object_position();
-                imgui->cmd_drag_float3("平移: ", glm::value_ptr(position), 0.01f);
+                NavUI::DragFloat3("平移: ", glm::value_ptr(position), 0.01f);
                 object->set_object_position(position);
 
                 Vec3 rotation = object->get_object_rotation();
-                imgui->cmd_drag_float3("旋转: ", glm::value_ptr(rotation), 0.01f);
+                NavUI::DragFloat3("旋转: ", glm::value_ptr(rotation), 0.01f);
                 object->set_object_rotation(rotation);
 
                 Vec3 scaling = object->get_object_scaling();
-                imgui->cmd_drag_float3("缩放: ", glm::value_ptr(scaling), 0.01f);
+                NavUI::DragFloat3("缩放: ", glm::value_ptr(scaling), 0.01f);
                 object->set_object_scaling(scaling);
             }
-            imgui->cmd_end_window();
+            ImGui::End();
 
-            imgui->cmd_begin_window("调试");
+            ImGui::Begin("调试");
             {
                 ImGui::SeparatorText("高级信息");
                 ImGui::Indent(32.0f);
@@ -209,38 +208,38 @@ void rendering()
                 ImGui::Unindent(12.0f);
                 ImGui::Unindent(32.0f);
             }
-            imgui->cmd_end_window();
+            ImGui::End();
 
-            imgui->cmd_begin_window("摄像机");
+            ImGui::Begin("摄像机");
             {
                 ImGui::SeparatorText("变换");
                 Vec3 position = camera->get_position();
-                imgui->cmd_drag_float3("位置: ", glm::value_ptr(position), 0.01f);
+                NavUI::DragFloat3("位置: ", glm::value_ptr(position), 0.01f);
                 camera->set_position(position);
 
                 Vec3 target = camera->get_target();
-                imgui->cmd_drag_float3("目标: ", glm::value_ptr(target), 0.01f);
+                NavUI::DragFloat3("目标: ", glm::value_ptr(target), 0.01f);
                 camera->set_target(target);
 
                 float fov = camera->get_fov();
-                imgui->cmd_drag_float("景深: ", &fov, 0.01f);
+                NavUI::DragFloat("景深: ", &fov, 0.01f);
                 camera->set_fov(fov);
 
                 float near = camera->get_near();
-                imgui->cmd_drag_float("近点: ", &near, 0.01f);
+                NavUI::DragFloat("近点: ", &near, 0.01f);
                 camera->set_near(near);
 
                 float far = camera->get_far();
-                imgui->cmd_drag_float("远点: ", &far, 0.01f);
+                NavUI::DragFloat("远点: ", &far, 0.01f);
                 camera->set_far(far);
 
                 float speed = camera->get_speed();
-                imgui->cmd_drag_float("速度: ", &speed, 0.01f);
+                NavUI::DragFloat("速度: ", &speed, 0.01f);
                 camera->set_speed(speed);
             }
-            imgui->cmd_end_window();
+            ImGui::End();
         }
-        imgui->cmd_end_imgui_render(screen_cmd_buffer);
+        NavUI::EndNewFrame(screen_cmd_buffer);
     }
     screen->cmd_end_screen_render(screen_cmd_buffer);
     double screen_render_end_time = glfwGetTime();
@@ -279,8 +278,19 @@ void initialize()
     object = RenderObject::load_assets_obj("../assets/cube.obj");
     graphics->push_render_object(object);
 
-    imgui = memnew(RendererImGui, rd);
-    imgui->initialize(screen);
+    NavUI::InitializeInfo initialize_info = {};
+    initialize_info.window = (GLFWwindow *) screen->get_focused_window()->get_native_window();
+    initialize_info.Instance = rdc->get_instance();
+    initialize_info.PhysicalDevice = rdc->get_physical_device();
+    initialize_info.Device = rdc->get_device();
+    initialize_info.QueueFamily = rdc->get_graph_queue_family();
+    initialize_info.Queue = rdc->get_graph_queue();
+    initialize_info.DescriptorPool = rd->get_descriptor_pool();
+    initialize_info.RenderPass = screen->get_render_pass();
+    initialize_info.MinImageCount = screen->get_image_buffer_count();
+    initialize_info.ImageCount = screen->get_image_buffer_count();
+    initialize_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    NavUI::Initialize(&initialize_info);
 
     camera = memnew(ProjectionCamera);
     game_player_controller = memnew(GamePlayerCameraController);
@@ -317,7 +327,7 @@ int main(int argc, char **argv)
     memdel(camera);
     memdel(screen);
     memdel(canvas);
-    memdel(imgui);
+    NavUI::Destroy();
     ((RenderDeviceContextWin32 *) rdc)->destroy_render_device(rd);
     memdel(rdc);
     memdel(window);

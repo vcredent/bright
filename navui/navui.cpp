@@ -140,6 +140,10 @@ namespace NavUI {
 
     void Initialize(InitializeInfo *p_initialize_info)
     {
+        // Setup Dear ImGui context
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -238,32 +242,42 @@ namespace NavUI {
         ImGui::PopStyleVar();
     }
 
-    void DrawTexture(NavTextureId v_texture, NavVec2 v_size)
+    void DrawTexture(ImTextureID v_texture, const ImVec2& v_size)
     {
-        ImGui::Image(v_texture, ImVec2(v_size.x, v_size.y));
+        ImGui::Image(v_texture, v_size);
     }
 
     void DragFloat(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
     {
-        DragScalarN(label, v, 3, v_speed, v_min, v_max, format);
+        _DragScalarN(label, v, 1, v_speed, v_min, v_max, format);
     }
 
     void DragFloat2(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
     {
-        DragScalarN(label, v, 2, v_speed, v_min, v_max, format);
+        _DragScalarN(label, v, 2, v_speed, v_min, v_max, format);
     }
 
     void DragFloat3(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
     {
-        DragScalarN(label, v, 3, v_speed, v_min, v_max, format);
+        _DragScalarN(label, v, 3, v_speed, v_min, v_max, format);
     }
 
     void DragFloat4(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
     {
-        DragScalarN(label, v, 4, v_speed, v_min, v_max, format);
+        _DragScalarN(label, v, 4, v_speed, v_min, v_max, format);
     }
 
-    void DragScalarN(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format)
+    ImTextureID AddTexture(VkSampler v_sampler, VkImageView v_image, VkImageLayout v_layout)
+    {
+        return ImGui_ImplVulkan_AddTexture(v_sampler, v_image, v_layout);
+    }
+
+    void RemoveTexture(ImTextureID v_texture)
+    {
+        ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet) v_texture);
+    }
+
+    void _DragScalarN(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format)
     {
         assert(v_number <= 4);
 
@@ -307,16 +321,6 @@ namespace NavUI {
         ImGui::Unindent(32.0f);
         ImGui::PopID();
         ImGui::EndGroup();
-    }
-
-    NavTextureId AddTexture(VkSampler v_sampler, VkImageView v_image, VkImageLayout v_layout)
-    {
-        return ImGui_ImplVulkan_AddTexture(v_sampler, v_image, v_layout);
-    }
-
-    void RemoveTexture(NavTextureId v_texture)
-    {
-        ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet) v_texture);
     }
 
 }
