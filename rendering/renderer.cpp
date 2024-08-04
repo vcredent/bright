@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_axis_line.h                                                     */
+/* renderer.cpp                                                             */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,34 +20,46 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _RENDERER_AXIS_LINE_H_
-#define _RENDERER_AXIS_LINE_H_
+#include "renderer.h"
 
-#include "drivers/render_device.h"
-#include <copilot/math.h>
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "NullDereference"
 
-class RendererAxisLine {
-public:
-    U_MEMNEW_ONLY RendererAxisLine(RenderDevice *v_rd);
-    ~RendererAxisLine();
+RenderDevice *Renderer::rd = NULL;
+RendererScene *Renderer::scene = NULL;
 
-    void initialize(VkRenderPass render_pass);
+#define _CHECK_RENDERER_INIT() do {                                                                          \
+    EXIT_FAIL_COND_V(rd, "-engine error: the renderer is not initialized! call Renderer::Initialize(rd)");   \
+} while(0)
 
-    void cmd_setval_viewport(VkCommandBuffer cmd_buffer, uint32_t w, uint32_t h);
-    void cmd_draw_line(VkCommandBuffer cmd_buffer, Mat4 projection, Mat4 mat4);
+void Renderer::Initialize(RenderDevice *v_rd)
+{
+    rd = v_rd;
+    // initialize
+    scene = memnew(RendererScene, rd);
+}
 
-private:
+void Renderer::Destroy()
+{
+    _CHECK_RENDERER_INIT();
+    memdel(scene);
+}
 
-    struct Matrix {
-        Mat4 projection;
-        Mat4 view;
-    } matrix;
+void Renderer::PushSceneRenderObject(RenderObject *v_object)
+{
+    _CHECK_RENDERER_INIT();
+    scene->push_render_object(v_object);
+}
 
-    RenderDevice *rd;
-    VkDescriptorSetLayout descriptor_set_layout;
-    VkDescriptorSet descriptor_set;
-    RenderDevice::Buffer *uniform;
-    RenderDevice::Pipeline *pipeline;
-};
+void Renderer::BeginScene(Camera *v_camera, uint32_t v_width, uint32_t v_height)
+{
+    _CHECK_RENDERER_INIT();
+    scene->cmd_begin_scene_renderer(v_camera, v_width, v_height);
+}
 
-#endif /* _RENDERER_AXIS_LINE_H_ */
+void Renderer::EndScene(RenderDevice::Texture2D **texture, RenderDevice::Texture2D **depth)
+{
+    _CHECK_RENDERER_INIT();
+    scene->cmd_end_scene_renderer(texture, depth);
+}
+#pragma clang diagnostic pop

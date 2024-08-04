@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_graphics.cpp                                                    */
+/* rendering_graphics.cpp                                                   */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,15 +20,15 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "renderer_graphics.h"
+#include "rendering_graphics.h"
 
-RendererGraphics::RendererGraphics(RenderDevice *v_rd)
+RenderingGraphics::RenderingGraphics(RenderDevice *v_rd)
     : rd(v_rd)
 {
     /* do nothing... */
 }
 
-RendererGraphics::~RendererGraphics()
+RenderingGraphics::~RenderingGraphics()
 {
     rd->destroy_descriptor_set_layout(descriptor_set_layout);
     rd->free_descriptor_set(descriptor_set);
@@ -36,7 +36,7 @@ RendererGraphics::~RendererGraphics()
     rd->destroy_pipeline(pipeline);
 }
 
-void RendererGraphics::initialize(VkRenderPass render_pass)
+void RenderingGraphics::initialize(VkRenderPass render_pass)
 {
     VkVertexInputBindingDescription binds[] = {
             { 0, sizeof(RenderObject::Mesh), VK_VERTEX_INPUT_RATE_VERTEX  }
@@ -87,46 +87,46 @@ void RendererGraphics::initialize(VkRenderPass render_pass)
     pipeline = rd->create_graphics_pipeline(&create_info, &shader_info);
 }
 
-void RendererGraphics::push_render_object(RenderObject *object)
+void RenderingGraphics::push_render_object(RenderObject *object)
 {
     object->initialize(rd);
     render_objects.push_back(object);
 }
 
-void RendererGraphics::cmd_begin_graphics_render(VkCommandBuffer cmd_buffer)
+void RenderingGraphics::cmd_begin_graphics_render(VkCommandBuffer cmd_buffer)
 {
     rd->cmd_bind_pipeline(cmd_buffer, pipeline);
 }
 
-void RendererGraphics::cmd_end_graphics_render(VkCommandBuffer cmd_buffer)
+void RenderingGraphics::cmd_end_graphics_render(VkCommandBuffer cmd_buffer)
 {
     /* do nothing... */
 }
 
-void RendererGraphics::cmd_setval_viewport(VkCommandBuffer cmd_buffer, uint32_t w, uint32_t h)
+void RenderingGraphics::cmd_setval_viewport(VkCommandBuffer cmd_buffer, uint32_t w, uint32_t h)
 {
     rd->cmd_setval_viewport(cmd_buffer, w, h);
 }
 
-void RendererGraphics::cmd_setval_view_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 view)
+void RenderingGraphics::cmd_setval_view_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 view)
 {
     transform.v = view;
     rd->write_buffer(transform_buffer, 0, sizeof(Transform), &transform);
 }
 
-void RendererGraphics::cmd_setval_projection_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 projection)
+void RenderingGraphics::cmd_setval_projection_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 projection)
 {
     transform.p = projection;
     rd->write_buffer(transform_buffer, 0, sizeof(Transform), &transform);
 }
 
-void RendererGraphics::cmd_setval_model_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 model)
+void RenderingGraphics::cmd_setval_model_matrix(VkCommandBuffer U_MAYBE_UNUSED cmd_buffer, Mat4 model)
 {
     transform.m = model;
     rd->write_buffer(transform_buffer, 0, sizeof(Transform), &transform);
 }
 
-void RendererGraphics::cmd_draw_list(VkCommandBuffer cmd_buffer)
+void RenderingGraphics::cmd_draw_list(VkCommandBuffer cmd_buffer)
 {
     rd->cmd_bind_descriptor_set(cmd_buffer, pipeline, descriptor_set);
     for (auto &object: render_objects) {

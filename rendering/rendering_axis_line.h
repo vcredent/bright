@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_scene.h                                                              */
+/* rendering_axis_line.h                                                    */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,32 +20,34 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _RENDERER_SCENE_H_
-#define _RENDERER_SCENE_H_
+#ifndef _RENDERER_AXIS_LINE_H_
+#define _RENDERER_AXIS_LINE_H_
 
 #include "drivers/render_device.h"
-#include "camera/camera.h"
-#include "rendering_scene.h"
-#include "rendering_axis_line.h"
-#include "rendering_graphics.h"
+#include <copilot/math.h>
 
-class RendererScene {
+class RenderingAxisLine {
 public:
-    RendererScene(RenderDevice *v_rd);
-   ~RendererScene();
+    U_MEMNEW_ONLY RenderingAxisLine(RenderDevice *v_rd);
+    ~RenderingAxisLine();
 
-    // api
-    void push_render_object(RenderObject *v_object);
-    void cmd_begin_scene_renderer(Camera *v_camera, uint32_t v_width, uint32_t v_height);
-    void cmd_end_scene_renderer(RenderDevice::Texture2D **scene_texture, RenderDevice::Texture2D **scene_depth);
+    void initialize(VkRenderPass render_pass);
+
+    void cmd_setval_viewport(VkCommandBuffer cmd_buffer, uint32_t w, uint32_t h);
+    void cmd_draw_line(VkCommandBuffer cmd_buffer, Mat4 projection, Mat4 mat4);
 
 private:
-    RenderDevice *rd;
-    RenderingScene *scene;
-    RenderingAxisLine *axisline;
-    RenderingGraphics *graphics;
 
-    VkCommandBuffer scene_cmd_buffer;
+    struct Matrix {
+        Mat4 projection;
+        Mat4 view;
+    } matrix;
+
+    RenderDevice *rd;
+    VkDescriptorSetLayout descriptor_set_layout;
+    VkDescriptorSet descriptor_set;
+    RenderDevice::Buffer *uniform;
+    RenderDevice::Pipeline *pipeline;
 };
 
-#endif /* _RENDERER_SCENE_H_ */
+#endif /* _RENDERER_AXIS_LINE_H_ */

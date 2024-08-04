@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_graphics.h                                                      */
+/* rendering_graphics.h                                                     */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -25,10 +25,10 @@
 
 #include "render_object.h"
 
-class RendererGraphics {
+class RenderingGraphics {
 public:
-    U_MEMNEW_ONLY RendererGraphics(RenderDevice *v_rd);
-    ~RendererGraphics();
+    U_MEMNEW_ONLY RenderingGraphics(RenderDevice *v_rd);
+    ~RenderingGraphics();
 
     void initialize(VkRenderPass render_pass);
     void push_render_object(RenderObject *object);

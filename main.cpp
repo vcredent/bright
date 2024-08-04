@@ -24,11 +24,9 @@
 #include <vector>
 #include "rendering/camera/projection_camera.h"
 #include "rendering/camera/game_player_camera_controller.h"
-#include "rendering/renderer_scene.h"
-#include "rendering/renderer_screen.h"
-#include "rendering/renderer_graphics.h"
-#include "rendering/renderer_axis_line.h"
+#include "rendering/rendering_screen.h"
 #include "utils/fps_counter.h"
+#include "rendering/renderer.h"
 // editor ui
 #include "editor/camera_editor_ui.h"
 #include "editor/debugger_editor_ui.h"
@@ -37,16 +35,13 @@
 Window *window;
 RenderDeviceContext *rdc;
 RenderDevice *rd;
-RendererScreen *screen;
-RendererScene *scene;
-RendererGraphics *graphics;
-RendererAxisLine *axis_line;
+RenderingScreen *screen;
 RenderObject *object;
 ProjectionCamera *camera;
 CameraController *game_player_controller;
 RenderDevice::Texture2D *scene_preview_texture;
 RenderDevice::Texture2D *scene_depth_texture;
-ImVec2 viewport_window_region = ImVec2(32.0f, 32.0f);
+ImVec2 scene_region = ImVec2(32.0f, 32.0f);
 FPSCounter fps_counter;
 
 static float mouse_scroll_xoffset = 0.0f;
@@ -84,13 +79,12 @@ void _update_camera()
         game_player_controller->on_event_scroll(mouse_scroll_xoffset, mouse_scroll_yoffset);
     }
 
+    camera->set_aspect_ratio(scene_region.x / scene_region.y);
     game_player_controller->on_update_camera();
 }
 
 void update()
 {
-    scene->set_scene_extent(viewport_window_region.x, viewport_window_region.y);
-    camera->set_aspect_ratio(viewport_window_region.x / viewport_window_region.y);
     _update_camera();
 }
 
@@ -98,28 +92,8 @@ void rendering()
 {
     /* render to scene */
     double scene_render_start_time = glfwGetTime();
-    VkCommandBuffer scene_cmd_buffer;
-    scene->cmd_begin_scene_render(&scene_cmd_buffer);
-    {
-        Mat4 projection, view;
-
-        projection = camera->get_projection_matrix();
-        view = camera->get_view_matrix();
-
-        axis_line->cmd_setval_viewport(scene_cmd_buffer, scene->get_scene_width(), scene->get_scene_height());
-        axis_line->cmd_draw_line(scene_cmd_buffer, projection, view);
-        graphics->cmd_begin_graphics_render(scene_cmd_buffer);
-        {
-            graphics->cmd_setval_viewport(scene_cmd_buffer, scene->get_scene_width(), scene->get_scene_height());
-            graphics->cmd_setval_view_matrix(scene_cmd_buffer, view);
-            graphics->cmd_setval_projection_matrix(scene_cmd_buffer, projection);
-            graphics->cmd_draw_list(scene_cmd_buffer);
-        }
-        graphics->cmd_end_graphics_render(scene_cmd_buffer);
-    }
-    scene->cmd_end_scene_render();
-    scene_preview_texture = scene->get_scene_texture();
-    scene_depth_texture = scene->get_scene_depth();
+    Renderer::BeginScene(camera, scene_region.x, scene_region.y);
+    Renderer::EndScene(&scene_preview_texture, &scene_depth_texture);
     double scene_render_end_time = glfwGetTime();
 
     double screen_render_start_time = glfwGetTime();
@@ -132,7 +106,7 @@ void rendering()
             static bool show_demo_flag = true;
             ImGui::ShowDemoWindow(&show_demo_flag);
 
-            naveditor::draw_scene_editor_ui(scene_preview_texture, scene_depth_texture, &viewport_window_region);
+            naveditor::draw_scene_editor_ui(scene_preview_texture, scene_depth_texture, &scene_region);
 
             ImGui::Begin("object");
             {
@@ -178,20 +152,13 @@ void initialize()
     rdc->initialize();
     rd = ((RenderDeviceContextWin32 *) rdc)->load_render_device();
 
-    screen = memnew(RendererScreen, rd);
+    screen = memnew(RenderingScreen, rd);
     screen->initialize(window);
 
-    scene = memnew(RendererScene, rd);
-    scene->initialize();
-
-    graphics = memnew(RendererGraphics, rd);
-    graphics->initialize(scene->get_render_pass());
-
-    axis_line = memnew(RendererAxisLine, rd);
-    axis_line->initialize(scene->get_render_pass());
+    Renderer::Initialize(rd);
 
     object = RenderObject::load_obj("../assets/cube.obj");
-    graphics->push_render_object(object);
+    Renderer::PushSceneRenderObject(object);
 
     NavUI::InitializeInfo initialize_info = {};
     initialize_info.window = (GLFWwindow *) screen->get_focused_window()->get_native_window();
@@ -231,11 +198,9 @@ int main(int argc, char **argv)
     }
 
     memdel(object);
-    memdel(axis_line);
-    memdel(graphics);
     memdel(camera);
+    Renderer::Destroy();
     memdel(screen);
-    memdel(scene);
     NavUI::Destroy();
     ((RenderDeviceContextWin32 *) rdc)->destroy_render_device(rd);
     memdel(rdc);

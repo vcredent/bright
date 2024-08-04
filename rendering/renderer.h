@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_scene.h                                                              */
+/* renderer.h                                                               */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,32 +20,28 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _RENDERER_SCENE_H_
-#define _RENDERER_SCENE_H_
+#ifndef _ENGINE_RENDERER_API_H_
+#define _ENGINE_RENDERER_API_H_
 
 #include "drivers/render_device.h"
 #include "camera/camera.h"
-#include "rendering_scene.h"
-#include "rendering_axis_line.h"
-#include "rendering_graphics.h"
+// renderer
+#include "renderer_scene.h"
 
-class RendererScene {
+class Renderer {
 public:
-    RendererScene(RenderDevice *v_rd);
-   ~RendererScene();
+    // initialize and destroy
+    static void Initialize(RenderDevice *v_rd);
+    static void Destroy();
 
     // api
-    void push_render_object(RenderObject *v_object);
-    void cmd_begin_scene_renderer(Camera *v_camera, uint32_t v_width, uint32_t v_height);
-    void cmd_end_scene_renderer(RenderDevice::Texture2D **scene_texture, RenderDevice::Texture2D **scene_depth);
+    static void PushSceneRenderObject(RenderObject *v_object);
+    static void BeginScene(Camera *v_camera, uint32_t v_width, uint32_t v_height);
+    static void EndScene(RenderDevice::Texture2D **texture, RenderDevice::Texture2D **depth);
 
 private:
-    RenderDevice *rd;
-    RenderingScene *scene;
-    RenderingAxisLine *axisline;
-    RenderingGraphics *graphics;
-
-    VkCommandBuffer scene_cmd_buffer;
+    static RenderDevice *rd;
+    static RendererScene *scene;
 };
 
-#endif /* _RENDERER_SCENE_H_ */
+#endif /* _ENGINE_RENDERER_API_H_ */

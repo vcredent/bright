@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_screen.h                                                        */
+/* rendering_screen.h                                                       */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,16 +20,16 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _SCREEN_H_
-#define _SCREEN_H_
+#ifndef _RENDERING_SCREEN_H_
+#define _RENDERING_SCREEN_H_
 
 #include "drivers/render_device.h"
 #include "platform/window.h"
 
-class RendererScreen {
+class RenderingScreen {
 public:
-    RendererScreen(RenderDevice *p_render_device);
-   ~RendererScreen();
+    RenderingScreen(RenderDevice *p_render_device);
+   ~RenderingScreen();
 
     VkRenderPass get_render_pass() { return window->render_pass; }
     uint32_t get_image_buffer_count() { return window->image_buffer_count; }
@@ -81,4 +81,4 @@ private:
     uint32_t acquire_next_index;
 };
 
-#endif /* _SCREEN_H_ */
+#endif /* _RENDERING_SCREEN_H_ */
