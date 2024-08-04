@@ -53,7 +53,7 @@ public:
     void cmd_bind_index_buffer(VkCommandBuffer cmd_buffer);
     void cmd_draw(VkCommandBuffer cmd_buffer);
 
-    static RenderObject *load_assets_obj(const char *filename);
+    static RenderObject *load_obj(const char *filename);
 
 private:
     std::vector<Mesh> meshes;

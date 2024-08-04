@@ -21,7 +21,7 @@
 /*                                                                          */
 /* ======================================================================== */
 #include "render_object.h"
-#include "model/obj.h"
+#include "modules/obj.h"
 #include <tinyobjloader/tiny_obj_loader.h>
 
 RenderObject::RenderObject()
@@ -82,48 +82,28 @@ void RenderObject::cmd_draw(VkCommandBuffer cmd_buffer)
     rd->cmd_draw_indexed(cmd_buffer, std::size(indices));
 }
 
-RenderObject *RenderObject::load_assets_obj(const char *filename)
+RenderObject *RenderObject::load_obj(const char *filename)
 {
     RenderObject *object = memnew(RenderObject);
+
     ObjLoader *loader = ObjLoader::load(filename);
 
-    tinyobj::attrib_t attrib;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
-    tinyobj::LoadObj(&attrib, &shapes, &materials, NULL, NULL, filename);
+    std::vector<ObjLoader::Vertex> vertices = loader->get_vertices();
+    std::vector<uint32_t> indices = loader->get_indices();
 
-    for (const auto& shape : shapes) {
-        for (size_t i = 0; i < shape.mesh.indices.size(); ++i) {
-            const auto& index = shape.mesh.indices[i];
-
-            // 获取顶点、纹理坐标和法线数据
-            Vec3 vertex = { attrib.vertices[3 * index.vertex_index + 0],
-                               attrib.vertices[3 * index.vertex_index + 1],
-                               attrib.vertices[3 * index.vertex_index + 2] };
-
-            Vec2 texcoord = { index.texcoord_index >= 0 ?
-                                 attrib.texcoords[2 * index.texcoord_index + 0] : 0.0f,
-                                 index.texcoord_index >= 0 ?
-                                 attrib.texcoords[2 * index.texcoord_index + 1] : 0.0f };
-
-            Vec3 normal = { index.normal_index >= 0 ?
-                               attrib.normals[3 * index.normal_index + 0] : 0.0f,
-                               index.normal_index >= 0 ?
-                               attrib.normals[3 * index.normal_index + 1] : 0.0f,
-                               index.normal_index >= 0 ?
-                               attrib.normals[3 * index.normal_index + 2] : 0.0f };
-
-            // 将数据存入 mesh 结构体中
-            Mesh mesh = {
-                /* vertex= */ vertex,
-                /* texcoord= */ texcoord,
-                /* normal= */ normal
-            };
-            object->meshes.push_back(mesh);
-            object->indices.push_back(static_cast<uint32_t>(i));
-        }
+    for (const auto &vertex: vertices) {
+        object->meshes.push_back({
+          vertex.position,
+          vertex.texcoord,
+          vertex.normal,
+        });
     }
 
-    memdel(loader);
+    for (const auto &index: indices) {
+        object->indices.push_back(index);
+    }
+
+    ObjLoader::destroy(loader);
+
     return object;
 }

@@ -190,7 +190,7 @@ void initialize()
     axis_line = memnew(RendererAxisLine, rd);
     axis_line->initialize(canvas->get_render_pass());
 
-    object = RenderObject::load_assets_obj("../assets/cube.obj");
+    object = RenderObject::load_obj("../assets/cube.obj");
     graphics->push_render_object(object);
 
     NavUI::InitializeInfo initialize_info = {};

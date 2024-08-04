@@ -47,10 +47,11 @@ file(GLOB_RECURSE SOURCES
   "drivers/*.cpp"
   "editor/*.cpp"
   "platform/*.cpp"
-  "model/*.cpp"
+  "modules/*.cpp"
   "rendering/*.cpp"
   "misc/*.cpp"
   "thirdparty/vma/*.cpp"
+  "thirdparty/tinyobjloader/*.cpp"
 )
 
 link_directories(${LINK_DIRS})

@@ -32,26 +32,29 @@ public:
     ~ObjLoader() { /* do nothing... */ }
 
     struct Vertex {
-        Vec3 v;
-        Vec2 vt;
-        Vec3 vn;
+        Vec3 position;
+        Vec2 texcoord;
+        Vec3 normal;
+
+        // eq
+        bool operator==(const Vertex &other) const {
+          return position == other.position && normal == other.normal && normal == other.normal &&
+                 texcoord == other.texcoord;
+        }
     };
 
-    struct Face {
-        std::vector<int> vertices;
-    };
+    const std::vector<Vertex> &get_vertices() const { return vertices; }
+    const std::vector<uint32_t> &get_indices() const { return indices; }
 
+    // static
     static ObjLoader *load(const char *filepath);
     static void destroy(ObjLoader *loader);
-
-    const std::vector<Vertex> &get_obj_vertices() const { return vertices; }
-    const std::vector<Face> &get_obj_faces() const { return faces; }
 
 private:
     U_MEMNEW_ONLY ObjLoader() { /* do nothing... */ }
 
     std::vector<Vertex> vertices;
-    std::vector<Face> faces;
+    std::vector<uint32_t> indices;
 };
 
 #endif /* _FORMAT_OBJ_H_ */
