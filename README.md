@@ -22,17 +22,17 @@ Some links to learning resource:
 - `CMake`
 - `Vulkan SDK`
 
-if you use `Clion` IDE you can do nothing, just open project and run or debug. so fucking simple!
+if you use `Clion` IDE you don't need to do anything, just open project and run or debug. so fucking simple!
 
 ## Preview editor
 
 -----------
 
-Preview Editor 1
+**Preview Editor 1**
 
 ![Preview1](https://github.com/vcredent/copilot/blob/master/document/references/editor-preview-1.png)
 
-Preview Editor 2
+**Preview Editor 2**
 
 ![Preview1](https://github.com/vcredent/copilot/blob/master/document/references/editor-preview-2.png)
 
