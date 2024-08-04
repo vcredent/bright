@@ -151,6 +151,7 @@ namespace NavUI {
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
         io.ConfigViewportsNoAutoMerge = true;
         io.ConfigViewportsNoTaskBarIcon = true;
+        io.IniFilename = "../naveditor.ini";
 
         // set default font.
         io.Fonts->AddFontFromFileTTF("../resource/fonts/Microsoft Yahei UI/Microsoft Yahei UI.ttf", 18.0f,
