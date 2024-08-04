@@ -89,7 +89,7 @@ void _update_camera()
 
 void update()
 {
-    scene->set_extent(viewport_window_region.x, viewport_window_region.y);
+    scene->set_scene_extent(viewport_window_region.x, viewport_window_region.y);
     camera->set_aspect_ratio(viewport_window_region.x / viewport_window_region.y);
     _update_camera();
 }
@@ -106,11 +106,11 @@ void rendering()
         projection = camera->get_projection_matrix();
         view = camera->get_view_matrix();
 
-        axis_line->cmd_setval_viewport(scene_cmd_buffer, scene->get_width(), scene->get_height());
+        axis_line->cmd_setval_viewport(scene_cmd_buffer, scene->get_scene_width(), scene->get_scene_height());
         axis_line->cmd_draw_line(scene_cmd_buffer, projection, view);
         graphics->cmd_begin_graphics_render(scene_cmd_buffer);
         {
-            graphics->cmd_setval_viewport(scene_cmd_buffer, scene->get_width(), scene->get_height());
+            graphics->cmd_setval_viewport(scene_cmd_buffer, scene->get_scene_width(), scene->get_scene_height());
             graphics->cmd_setval_view_matrix(scene_cmd_buffer, view);
             graphics->cmd_setval_projection_matrix(scene_cmd_buffer, projection);
             graphics->cmd_draw_list(scene_cmd_buffer);

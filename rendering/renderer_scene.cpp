@@ -120,7 +120,7 @@ void RendererScene::initialize()
     _create_scene_texture(width, height);
 }
 
-void RendererScene::set_extent(uint32_t v_width, uint32_t v_height)
+void RendererScene::set_scene_extent(uint32_t v_width, uint32_t v_height)
 {
     width  = v_width;
     height = v_height;

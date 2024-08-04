@@ -32,9 +32,9 @@ public:
 
     void initialize();
 
-    void set_extent(uint32_t v_width, uint32_t v_height);
-    uint32_t get_width() { return width; }
-    uint32_t get_height() { return height; }
+    void set_scene_extent(uint32_t v_width, uint32_t v_height);
+    uint32_t get_scene_width() { return width; }
+    uint32_t get_scene_height() { return height; }
     VkRenderPass get_render_pass() { return render_pass; }
     RenderDevice::Texture2D *get_scene_texture() { return texture; }
     RenderDevice::Texture2D *get_scene_depth() { return depth; }
