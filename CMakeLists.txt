@@ -81,10 +81,3 @@ target_include_directories(${PROGRAM_NAME}
 target_link_libraries(${PROGRAM_NAME}
   PRIVATE ${LINK_LIBS}
 )
-
-add_custom_command(
-  TARGET ${PROGRAM_NAME}
-  POST_BUILD
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/shader
-  COMMAND ${CMAKE_SOURCE_DIR}/shader/compile
-)

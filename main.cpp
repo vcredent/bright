@@ -31,6 +31,8 @@
 #include "editor/camera_editor_ui.h"
 #include "editor/debugger_editor_ui.h"
 #include "editor/scene_editor_ui.h"
+// misc
+#include "misc/shader_compile.h"
 
 Window *window;
 RenderDeviceContext *rdc;
@@ -182,6 +184,7 @@ void initialize()
 
 int main(int argc, char **argv)
 {
+    compile_shader();
     initialize();
 
     while (window->is_close()) {

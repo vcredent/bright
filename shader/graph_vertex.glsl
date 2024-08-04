@@ -15,10 +15,10 @@ layout(push_constant) uniform PushConst {
 
 // out
 layout(location = 0) out vec3 v_object_color;
-layout(location = 1) out vec3 v_object_normal;
+layout(location = 1) out vec3 v_world_normal;
 
 void main() {
-    v_object_normal = normalize(scene.view * vec4(normal, 1.0f)).xyz;
+    v_world_normal = normalize(mat3(push_const.model) * normal);
     v_object_color = vec3(1.0f, 1.0f, 1.0f);
     gl_Position = scene.projection * scene.view * push_const.model * vec4(vertex, 1.0f);
 }
