@@ -43,7 +43,7 @@ void RenderingAxisLine::initialize(VkRenderPass render_pass)
 
     rd->create_descriptor_set_layout(ARRAY_SIZE(binds), binds, &descriptor_set_layout);
     rd->allocate_descriptor_set(descriptor_set_layout, &descriptor_set);
-    rd->update_descriptor_buffer(render_data->get_uniform_buffer(), 0, descriptor_set);
+    rd->update_descriptor_set_buffer(render_data->get_uniform_buffer(), 0, descriptor_set);
 
     RenderDevice::ShaderInfo shader_info = {
             "axis_line_vertex",

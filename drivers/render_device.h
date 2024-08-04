@@ -79,7 +79,7 @@ public:
     void destroy_descriptor_set_layout(VkDescriptorSetLayout descriptor_set_layout);
     void allocate_descriptor_set(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor_set);
     void free_descriptor_set(VkDescriptorSet descriptor_set);
-    void update_descriptor_buffer(Buffer *p_buffer, uint32_t binding, VkDescriptorSet descriptor_set);
+    void update_descriptor_set_buffer(Buffer *p_buffer, uint32_t binding, VkDescriptorSet descriptor_set);
 
     struct ShaderInfo {
         const char *vertex = NULL;
