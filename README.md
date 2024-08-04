@@ -28,7 +28,11 @@ if you use `Clion` IDE you don't need to do anything, just open project and run 
 
 -----------
 
+**Start**
+
 ![Preview1](https://github.com/vcredent/copilot/blob/master/document/references/editor-preview-1.png)
+
+**Move**
 
 ![Preview1](https://github.com/vcredent/copilot/blob/master/document/references/editor-preview-2.png)
 
