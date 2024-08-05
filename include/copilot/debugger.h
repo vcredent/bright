@@ -32,7 +32,7 @@ struct DebuggerProperties {
     float screen_render_time        = 0.0f;
 };
 
-namespace debugger
+namespace Debugger
 {
     extern DebuggerProperties *_debugger_properties;
 

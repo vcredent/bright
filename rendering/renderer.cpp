@@ -32,38 +32,38 @@ RendererScene *Renderer::scene = NULL;
     EXIT_FAIL_COND_V(rd, "-engine error: the renderer is not initialized! call Renderer::Initialize(rd)");   \
 } while(0)
 
-void Renderer::Initialize(RenderDevice *v_rd)
+void Renderer::initialize(RenderDevice *v_rd)
 {
     rd = v_rd;
     // initialize
     scene = memnew(RendererScene, rd);
 }
 
-void Renderer::Destroy()
+void Renderer::destroy()
 {
     _CHECK_RENDERER_INIT();
     memdel(scene);
 }
 
-void Renderer::EnableCoordinateAxis(bool is_enable)
+void Renderer::enable_coordinate_axis(bool is_enable)
 {
     _CHECK_RENDERER_INIT();
     scene->enable_coordinate_axis(is_enable);
 }
 
-void Renderer::PushSceneRenderObject(RenderObject *v_object)
+void Renderer::push_render_object(RenderObject *v_object)
 {
     _CHECK_RENDERER_INIT();
     scene->push_render_object(v_object);
 }
 
-void Renderer::BeginScene(Camera *v_camera, uint32_t v_width, uint32_t v_height)
+void Renderer::begin_scene(Camera *v_camera, uint32_t v_width, uint32_t v_height)
 {
     _CHECK_RENDERER_INIT();
     scene->cmd_begin_scene_renderer(v_camera, v_width, v_height);
 }
 
-void Renderer::EndScene(RenderDevice::Texture2D **texture, RenderDevice::Texture2D **depth)
+void Renderer::end_scene(RenderDevice::Texture2D **texture, RenderDevice::Texture2D **depth)
 {
     _CHECK_RENDERER_INIT();
     scene->cmd_end_scene_renderer(texture, depth);

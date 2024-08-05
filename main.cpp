@@ -108,10 +108,10 @@ void initialize()
 
     naveditor = memnew(Naveditor, rd, screen);
 
-    Renderer::Initialize(rd);
+    Renderer::initialize(rd);
 
     cube = RenderObject::load_obj("../assets/cube.obj");
-    Renderer::PushSceneRenderObject(cube);
+    Renderer::push_render_object(cube);
 
     camera = memnew(ProjectionCamera);
     game_player_controller = memnew(GamePlayerCameraController);
@@ -132,8 +132,8 @@ int main(int argc, char **argv)
 
         /* render to scene */
         double scene_render_start_time = glfwGetTime();
-        Renderer::BeginScene(camera, scene_region.x, scene_region.y);
-        Renderer::EndScene(&scene_preview_texture, &scene_depth_texture);
+        Renderer::begin_scene(camera, scene_region.x, scene_region.y);
+        Renderer::end_scene(&scene_preview_texture, &scene_depth_texture);
         double scene_render_end_time = glfwGetTime();
 
         double screen_render_start_time = glfwGetTime();
@@ -153,15 +153,15 @@ int main(int argc, char **argv)
         double screen_render_end_time = glfwGetTime();
 
         // set render debug time for debug.
-        debugger::set_scene_render_time_value((scene_render_end_time - scene_render_start_time) * 1000.0f);
-        debugger::set_screen_render_time((screen_render_end_time - screen_render_start_time) * 1000.0f);
-        debugger::set_fps_value(fps_counter.fps());
+        Debugger::set_scene_render_time_value((scene_render_end_time - scene_render_start_time) * 1000.0f);
+        Debugger::set_screen_render_time((screen_render_end_time - screen_render_start_time) * 1000.0f);
+        Debugger::set_fps_value(fps_counter.fps());
     }
 
     memdel(sphere);
     memdel(cube);
     memdel(camera);
-    Renderer::Destroy();
+    Renderer::destroy();
     memdel(naveditor);
     memdel(screen);
     ((RenderDeviceContextWin32 *) rdc)->destroy_render_device(rd);
