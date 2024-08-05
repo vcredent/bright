@@ -89,7 +89,6 @@ static void _draw_engine_settings_editor_ui(bool *p_enable, Naveditor::SettingVa
             _child::values(p_values);
             ImGui::EndChild();
             ImGui::EndGroup();
-            ImGui::SetWindowFocus();
             NavUI::End();
         }
     }
