@@ -49,7 +49,7 @@ namespace NavUI {
     // api
     void BeginNewFrame(VkCommandBuffer cmd_buffer);
     void EndNewFrame(VkCommandBuffer cmd_buffer);
-    void Begin(const char *title);
+    bool Begin(const char *title, bool* p_open = NULL, ImGuiWindowFlags flags = 0);
     void End();
     void BeginViewport(const char *title);
     void EndViewport();

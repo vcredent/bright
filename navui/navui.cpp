@@ -224,9 +224,9 @@ namespace NavUI {
         }
     }
 
-    void Begin(const char *title)
+    bool Begin(const char *title, bool* p_open, ImGuiWindowFlags flags)
     {
-        ImGui::Begin(title);
+        return ImGui::Begin(title, p_open, flags);
     }
 
     void End()
