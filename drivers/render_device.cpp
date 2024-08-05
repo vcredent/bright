@@ -332,8 +332,8 @@ RenderDevice::Pipeline *RenderDevice::create_graphics_pipeline(PipelineCreateInf
 
     VkShaderModule vertex_shader_module, fragment_shader_module;
 
-    vertex_shader_module = load_shader_module(vk_device, p_shader_info->vertex);
-    fragment_shader_module = load_shader_module(vk_device, p_shader_info->fragment);
+    vertex_shader_module = load_shader_module(vk_device, p_shader_info->vertex, "vert");
+    fragment_shader_module = load_shader_module(vk_device, p_shader_info->fragment, "frag");
 
     VkPipelineShaderStageCreateInfo vertex_shader_create_info = {};
     vertex_shader_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -554,7 +554,7 @@ RenderDevice::Pipeline *RenderDevice::create_compute_pipeline(RenderDevice::Comp
     vkCreatePipelineLayout(vk_device, &pipeline_layout_create_info, allocation_callbacks, &pipeline->layout);
 
     VkShaderModule compute_shader_module;
-    compute_shader_module = load_shader_module(vk_device, p_shader_info->compute);
+    compute_shader_module = load_shader_module(vk_device, p_shader_info->compute, "vert");
 
     VkPipelineShaderStageCreateInfo shader_stage_create_info = {};
     shader_stage_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

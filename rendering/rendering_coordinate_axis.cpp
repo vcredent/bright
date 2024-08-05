@@ -46,8 +46,8 @@ void RenderingCoordinateAxis::initialize(VkRenderPass render_pass)
     rd->update_descriptor_set_buffer(render_data->get_uniform_buffer(), 0, descriptor_set);
 
     RenderDevice::ShaderInfo shader_info = {
-            "coordinate_axis_vertex",
-            "coordinate_axis_fragment",
+            "coordaxis",
+            "coordaxis",
             0, NULL,
             0, NULL,
             1, &descriptor_set_layout,

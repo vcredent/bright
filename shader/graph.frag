@@ -10,6 +10,6 @@ const vec3 DIRECTION_TO_LIGHT = normalize(vec3(1.0f, -3.0f, -1.0f));
 const float AMBIENT = 0.02f;
 
 void main() {
-    float intensity = AMBIENT + max(dot(world_normal, DIRECTION_TO_LIGHT), 0.2f);
-    final_color = vec4(intensity * object_color, 1.0f);
+
+    final_color = vec4(object_color, 1.0f);
 }

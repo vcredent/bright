@@ -78,14 +78,14 @@ static VkSampleCountFlagBits find_max_msaa_sample_counts(VkPhysicalDevicePropert
 }
 
 // load shader module form .spv file content.
-static VkShaderModule load_shader_module(VkDevice device, const char *name)
+static VkShaderModule load_shader_module(VkDevice device, const char *name, const char *stage)
 {
     char *buf;
     size_t size;
     VkResult U_ASSERT_ONLY err;
 
     char path[255];
-    snprintf(path, sizeof(path), "../shader/%s.spv", name);
+    snprintf(path, sizeof(path), "../shader/%s.%s.spv", name, stage);
 
     buf = io_read_bytecode(path, &size);
 
