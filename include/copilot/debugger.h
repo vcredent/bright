@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* debugger_editor_ui.h                                                     */
+/* debugger.h                                                              */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,8 +20,38 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "debugger_editor_ui.h"
+#ifndef _ENGINE_DEBUGGER_H_
+#define _ENGINE_DEBUGGER_H_
 
-namespace naveditor {
-    std::shared_ptr<DebuggerStructure> debugger = std::make_shared<DebuggerStructure>();
+#include <copilot/typedefs.h>
+
+struct DebuggerProperties {
+    int   fps                       = 0;
+    float scene_render_time         = 0.0f;
+    float screen_render_time        = 0.0f;
+};
+
+static DebuggerProperties _DebuggerProperties = {};
+
+namespace debugger
+{
+V_FORCEINLINE
+inline static void set_fps_value(int fps)
+  {
+    _DebuggerProperties.fps = fps;
+  }
+
+V_FORCEINLINE
+inline static void set_scene_render_time_value(float time)
+  {
+    _DebuggerProperties.scene_render_time = time;
+  }
+
+V_FORCEINLINE
+inline static void set_screen_render_time(float time)
+  {
+    _DebuggerProperties.screen_render_time = time;
+  }
 }
+
+#endif /* _ENGINE_DEBUGGER_H_ */

@@ -24,5 +24,39 @@
 #define _NAVEDITOR_H_
 
 #include <navui/navui.h>
+#include <copilot/debugger.h>
+#include <vector>
+
+// rendering
+#include "rendering/rendering_screen.h"
+#include "rendering/camera/camera.h"
+
+class Naveditor {
+public:
+    U_MEMNEW_ONLY Naveditor(RenderDevice *v_rd, RenderingScreen *v_screen);
+   ~Naveditor();
+
+    // begin and end render
+    void cmd_begin_naveditor_render(VkCommandBuffer cmd_buffer);
+    void cmd_end_naveditor_render(VkCommandBuffer cmd_buffer);
+
+    // api
+    void cmd_draw_debugger_editor_ui();
+    void cmd_draw_camera_editor_ui(Camera *v_camera);
+    void cmd_draw_scene_viewport_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region);
+
+private:
+    // manager window context and click state etc...
+    struct Mger {
+        bool enable_imgui_demo = false;
+        bool enable_scene_settings = false;
+    };
+
+    void _draw_main_editor();
+
+    Mger mger;
+    DebuggerProperties *debugger;
+    std::vector<float> fps_list;
+};
 
 #endif /* _NAVEDITOR_H_ */

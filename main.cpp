@@ -28,9 +28,7 @@
 #include "utils/fps_counter.h"
 #include "rendering/renderer.h"
 // editor ui
-#include "editor/camera_editor_ui.h"
-#include "editor/debugger_editor_ui.h"
-#include "editor/scene_editor_ui.h"
+#include "editor/naveditor.h"
 // misc
 #include "misc/shader_compile.h"
 
@@ -38,6 +36,7 @@ Window *window;
 RenderDeviceContext *rdc;
 RenderDevice *rd;
 RenderingScreen *screen;
+Naveditor *_naveditor;
 RenderObject *cube;
 RenderObject *sphere;
 ProjectionCamera *camera;
@@ -104,51 +103,23 @@ void rendering()
     screen->cmd_begin_screen_render(&screen_cmd_buffer);
     {
         /* ImGui */
-        NavUI::BeginNewFrame(screen_cmd_buffer);
+        _naveditor->cmd_begin_naveditor_render(screen_cmd_buffer);
         {
-            ImGui::BeginMainMenuBar();
-            {
-                if (ImGui::BeginMenu("文件")) {
-                    ImGui::Separator();
-                    ImGui::MenuItem("场景设置");
-                    ImGui::EndMenu();
-                }
-            }
-            ImGui::EndMainMenuBar();
-
             static bool show_demo_flag = true;
             ImGui::ShowDemoWindow(&show_demo_flag);
 
-            naveditor::draw_scene_editor_ui(scene_preview_texture, scene_depth_texture, &scene_region);
-
-            ImGui::Begin("cube");
-            {
-                ImGui::SeparatorText("变换");
-                Vec3 position = cube->get_object_position();
-                NavUI::DragFloat3("平移: ", glm::value_ptr(position), 0.01f);
-                cube->set_object_position(position);
-
-                Vec3 rotation = cube->get_object_rotation();
-                NavUI::DragFloat3("旋转: ", glm::value_ptr(rotation), 0.01f);
-                cube->set_object_rotation(rotation);
-
-                Vec3 scaling = cube->get_object_scaling();
-                NavUI::DragFloat3("缩放: ", glm::value_ptr(scaling), 0.01f);
-                cube->set_object_scaling(scaling);
-            }
-            ImGui::End();
-
-            naveditor::draw_debugger_editor_ui();
-            naveditor::draw_camera_editor_ui(camera);
+            _naveditor->cmd_draw_debugger_editor_ui();
+            _naveditor->cmd_draw_camera_editor_ui(camera);
+            _naveditor->cmd_draw_scene_viewport_ui(scene_preview_texture, scene_depth_texture, &scene_region);
         }
-        NavUI::EndNewFrame(screen_cmd_buffer);
+        _naveditor->cmd_end_naveditor_render(screen_cmd_buffer);
     }
     screen->cmd_end_screen_render(screen_cmd_buffer);
     double screen_render_end_time = glfwGetTime();
 
-    // debug
-    naveditor::debugger->screen_render_time = (screen_render_end_time - screen_render_start_time) * 1000.0f;
-    naveditor::debugger->scene_render_time = (scene_render_end_time - scene_render_start_time) * 1000.0f;
+    // set render debug time for debug.
+    debugger::set_scene_render_time_value((scene_render_end_time - scene_render_start_time) * 1000.0f);
+    debugger::set_screen_render_time((screen_render_end_time - screen_render_start_time) * 1000.0f);
 }
 
 void initialize()
@@ -168,24 +139,12 @@ void initialize()
     screen = memnew(RenderingScreen, rd);
     screen->initialize(window);
 
+    _naveditor = memnew(Naveditor, rd, screen);
+
     Renderer::Initialize(rd);
 
     cube = RenderObject::load_obj("../assets/cube.obj");
     Renderer::PushSceneRenderObject(cube);
-
-    NavUI::InitializeInfo initialize_info = {};
-    initialize_info.window = (GLFWwindow *) screen->get_focused_window()->get_native_window();
-    initialize_info.Instance = rdc->get_instance();
-    initialize_info.PhysicalDevice = rdc->get_physical_device();
-    initialize_info.Device = rdc->get_device();
-    initialize_info.QueueFamily = rdc->get_graph_queue_family();
-    initialize_info.Queue = rdc->get_graph_queue();
-    initialize_info.DescriptorPool = rd->get_descriptor_pool();
-    initialize_info.RenderPass = screen->get_render_pass();
-    initialize_info.MinImageCount = screen->get_image_buffer_count();
-    initialize_info.ImageCount = screen->get_image_buffer_count();
-    initialize_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-    NavUI::Initialize(&initialize_info);
 
     camera = memnew(ProjectionCamera);
     game_player_controller = memnew(GamePlayerCameraController);
@@ -206,17 +165,15 @@ int main(int argc, char **argv)
         rendering();
         mouse_scroll_xoffset = 0.0f;
         mouse_scroll_yoffset = 0.0f;
-
-        naveditor::add_debugger_fps_value(fps_counter.fps());
-
+        debugger::set_fps_value(fps_counter.fps());
     }
 
     memdel(sphere);
     memdel(cube);
     memdel(camera);
     Renderer::Destroy();
+    memdel(_naveditor);
     memdel(screen);
-    NavUI::Destroy();
     ((RenderDeviceContextWin32 *) rdc)->destroy_render_device(rd);
     memdel(rdc);
     memdel(window);
