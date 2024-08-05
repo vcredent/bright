@@ -11,6 +11,7 @@ vec3 vertices[4] = {
 
 // in
 layout(set = 0, binding = 0) uniform Scene {
+    vec4 camera_pos;
     mat4 projection;
     mat4 view;
 } scene;

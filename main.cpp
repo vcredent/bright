@@ -38,7 +38,8 @@ Window *window;
 RenderDeviceContext *rdc;
 RenderDevice *rd;
 RenderingScreen *screen;
-RenderObject *object;
+RenderObject *cube;
+RenderObject *sphere;
 ProjectionCamera *camera;
 CameraController *game_player_controller;
 RenderDevice::Texture2D *scene_preview_texture;
@@ -110,20 +111,37 @@ void rendering()
 
             naveditor::draw_scene_editor_ui(scene_preview_texture, scene_depth_texture, &scene_region);
 
-            ImGui::Begin("object");
+            ImGui::Begin("cube");
             {
                 ImGui::SeparatorText("变换");
-                Vec3 position = object->get_object_position();
+                Vec3 position = cube->get_object_position();
                 NavUI::DragFloat3("平移: ", glm::value_ptr(position), 0.01f);
-                object->set_object_position(position);
+                cube->set_object_position(position);
 
-                Vec3 rotation = object->get_object_rotation();
+                Vec3 rotation = cube->get_object_rotation();
                 NavUI::DragFloat3("旋转: ", glm::value_ptr(rotation), 0.01f);
-                object->set_object_rotation(rotation);
+                cube->set_object_rotation(rotation);
 
-                Vec3 scaling = object->get_object_scaling();
+                Vec3 scaling = cube->get_object_scaling();
                 NavUI::DragFloat3("缩放: ", glm::value_ptr(scaling), 0.01f);
-                object->set_object_scaling(scaling);
+                cube->set_object_scaling(scaling);
+            }
+            ImGui::End();
+
+            ImGui::Begin("sphere");
+            {
+                ImGui::SeparatorText("变换");
+                Vec3 position = sphere->get_object_position();
+                NavUI::DragFloat3("平移: ", glm::value_ptr(position), 0.01f);
+                sphere->set_object_position(position);
+
+                Vec3 rotation = sphere->get_object_rotation();
+                NavUI::DragFloat3("旋转: ", glm::value_ptr(rotation), 0.01f);
+                sphere->set_object_rotation(rotation);
+
+                Vec3 scaling = sphere->get_object_scaling();
+                NavUI::DragFloat3("缩放: ", glm::value_ptr(scaling), 0.01f);
+                sphere->set_object_scaling(scaling);
             }
             ImGui::End();
 
@@ -159,8 +177,11 @@ void initialize()
 
     Renderer::Initialize(rd);
 
-    object = RenderObject::load_obj("../assets/cube.obj");
-    Renderer::PushSceneRenderObject(object);
+    cube = RenderObject::load_obj("../assets/cube.obj");
+    Renderer::PushSceneRenderObject(cube);
+
+    sphere = RenderObject::load_obj("../assets/sphere.obj");
+    Renderer::PushSceneRenderObject(sphere);
 
     NavUI::InitializeInfo initialize_info = {};
     initialize_info.window = (GLFWwindow *) screen->get_focused_window()->get_native_window();
@@ -200,7 +221,8 @@ int main(int argc, char **argv)
 
     }
 
-    memdel(object);
+    memdel(sphere);
+    memdel(cube);
     memdel(camera);
     Renderer::Destroy();
     memdel(screen);

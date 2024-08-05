@@ -35,11 +35,13 @@ SceneRenderData::~SceneRenderData()
 
 void SceneRenderData::set_render_data(uint32_t v_width,
                                       uint32_t v_height,
+                                      const Vec3 &camera_pos,
                                       const Mat4 &projection,
                                       const Mat4 &view)
 {
     width = v_width;
     height = v_height;
+    uniform.camera_pos = Vec4(camera_pos, 1.0f);
     uniform.projection = projection;
     uniform.view = view;
 

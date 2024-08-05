@@ -32,6 +32,7 @@ public:
    ~SceneRenderData();
 
     struct UniformBuffer {
+        Vec4 camera_pos;
         Mat4 projection;
         Mat4 view;
     };
@@ -39,8 +40,9 @@ public:
     // api
     void set_render_data(uint32_t v_width,
                          uint32_t v_height,
-                         const Mat4& projection,
-                         const Mat4& view);
+                         const Vec3 &camera_position,
+                         const Mat4 &projection,
+                         const Mat4 &view);
 
     V_FORCEINLINE inline uint32_t get_scene_width() { return width; }
     V_FORCEINLINE inline uint32_t get_scene_height() { return height; }

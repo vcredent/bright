@@ -59,6 +59,7 @@ void RendererScene::cmd_begin_scene_renderer(Camera *v_camera, uint32_t v_width,
     render_data->set_render_data(
         v_width,
         v_height,
+        v_camera->get_position(),
         v_camera->get_projection_matrix(),
         v_camera->get_view_matrix()
     );
