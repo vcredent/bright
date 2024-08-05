@@ -36,7 +36,7 @@ Window *window;
 RenderDeviceContext *rdc;
 RenderDevice *rd;
 RenderingScreen *screen;
-Naveditor *_naveditor;
+Naveditor *naveditor;
 RenderObject *cube;
 RenderObject *sphere;
 ProjectionCamera *camera;
@@ -106,7 +106,7 @@ void initialize()
     screen = memnew(RenderingScreen, rd);
     screen->initialize(window);
 
-    _naveditor = memnew(Naveditor, rd, screen);
+    naveditor = memnew(Naveditor, rd, screen);
 
     Renderer::Initialize(rd);
 
@@ -141,15 +141,15 @@ int main(int argc, char **argv)
         screen->cmd_begin_screen_render(&screen_cmd_buffer);
         {
             /* ImGui */
-            _naveditor->cmd_begin_naveditor_render(screen_cmd_buffer);
+            naveditor->cmd_begin_naveditor_render(screen_cmd_buffer);
             {
                 static bool show_demo_flag = true;
                 ImGui::ShowDemoWindow(&show_demo_flag);
-                _naveditor->cmd_draw_debugger_editor_ui();
-                _naveditor->cmd_draw_camera_editor_ui(camera);
-                _naveditor->cmd_draw_scene_viewport_ui(scene_preview_texture, scene_depth_texture, &scene_region);
+                naveditor->cmd_draw_debugger_editor_ui();
+                naveditor->cmd_draw_camera_editor_ui(camera);
+                naveditor->cmd_draw_scene_viewport_ui(scene_preview_texture, scene_depth_texture, &scene_region);
             }
-            _naveditor->cmd_end_naveditor_render(screen_cmd_buffer);
+            naveditor->cmd_end_naveditor_render(screen_cmd_buffer);
         }
         screen->cmd_end_screen_render(screen_cmd_buffer);
         double screen_render_end_time = glfwGetTime();
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
     memdel(cube);
     memdel(camera);
     Renderer::Destroy();
-    memdel(_naveditor);
+    memdel(naveditor);
     memdel(screen);
     ((RenderDeviceContextWin32 *) rdc)->destroy_render_device(rd);
     memdel(rdc);

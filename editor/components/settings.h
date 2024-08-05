@@ -38,14 +38,14 @@ namespace _child {
 
     Options v_option = Options::None;
 
-    static void _settings_scene_render()
+    static void _settings_scene_render(Naveditor::SettingValues *p_values)
     {
         _CHECK_OPTION(v_option, Options::SCENE_RENDER);
         static bool v;
 
         ImGui::SeparatorText("渲染");
         _SETTINGS_INDENT();
-        ImGui::Checkbox("显示坐标线", &v);
+        ImGui::Checkbox("显示坐标线", &p_values->show_coordinate_render);
         _SETTINGS_UNINDENT();
     }
 
@@ -66,14 +66,14 @@ namespace _child {
     }
 
     // value set
-    static void values()
+    static void values(Naveditor::SettingValues *p_values)
     {
-        _settings_scene_render();
+        _settings_scene_render(p_values);
     }
 
 }
 
-static void _draw_engine_settings_editor_ui(bool *p_enable)
+static void _draw_engine_settings_editor_ui(bool *p_enable, Naveditor::SettingValues *p_values)
 {
     if (*p_enable) {
         ImGui::Begin("引擎设置", p_enable);
@@ -85,7 +85,7 @@ static void _draw_engine_settings_editor_ui(bool *p_enable)
             ImGui::SameLine();
 
             ImGui::BeginChild("设置", ImVec2(0, 0), true);
-            _child::values();
+            _child::values(p_values);
             ImGui::EndChild();
         }
         ImGui::End();

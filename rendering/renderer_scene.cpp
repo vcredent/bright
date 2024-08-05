@@ -46,6 +46,11 @@ RendererScene::~RendererScene()
     memdel(render_data);
 }
 
+void RendererScene::enable_coordinate_axis(bool is_enable)
+{
+    show_coordinate_axis = is_enable;
+}
+
 void RendererScene::push_render_object(RenderObject *v_object)
 {
     graphics->push_render_object(v_object);
@@ -64,7 +69,8 @@ void RendererScene::cmd_begin_scene_renderer(Camera *v_camera, uint32_t v_width,
         v_camera->get_view_matrix()
     );
 
-    axisline->cmd_draw_coordinate_axis(scene_cmd_buffer);
+    if (show_coordinate_axis)
+        axisline->cmd_draw_coordinate_axis(scene_cmd_buffer);
     graphics->cmd_draw_object_list(scene_cmd_buffer);
 }
 

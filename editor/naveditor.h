@@ -36,6 +36,10 @@ public:
     U_MEMNEW_ONLY Naveditor(RenderDevice *v_rd, RenderingScreen *v_screen);
    ~Naveditor();
 
+    struct SettingValues {
+        bool show_coordinate_render = true;
+    };
+
     // begin and end render
     void cmd_begin_naveditor_render(VkCommandBuffer cmd_buffer);
     void cmd_end_naveditor_render(VkCommandBuffer cmd_buffer);
@@ -51,9 +55,11 @@ private:
         bool enable_engine_settings = false;
     };
 
+    void _check_values();
     void _draw_main_editor();
 
     Mger mger;
+    SettingValues setting_values;
 };
 
 #endif /* _NAVEDITOR_H_ */

@@ -21,6 +21,7 @@
 /*                                                                          */
 /* ======================================================================== */
 #include "naveditor.h"
+#include "rendering/renderer.h"
 // components
 #include "components/debugger.h"
 #include "components/camera.h"
@@ -61,6 +62,7 @@ Naveditor::~Naveditor()
 void Naveditor::cmd_begin_naveditor_render(VkCommandBuffer cmd_buffer)
 {
     NavUI::BeginNewFrame(cmd_buffer);
+    _check_values();
 
     // menu bar
     ImGui::BeginMainMenuBar();
@@ -99,8 +101,13 @@ void Naveditor::cmd_draw_scene_viewport_ui(RenderDevice::Texture2D *v_texture, R
     _draw_scene_editor_ui(v_texture, v_depth, p_region);
 }
 
+void Naveditor::_check_values()
+{
+    Renderer::EnableCoordinateAxis(setting_values.show_coordinate_render);
+}
+
 void Naveditor::_draw_main_editor()
 {
     if (mger.enable_engine_settings)
-        _draw_engine_settings_editor_ui(&mger.enable_engine_settings);
+        _draw_engine_settings_editor_ui(&mger.enable_engine_settings, &setting_values);
 }

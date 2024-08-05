@@ -45,6 +45,12 @@ void Renderer::Destroy()
     memdel(scene);
 }
 
+void Renderer::EnableCoordinateAxis(bool is_enable)
+{
+    _CHECK_RENDERER_INIT();
+    scene->enable_coordinate_axis(is_enable);
+}
+
 void Renderer::PushSceneRenderObject(RenderObject *v_object)
 {
     _CHECK_RENDERER_INIT();

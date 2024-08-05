@@ -35,7 +35,9 @@ public:
     static void Destroy();
 
     // api
+    static void EnableCoordinateAxis(bool is_enable);
     static void PushSceneRenderObject(RenderObject *v_object);
+
     static void BeginScene(Camera *v_camera, uint32_t v_width, uint32_t v_height);
     static void EndScene(RenderDevice::Texture2D **texture, RenderDevice::Texture2D **depth);
 
