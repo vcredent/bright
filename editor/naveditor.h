@@ -37,7 +37,8 @@ public:
    ~Naveditor();
 
     struct SettingValues {
-        bool show_coordinate_render = true;
+        bool render_show_coordinate = true;
+        bool imgui_show_demo_window = false;
     };
 
     // begin and end render

@@ -143,8 +143,6 @@ int main(int argc, char **argv)
             /* ImGui */
             naveditor->cmd_begin_naveditor_render(screen_cmd_buffer);
             {
-                static bool show_demo_flag = true;
-                ImGui::ShowDemoWindow(&show_demo_flag);
                 naveditor->cmd_draw_debugger_editor_ui();
                 naveditor->cmd_draw_camera_editor_ui(camera);
                 naveditor->cmd_draw_scene_viewport_ui(scene_preview_texture, scene_depth_texture, &scene_region);

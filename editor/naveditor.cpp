@@ -106,7 +106,10 @@ void Naveditor::cmd_draw_scene_viewport_ui(RenderDevice::Texture2D *v_texture, R
 
 void Naveditor::_check_values()
 {
-    Renderer::EnableCoordinateAxis(setting_values.show_coordinate_render);
+    Renderer::EnableCoordinateAxis(setting_values.render_show_coordinate);
+
+    if (setting_values.imgui_show_demo_window)
+        ImGui::ShowDemoWindow(&setting_values.imgui_show_demo_window);
 }
 
 void Naveditor::_draw_main_editor()

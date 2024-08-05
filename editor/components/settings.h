@@ -38,14 +38,29 @@ namespace _child {
 
     Options v_option = Options::None;
 
+    //
+    // scene settings
+    //
     static void _settings_scene_render(Naveditor::SettingValues *p_values)
     {
         _CHECK_OPTION(v_option, Options::SCENE_RENDER);
-        static bool v;
 
         ImGui::SeparatorText("渲染");
         _SETTINGS_INDENT();
-        ImGui::Checkbox("显示坐标线", &p_values->show_coordinate_render);
+        ImGui::Checkbox("显示坐标线", &p_values->render_show_coordinate);
+        _SETTINGS_UNINDENT();
+    }
+
+    //
+    // engine settings
+    //
+    static void _settings_engine(Naveditor::SettingValues *p_values)
+    {
+        _CHECK_OPTION(v_option, Options::ENGINE_SETTINGS);
+
+        ImGui::SeparatorText("ImGui 设置");
+        _SETTINGS_INDENT();
+        ImGui::Checkbox("显示演示窗口", &p_values->imgui_show_demo_window);
         _SETTINGS_UNINDENT();
     }
 
@@ -53,22 +68,21 @@ namespace _child {
     static void options()
     {
         if (ImGui::CollapsingHeader("通用设置")) {
-            if (_SELECTABLE("场景渲染", v_option == Options::SCENE_RENDER)) {
+            if (_SELECTABLE("场景渲染", v_option == Options::SCENE_RENDER))
                 v_option = SCENE_RENDER;
-            }
         }
 
         ImGui::Separator();
 
-        if (_SELECTABLE("引擎设置", v_option == Options::ENGINE_SETTINGS)) {
+        if (_SELECTABLE("引擎设置", v_option == Options::ENGINE_SETTINGS))
             v_option = ENGINE_SETTINGS;
-        }
     }
 
     // value set
     static void values(Naveditor::SettingValues *p_values)
     {
         _settings_scene_render(p_values);
+        _settings_engine(p_values);
     }
 
 }
