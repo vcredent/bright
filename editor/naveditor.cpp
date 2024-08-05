@@ -65,10 +65,10 @@ void Naveditor::cmd_begin_naveditor_render(VkCommandBuffer cmd_buffer)
     // menu bar
     ImGui::BeginMainMenuBar();
     {
-        if (ImGui::BeginMenu("引擎设置 渲染")) {
+        if (ImGui::BeginMenu("文件")) {
             ImGui::Separator();
             // engine settings
-            if (MENU_ITEM("aaa"))
+            if (MENU_ITEM("引擎设置"))
                 mger.enable_engine_settings = true;
             ImGui::EndMenu();
         }

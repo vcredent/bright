@@ -23,18 +23,70 @@
 #ifndef _NAVEDITOR_COMPONENT_SETTINGS_H_
 #define _NAVEDITOR_COMPONENT_SETTINGS_H_
 
+#define _SELECTABLE(name, selected) ImGui::Selectable("        " name "    ", selected)
+#define _CHECK_OPTION(current, option) if (current != option) return
+#define _SETTINGS_INDENT() ImGui::Indent(32.0f)
+#define _SETTINGS_UNINDENT() ImGui::Unindent(32.0f)
+
+namespace _child {
+
+    enum Options {
+        None,
+        SCENE_RENDER,
+        ENGINE_SETTINGS
+    };
+
+    Options v_option = Options::None;
+
+    static void _settings_scene_render()
+    {
+        _CHECK_OPTION(v_option, Options::SCENE_RENDER);
+        static bool v;
+
+        ImGui::SeparatorText("渲染");
+        _SETTINGS_INDENT();
+        ImGui::Checkbox("显示坐标线", &v);
+        _SETTINGS_UNINDENT();
+    }
+
+    // options
+    static void options()
+    {
+        if (ImGui::CollapsingHeader("通用设置")) {
+            if (_SELECTABLE("场景渲染", v_option == Options::SCENE_RENDER)) {
+                v_option = SCENE_RENDER;
+            }
+        }
+
+        ImGui::Separator();
+
+        if (_SELECTABLE("引擎设置", v_option == Options::ENGINE_SETTINGS)) {
+            v_option = ENGINE_SETTINGS;
+        }
+    }
+
+    // value set
+    static void values()
+    {
+        _settings_scene_render();
+    }
+
+}
+
 static void _draw_engine_settings_editor_ui(bool *p_enable)
 {
     if (*p_enable) {
-        ImGui::Begin("选项");
+        ImGui::Begin("引擎设置", p_enable);
         {
-            ImGui::Text("这是选项列表");
-        }
-        ImGui::End();
+            ImGui::BeginChild("选项", ImVec2(150, 0), true);
+            _child::options();
+            ImGui::EndChild();
 
-        ImGui::Begin("设置", p_enable);
-        {
-            ImGui::Text("这是设置列表");
+            ImGui::SameLine();
+
+            ImGui::BeginChild("设置", ImVec2(0, 0), true);
+            _child::values();
+            ImGui::EndChild();
         }
         ImGui::End();
     }
