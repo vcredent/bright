@@ -106,6 +106,16 @@ void rendering()
         /* ImGui */
         NavUI::BeginNewFrame(screen_cmd_buffer);
         {
+            ImGui::BeginMainMenuBar();
+            {
+                if (ImGui::BeginMenu("文件")) {
+                    ImGui::Separator();
+                    ImGui::MenuItem("场景设置");
+                    ImGui::EndMenu();
+                }
+            }
+            ImGui::EndMainMenuBar();
+
             static bool show_demo_flag = true;
             ImGui::ShowDemoWindow(&show_demo_flag);
 
@@ -125,23 +135,6 @@ void rendering()
                 Vec3 scaling = cube->get_object_scaling();
                 NavUI::DragFloat3("缩放: ", glm::value_ptr(scaling), 0.01f);
                 cube->set_object_scaling(scaling);
-            }
-            ImGui::End();
-
-            ImGui::Begin("sphere");
-            {
-                ImGui::SeparatorText("变换");
-                Vec3 position = sphere->get_object_position();
-                NavUI::DragFloat3("平移: ", glm::value_ptr(position), 0.01f);
-                sphere->set_object_position(position);
-
-                Vec3 rotation = sphere->get_object_rotation();
-                NavUI::DragFloat3("旋转: ", glm::value_ptr(rotation), 0.01f);
-                sphere->set_object_rotation(rotation);
-
-                Vec3 scaling = sphere->get_object_scaling();
-                NavUI::DragFloat3("缩放: ", glm::value_ptr(scaling), 0.01f);
-                sphere->set_object_scaling(scaling);
             }
             ImGui::End();
 
@@ -179,9 +172,6 @@ void initialize()
 
     cube = RenderObject::load_obj("../assets/cube.obj");
     Renderer::PushSceneRenderObject(cube);
-
-    sphere = RenderObject::load_obj("../assets/sphere.obj");
-    Renderer::PushSceneRenderObject(sphere);
 
     NavUI::InitializeInfo initialize_info = {};
     initialize_info.window = (GLFWwindow *) screen->get_focused_window()->get_native_window();
