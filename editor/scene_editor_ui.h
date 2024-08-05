@@ -23,7 +23,7 @@
 #ifndef _VIEWPORT_EDITOR_UI_H_
 #define _VIEWPORT_EDITOR_UI_H_
 
-#include <navui.h>
+#include <navui/navui.h>
 #include "drivers/render_device.h"
 
 namespace naveditor {

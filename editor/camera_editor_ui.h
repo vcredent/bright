@@ -24,7 +24,7 @@
 #define _CAMERA_EDITOR_UI_H_
 
 #include "rendering/camera/camera.h"
-#include <navui.h>
+#include <navui/navui.h>
 
 namespace naveditor {
     static void draw_camera_editor_ui(Camera *v_camera)

@@ -23,6 +23,6 @@
 #ifndef _NAVEDITOR_H_
 #define _NAVEDITOR_H_
 
-#include <navui.h>
+#include <navui/navui.h>
 
 #endif /* _NAVEDITOR_H_ */

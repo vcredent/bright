@@ -23,7 +23,7 @@
 #ifndef _DEBUGGER_EDITOR_UI_H_
 #define _DEBUGGER_EDITOR_UI_H_
 
-#include <navui.h>
+#include <navui/navui.h>
 #include <vector>
 #include <copilot/memalloc.h>
 #include <copilot/typedefs.h>
