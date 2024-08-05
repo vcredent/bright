@@ -65,8 +65,11 @@ void Naveditor::cmd_begin_naveditor_render(VkCommandBuffer cmd_buffer)
     _check_values();
 
     // menu bar
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 5.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15.0f, 5.0f));
     ImGui::BeginMainMenuBar();
     {
+        ImGui::PopStyleVar(2);
         if (ImGui::BeginMenu("文件")) {
             ImGui::Separator();
             // engine settings
