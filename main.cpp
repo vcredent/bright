@@ -159,7 +159,7 @@ void initialize()
 
     Renderer::Initialize(rd);
 
-    object = RenderObject::load_obj("../assets/flat_vase.obj");
+    object = RenderObject::load_obj("../assets/cube.obj");
     Renderer::PushSceneRenderObject(object);
 
     NavUI::InitializeInfo initialize_info = {};
