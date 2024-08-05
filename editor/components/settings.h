@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* naveditor.h                                                              */
+/* settings.h                                                               */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,40 +20,24 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _NAVEDITOR_H_
-#define _NAVEDITOR_H_
+#ifndef _NAVEDITOR_COMPONENT_SETTINGS_H_
+#define _NAVEDITOR_COMPONENT_SETTINGS_H_
 
-#include <navui/navui.h>
-#include <copilot/debugger.h>
-#include <vector>
+static void _draw_engine_settings_editor_ui(bool *p_enable)
+{
+    if (*p_enable) {
+        ImGui::Begin("选项");
+        {
+            ImGui::Text("这是选项列表");
+        }
+        ImGui::End();
 
-// rendering
-#include "rendering/rendering_screen.h"
-#include "rendering/camera/camera.h"
+        ImGui::Begin("设置", p_enable);
+        {
+            ImGui::Text("这是设置列表");
+        }
+        ImGui::End();
+    }
+}
 
-class Naveditor {
-public:
-    U_MEMNEW_ONLY Naveditor(RenderDevice *v_rd, RenderingScreen *v_screen);
-   ~Naveditor();
-
-    // begin and end render
-    void cmd_begin_naveditor_render(VkCommandBuffer cmd_buffer);
-    void cmd_end_naveditor_render(VkCommandBuffer cmd_buffer);
-
-    // api
-    void cmd_draw_debugger_editor_ui();
-    void cmd_draw_camera_editor_ui(Camera *v_camera);
-    void cmd_draw_scene_viewport_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region);
-
-private:
-    // manager window context and click state etc...
-    struct Mger {
-        bool enable_engine_settings = false;
-    };
-
-    void _draw_main_editor();
-
-    Mger mger;
-};
-
-#endif /* _NAVEDITOR_H_ */
+#endif /* _NAVEDITOR_COMPONENT_SETTINGS_H_ */

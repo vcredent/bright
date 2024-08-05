@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* naveditor.h                                                              */
+/* scene.h                                                              */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,40 +20,45 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _NAVEDITOR_H_
-#define _NAVEDITOR_H_
+#ifndef _NAVEDITOR_COMPONENT_SCENE_H_
+#define _NAVEDITOR_COMPONENT_SCENE_H_
 
-#include <navui/navui.h>
-#include <copilot/debugger.h>
-#include <vector>
+static void _draw_scene_editor_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region)
+{
+    NavUI::BeginViewport("场景");
+    {
+        static ImTextureID preview = NULL;
+        if (preview != NULL)
+            NavUI::RemoveTexture(preview);
 
-// rendering
-#include "rendering/rendering_screen.h"
-#include "rendering/camera/camera.h"
+        static ImTextureID depth = NULL;
+        if (depth != NULL)
+            NavUI::RemoveTexture(depth);
 
-class Naveditor {
-public:
-    U_MEMNEW_ONLY Naveditor(RenderDevice *v_rd, RenderingScreen *v_screen);
-   ~Naveditor();
+        preview = NavUI::AddTexture(v_texture->sampler, v_texture->image_view, v_texture->image_layout);
+        depth = NavUI::AddTexture(v_depth->sampler, v_depth->image_view, v_depth->image_layout);
 
-    // begin and end render
-    void cmd_begin_naveditor_render(VkCommandBuffer cmd_buffer);
-    void cmd_end_naveditor_render(VkCommandBuffer cmd_buffer);
+        // Main image
+        {
+            *p_region = ImGui::GetContentRegionAvail();
+            ImGui::Image(preview, ImVec2(p_region->x, p_region->y));
+        }
 
-    // api
-    void cmd_draw_debugger_editor_ui();
-    void cmd_draw_camera_editor_ui(Camera *v_camera);
-    void cmd_draw_scene_viewport_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region);
+        // Depth image
+        {
+            ImVec2 position = ImGui::GetWindowPos();
+            ImVec2 size = ImGui::GetWindowSize();
 
-private:
-    // manager window context and click state etc...
-    struct Mger {
-        bool enable_engine_settings = false;
-    };
+            ImVec2 offset = ImVec2(30.0f, 70.0f);
+            ImVec2 tex_size = ImVec2((size.x * 0.1f) * 1.3f, (size.y * 0.1f) * 1.3f);
 
-    void _draw_main_editor();
+            ImVec2 depth_tex_pos = ImVec2(position.x + offset.x, position.y + size.y - tex_size.y - offset.y);
 
-    Mger mger;
-};
+            ImDrawList *draw = ImGui::GetWindowDrawList();
+            draw->AddImage(depth, depth_tex_pos, ImVec2(depth_tex_pos.x + tex_size.x, depth_tex_pos.y + tex_size.y));
+        }
+    }
+    NavUI::EndViewport();
+}
 
-#endif /* _NAVEDITOR_H_ */
+#endif /* _NAVEDITOR_COMPONENT_SCENE_H_ */

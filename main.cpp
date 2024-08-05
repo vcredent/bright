@@ -49,10 +49,11 @@ FPSCounter fps_counter;
 static float mouse_scroll_xoffset = 0.0f;
 static float mouse_scroll_yoffset = 0.0f;
 
-void _update_camera()
+void update()
 {
     // update camera
     static bool is_dragging = false;
+
     if (window->getkey(GLFW_KEY_F)) {
         is_dragging = true;
         window->hide_cursor();
@@ -83,43 +84,9 @@ void _update_camera()
 
     camera->set_aspect_ratio(scene_region.x / scene_region.y);
     game_player_controller->on_update_camera();
-}
 
-void update()
-{
-    _update_camera();
-}
-
-void rendering()
-{
-    /* render to scene */
-    double scene_render_start_time = glfwGetTime();
-    Renderer::BeginScene(camera, scene_region.x, scene_region.y);
-    Renderer::EndScene(&scene_preview_texture, &scene_depth_texture);
-    double scene_render_end_time = glfwGetTime();
-
-    double screen_render_start_time = glfwGetTime();
-    VkCommandBuffer screen_cmd_buffer;
-    screen->cmd_begin_screen_render(&screen_cmd_buffer);
-    {
-        /* ImGui */
-        _naveditor->cmd_begin_naveditor_render(screen_cmd_buffer);
-        {
-            static bool show_demo_flag = true;
-            ImGui::ShowDemoWindow(&show_demo_flag);
-
-            _naveditor->cmd_draw_debugger_editor_ui();
-            _naveditor->cmd_draw_camera_editor_ui(camera);
-            _naveditor->cmd_draw_scene_viewport_ui(scene_preview_texture, scene_depth_texture, &scene_region);
-        }
-        _naveditor->cmd_end_naveditor_render(screen_cmd_buffer);
-    }
-    screen->cmd_end_screen_render(screen_cmd_buffer);
-    double screen_render_end_time = glfwGetTime();
-
-    // set render debug time for debug.
-    debugger::set_scene_render_time_value((scene_render_end_time - scene_render_start_time) * 1000.0f);
-    debugger::set_screen_render_time((screen_render_end_time - screen_render_start_time) * 1000.0f);
+    mouse_scroll_xoffset = 0.0f;
+    mouse_scroll_yoffset = 0.0f;
 }
 
 void initialize()
@@ -162,9 +129,34 @@ int main(int argc, char **argv)
         /* poll events */
         window->poll_events();
         update();
-        rendering();
-        mouse_scroll_xoffset = 0.0f;
-        mouse_scroll_yoffset = 0.0f;
+
+        /* render to scene */
+        double scene_render_start_time = glfwGetTime();
+        Renderer::BeginScene(camera, scene_region.x, scene_region.y);
+        Renderer::EndScene(&scene_preview_texture, &scene_depth_texture);
+        double scene_render_end_time = glfwGetTime();
+
+        double screen_render_start_time = glfwGetTime();
+        VkCommandBuffer screen_cmd_buffer;
+        screen->cmd_begin_screen_render(&screen_cmd_buffer);
+        {
+            /* ImGui */
+            _naveditor->cmd_begin_naveditor_render(screen_cmd_buffer);
+            {
+                static bool show_demo_flag = true;
+                ImGui::ShowDemoWindow(&show_demo_flag);
+                _naveditor->cmd_draw_debugger_editor_ui();
+                _naveditor->cmd_draw_camera_editor_ui(camera);
+                _naveditor->cmd_draw_scene_viewport_ui(scene_preview_texture, scene_depth_texture, &scene_region);
+            }
+            _naveditor->cmd_end_naveditor_render(screen_cmd_buffer);
+        }
+        screen->cmd_end_screen_render(screen_cmd_buffer);
+        double screen_render_end_time = glfwGetTime();
+
+        // set render debug time for debug.
+        debugger::set_scene_render_time_value((scene_render_end_time - scene_render_start_time) * 1000.0f);
+        debugger::set_screen_render_time((screen_render_end_time - screen_render_start_time) * 1000.0f);
         debugger::set_fps_value(fps_counter.fps());
     }
 

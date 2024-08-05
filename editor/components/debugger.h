@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* naveditor.h                                                              */
+/* camera.h                                                                 */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,40 +20,36 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _NAVEDITOR_H_
-#define _NAVEDITOR_H_
+#ifndef _NAVEDITOR_COMPONENT_DEBUGGER_H_
+#define _NAVEDITOR_COMPONENT_DEBUGGER_H_
 
-#include <navui/navui.h>
-#include <copilot/debugger.h>
-#include <vector>
+static void _draw_debugger_editor_ui(DebuggerProperties *v_debugger)
+{
+    static std::vector<float> fps_list;
 
-// rendering
-#include "rendering/rendering_screen.h"
-#include "rendering/camera/camera.h"
+    fps_list.push_back(v_debugger->fps);
+    if (std::size(fps_list) > 255)
+        fps_list.erase(fps_list.begin());
 
-class Naveditor {
-public:
-    U_MEMNEW_ONLY Naveditor(RenderDevice *v_rd, RenderingScreen *v_screen);
-   ~Naveditor();
+    NavUI::Begin("调试");
+    {
+        ImGui::SeparatorText("高级信息");
+        ImGui::Indent(32.0f);
+        ImGui::Text("canvas render time: %.2fms", v_debugger->scene_render_time);
+        ImGui::Text("screen render time: %.2fms", v_debugger->screen_render_time);
+        ImGui::Text("total render time: %.2fms", v_debugger->scene_render_time + v_debugger->screen_render_time);
+        ImGui::Unindent(32.0f);
 
-    // begin and end render
-    void cmd_begin_naveditor_render(VkCommandBuffer cmd_buffer);
-    void cmd_end_naveditor_render(VkCommandBuffer cmd_buffer);
+        ImGui::SeparatorText("基础信息");
+        ImGui::Indent(32.0f);
+        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "fps: %d", v_debugger->fps
+        );
+        ImGui::Indent(12.0f);
+        ImGui::PlotLines("##", std::data(fps_list), std::size(fps_list), 0, NULL, 0.0f, 144.0f, ImVec2(0.0f, 32.0f));
+        ImGui::Unindent(12.0f);
+        ImGui::Unindent(32.0f);
+    }
+    NavUI::End();
+}
 
-    // api
-    void cmd_draw_debugger_editor_ui();
-    void cmd_draw_camera_editor_ui(Camera *v_camera);
-    void cmd_draw_scene_viewport_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region);
-
-private:
-    // manager window context and click state etc...
-    struct Mger {
-        bool enable_engine_settings = false;
-    };
-
-    void _draw_main_editor();
-
-    Mger mger;
-};
-
-#endif /* _NAVEDITOR_H_ */
+#endif /* _NAVEDITOR_COMPONENT_DEBUGGER_H_ */

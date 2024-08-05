@@ -156,6 +156,7 @@ namespace NavUI {
         io.IniFilename = "../naveditor.ini";
 
         // set default font.
+
         io.Fonts->AddFontFromFileTTF("../resource/fonts/Microsoft Yahei UI/Microsoft Yahei UI.ttf", 18.0f,
                                      nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
         io.FontDefault = io.Fonts->Fonts.back();

@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* naveditor.h                                                              */
+/* camera.h                                                                 */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,40 +20,39 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _NAVEDITOR_H_
-#define _NAVEDITOR_H_
+#ifndef _NAVEDITOR_COMPONENT_CAMERA_H_
+#define _NAVEDITOR_COMPONENT_CAMERA_H_
 
-#include <navui/navui.h>
-#include <copilot/debugger.h>
-#include <vector>
+static void _draw_camera_editor_ui(Camera *v_camera)
+{
+    NavUI::Begin("摄像机");
+    {
+        ImGui::SeparatorText("变换");
+        Vec3 position = v_camera->get_position();
+        NavUI::DragFloat3("位置: ", glm::value_ptr(position), 0.01f);
+        v_camera->set_position(position);
 
-// rendering
-#include "rendering/rendering_screen.h"
-#include "rendering/camera/camera.h"
+        Vec3 target = v_camera->get_target();
+        NavUI::DragFloat3("目标: ", glm::value_ptr(target), 0.01f);
+        v_camera->set_target(target);
 
-class Naveditor {
-public:
-    U_MEMNEW_ONLY Naveditor(RenderDevice *v_rd, RenderingScreen *v_screen);
-   ~Naveditor();
+        float fov = v_camera->get_fov();
+        NavUI::DragFloat("景深: ", &fov, 0.01f);
+        v_camera->set_fov(fov);
 
-    // begin and end render
-    void cmd_begin_naveditor_render(VkCommandBuffer cmd_buffer);
-    void cmd_end_naveditor_render(VkCommandBuffer cmd_buffer);
+        float near = v_camera->get_near();
+        NavUI::DragFloat("近点: ", &near, 0.01f);
+        v_camera->set_near(near);
 
-    // api
-    void cmd_draw_debugger_editor_ui();
-    void cmd_draw_camera_editor_ui(Camera *v_camera);
-    void cmd_draw_scene_viewport_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region);
+        float far = v_camera->get_far();
+        NavUI::DragFloat("远点: ", &far, 0.01f);
+        v_camera->set_far(far);
 
-private:
-    // manager window context and click state etc...
-    struct Mger {
-        bool enable_engine_settings = false;
-    };
+        float speed = v_camera->get_speed();
+        NavUI::DragFloat("速度: ", &speed, 0.01f);
+        v_camera->set_speed(speed);
+    }
+    NavUI::End();
+}
 
-    void _draw_main_editor();
-
-    Mger mger;
-};
-
-#endif /* _NAVEDITOR_H_ */
+#endif /* _NAVEDITOR_COMPONENT_CAMERA_H_ */

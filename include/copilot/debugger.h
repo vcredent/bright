@@ -24,6 +24,7 @@
 #define _ENGINE_DEBUGGER_H_
 
 #include <copilot/typedefs.h>
+#include <copilot/memalloc.h>
 
 struct DebuggerProperties {
     int   fps                       = 0;
@@ -31,26 +32,26 @@ struct DebuggerProperties {
     float screen_render_time        = 0.0f;
 };
 
-static DebuggerProperties _DebuggerProperties = {};
-
 namespace debugger
 {
+    extern DebuggerProperties *_debugger_properties;
+
 V_FORCEINLINE
 inline static void set_fps_value(int fps)
   {
-    _DebuggerProperties.fps = fps;
+      _debugger_properties->fps = fps;
   }
 
 V_FORCEINLINE
 inline static void set_scene_render_time_value(float time)
   {
-    _DebuggerProperties.scene_render_time = time;
+      _debugger_properties->scene_render_time = time;
   }
 
 V_FORCEINLINE
 inline static void set_screen_render_time(float time)
   {
-    _DebuggerProperties.screen_render_time = time;
+      _debugger_properties->screen_render_time = time;
   }
 }
 
