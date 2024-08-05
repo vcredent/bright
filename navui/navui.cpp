@@ -226,7 +226,14 @@ namespace NavUI {
 
     bool Begin(const char *title, bool* p_open, ImGuiWindowFlags flags)
     {
-        return ImGui::Begin(title, p_open, flags);
+        bool retval;
+        ImGuiStyle &style = ImGui::GetStyle();
+        ImVec2 padding = style.FramePadding;
+        padding.y = padding.y + 5;
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, padding);
+        retval = ImGui::Begin(title, p_open, flags);
+        ImGui::PopStyleVar();
+        return retval;
     }
 
     void End()
