@@ -38,35 +38,12 @@ public:
         PropertyType type;
     };
 
-    void set_node_name(const char *v_name)
-      {
-        name = v_name;
-      }
-
-    const char * get_node_name()
-      {
-        return name;
-      }
-
-    void set_icon(const char *v_icon)
-      {
-        icon = v_icon;
-      }
-
-    const char *get_icon()
-      {
-        return icon;
-      }
-
-    void add_property(const char *name, PropertyType type, void *ptr)
-      {
-        properties.insert({ name, { ptr, type } });
-      }
-
-    const std::unordered_map<const char *, Property> &get_properties()
-      {
-        return properties;
-      }
+    void set_node_name(const char *v_name) { name = v_name; }
+    const char *get_node_name() { return name; }
+    void set_node_icon(const char *v_icon) { icon = v_icon; }
+    const char *get_node_icon() { return icon; }
+    void add_node_property(const char *name, PropertyType type, void *ptr) { properties.insert({ name, { ptr, type } }); }
+    const std::unordered_map<const char *, Property> &get_node_properties() { return properties; }
 
 private:
     const char *name;

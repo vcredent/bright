@@ -31,28 +31,40 @@ public:
     U_MEMNEW_ONLY SceneRenderData(RenderDevice *v_rd);
    ~SceneRenderData();
 
-    struct UniformBuffer {
+    struct Perspective {
         Vec4 camera_pos;
         Mat4 projection;
         Mat4 view;
     };
 
+    struct DirectionalLight {
+        Vec3 direction;
+        float intensity;
+        float specular_exponent;
+        float ambient;
+        Vec3 color;
+        Vec3 specular_color;
+    };
+
     // api
     void set_render_data(uint32_t v_width,
                          uint32_t v_height,
-                         const Vec3 &camera_position,
-                         const Mat4 &projection,
-                         const Mat4 &view);
+                         Perspective *v_perspective,
+                         DirectionalLight *v_light);
 
     V_FORCEINLINE uint32_t get_scene_width() { return width; }
     V_FORCEINLINE uint32_t get_scene_height() { return height; }
-    V_FORCEINLINE RenderDevice::Buffer *get_uniform_buffer() { return buffer; }
+    V_FORCEINLINE RenderDevice::Buffer* get_perspective_buffer() { return perspective_buffer; }
+    V_FORCEINLINE RenderDevice::Buffer* get_directional_light_buffer() { return directional_light_buffer; }
 
-    // static
-    V_FORCEINLINE static size_t GetUniformSize() { return sizeof(UniformBuffer); }
+    V_FORCEINLINE void set_descriptor_buffers(VkDescriptorSet descriptor)
+      {
+        rd->update_descriptor_set_buffer(perspective_buffer, 0, descriptor);
+        rd->update_descriptor_set_buffer(directional_light_buffer, 1, descriptor);
+      }
 
     /* get descriptor bind zero. */
-    static VkDescriptorSetLayoutBinding GetDescriptorBindZero()
+    static VkDescriptorSetLayoutBinding GetPerspectiveDescriptorBindZero()
       {
         VkDescriptorSetLayoutBinding bind = {
           /* binding= */ 0,
@@ -64,12 +76,24 @@ public:
         return bind;
       }
 
+    static VkDescriptorSetLayoutBinding GetLightDescriptorBindOne()
+      {
+        VkDescriptorSetLayoutBinding bind = {
+          /* binding= */ 1,
+          /* descriptorType= */ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+          /* descriptorCount= */ 1,
+          /* stageFlags= */ VK_SHADER_STAGE_FRAGMENT_BIT,
+          /* pImmutableSamplers= */ VK_NULL_HANDLE
+        };
+        return bind;
+      }
+
 private:
     RenderDevice *rd;
     uint32_t width;
     uint32_t height;
-    UniformBuffer uniform;
-    RenderDevice::Buffer *buffer;
+    RenderDevice::Buffer * perspective_buffer;
+    RenderDevice::Buffer * directional_light_buffer;
 };
 
 #endif /* _SCENE_RENDER_DATA_H_ */

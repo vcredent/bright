@@ -28,6 +28,9 @@ RendererScene::RendererScene(RenderDevice *v_rd)
 
     render_data = memnew(SceneRenderData, rd);
 
+
+    directional_light = memnew(RenderingDirectionalLight, rd);
+
     scene = memnew(RenderingScene, rd);
     scene->initialize();
 
@@ -42,6 +45,7 @@ RendererScene::~RendererScene()
 {
     memdel(axisline);
     memdel(graphics);
+    memdel(directional_light);
     memdel(scene);
     memdel(render_data);
 }
@@ -51,9 +55,9 @@ void RendererScene::set_scene_camera(Camera *v_camera)
     camera = v_camera;
 }
 
-void RendererScene::get_scene_camera(Camera **p_camera)
+Camera *RendererScene::get_scene_camera()
 {
-    *p_camera = camera;
+    return camera;
 }
 
 void RendererScene::enable_coordinate_axis(bool is_enable)
@@ -73,17 +77,27 @@ void RendererScene::push_render_object(RenderObject *v_object)
 
 void RendererScene::cmd_begin_scene_renderer(uint32_t v_width, uint32_t v_height)
 {
-    scene->set_scene_extent(v_width, v_height);
-    scene->cmd_begin_scene_rendering(&scene_cmd_buffer);
-
+    // update
     camera->update();
+
+    SceneRenderData::DirectionalLight light;
+    directional_light->copy_data(&light);
+    
+    SceneRenderData::Perspective perspective;
+    perspective.camera_pos = Vec4(camera->get_position(), 1.0f);
+    perspective.view = camera->get_view_matrix();
+    perspective.projection = camera->get_projection_matrix();
+
     render_data->set_render_data(
         v_width,
         v_height,
-        camera->get_position(),
-        camera->get_projection_matrix(),
-        camera->get_view_matrix()
+        &perspective,
+        &light
     );
+
+    // render
+    scene->set_scene_extent(v_width, v_height);
+    scene->cmd_begin_scene_rendering(&scene_cmd_buffer);
 
     if (show_coordinate_axis)
         axisline->cmd_draw_coordinate_axis(scene_cmd_buffer);

@@ -51,10 +51,16 @@ void Renderer::set_scene_camera(Camera *v_camera)
     scene->set_scene_camera(v_camera);
 }
 
-void Renderer::get_scene_camera(Camera **p_camera)
+Camera *Renderer::get_scene_camera()
 {
     _CHECK_RENDERER_INIT();
-    scene->get_scene_camera(p_camera);
+    return scene->get_scene_camera();
+}
+
+RenderingDirectionalLight *Renderer::get_scene_directional_light()
+{
+    _CHECK_RENDERER_INIT();
+    return scene->get_directional_light();
 }
 
 void Renderer::enable_coordinate_axis(bool is_enable)

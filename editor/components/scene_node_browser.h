@@ -38,7 +38,7 @@ static void _cmd_draw_scene_node_browser(const std::vector<ClassProperties*>& v_
     if (NavUI::Begin("节点浏览器")) {
         ImGui::Indent(32.0f);
         for (const auto& item : v_properties) {
-            Naveditor::Navicon* icon = naveditor->geticon(item->get_icon());
+            Naveditor::Navicon* icon = naveditor->geticon(item->get_node_icon());
             const char* name = item->get_node_name();
             NavUI::DrawTexture(icon->texture, ImVec2(18.0f, 18.0f));
             ImGui::SameLine();
@@ -53,7 +53,7 @@ static void _cmd_draw_scene_node_browser(const std::vector<ClassProperties*>& v_
     if (current.name != NULL) {
         NavUI::Begin("属性面板");
         ClassProperties* node = current.node;
-        auto properties = node->get_properties();
+        auto properties = node->get_node_properties();
         for (const auto& item : properties) {
             const char* name = item.first;
             ClassProperties::Property property = item.second;

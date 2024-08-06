@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* scene_render_data.cpp                                                    */
+/* rendering_directional_light.cpp                                          */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -15,34 +15,36 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "scene_render_data.h"
+#include "rendering_directional_light.h"
 
-SceneRenderData::SceneRenderData(RenderDevice *v_rd)
-    : rd(v_rd)
+RenderingDirectionalLight::RenderingDirectionalLight(RenderDevice *v_rd)
 {
-    perspective_buffer = rd->create_buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(Perspective));
-    directional_light_buffer = rd->create_buffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(DirectionalLight));
+    set_node_name("定向光源");
+    set_node_icon("sun");
+    add_node_property("方向", FLOAT3, glm::value_ptr(direction));
+    add_node_property("颜色", FLOAT3, glm::value_ptr(color));
+    add_node_property("高光", FLOAT3, glm::value_ptr(specular_color));
+    add_node_property("强度", FLOAT, &intensity);
+    add_node_property("指数", FLOAT, &specular_exponent);
+    add_node_property("环境", FLOAT, &ambient);
 }
 
-SceneRenderData::~SceneRenderData()
+RenderingDirectionalLight::~RenderingDirectionalLight()
 {
-    rd->destroy_buffer(directional_light_buffer);
-    rd->destroy_buffer(perspective_buffer);
+    /* do nothing... */
 }
 
-void SceneRenderData::set_render_data(uint32_t v_width,
-                                      uint32_t v_height,
-                                      Perspective *v_perspective,
-                                      DirectionalLight *v_light)
+void RenderingDirectionalLight::copy_data(SceneRenderData::DirectionalLight* v_light)
 {
-    width = v_width;
-    height = v_height;
-
-    rd->write_buffer(perspective_buffer, 0, sizeof(Perspective), v_perspective);
-    rd->write_buffer(directional_light_buffer, 0, sizeof(DirectionalLight), v_light);
+    v_light->direction = direction;
+    v_light->color = color;
+    v_light->specular_color = specular_color;
+    v_light->intensity = intensity;
+    v_light->specular_exponent = specular_exponent;
+    v_light->ambient = ambient;
 }

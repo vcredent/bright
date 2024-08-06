@@ -48,12 +48,13 @@ void RenderingGraphics::initialize(VkRenderPass render_pass)
     };
 
     VkDescriptorSetLayoutBinding descriptor_layout_binds[] = {
-            SceneRenderData::GetDescriptorBindZero(),
+            SceneRenderData::GetPerspectiveDescriptorBindZero(),
+            SceneRenderData::GetLightDescriptorBindOne(),
     };
 
     rd->create_descriptor_set_layout(ARRAY_SIZE(descriptor_layout_binds), descriptor_layout_binds, &descriptor_set_layout);
     rd->allocate_descriptor_set(descriptor_set_layout, &descriptor_set);
-    rd->update_descriptor_set_buffer(render_data->get_uniform_buffer(), 0, descriptor_set);
+    render_data->set_descriptor_buffers(descriptor_set);
 
     VkPushConstantRange push_const_range = {
             /* stageFlags= */ VK_SHADER_STAGE_VERTEX_BIT,

@@ -32,10 +32,10 @@ class Camera : public ClassProperties {
 public:
     U_MEMNEW_ONLY Camera()
       {
-        set_icon("camera");
-        add_property("位置", PropertyType::FLOAT3, glm::value_ptr(position));
-        add_property("速度", PropertyType::FLOAT, &speed);
-        add_property("灵敏", PropertyType::FLOAT, &sensitivity);
+        set_node_icon("camera");
+        add_node_property("位置", PropertyType::FLOAT3, glm::value_ptr(position));
+        add_node_property("速度", PropertyType::FLOAT, &speed);
+        add_node_property("灵敏", PropertyType::FLOAT, &sensitivity);
       }
 
     virtual ~Camera() = default;

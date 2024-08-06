@@ -38,12 +38,12 @@ RenderingCoordinateAxis::~RenderingCoordinateAxis()
 void RenderingCoordinateAxis::initialize(VkRenderPass render_pass)
 {
     VkDescriptorSetLayoutBinding binds[] = {
-            SceneRenderData::GetDescriptorBindZero(),
+            SceneRenderData::GetPerspectiveDescriptorBindZero(),
     };
 
     rd->create_descriptor_set_layout(ARRAY_SIZE(binds), binds, &descriptor_set_layout);
     rd->allocate_descriptor_set(descriptor_set_layout, &descriptor_set);
-    rd->update_descriptor_set_buffer(render_data->get_uniform_buffer(), 0, descriptor_set);
+    rd->update_descriptor_set_buffer(render_data->get_perspective_buffer(), 0, descriptor_set);
 
     RenderDevice::ShaderInfo shader_info = {
             "coordaxis",

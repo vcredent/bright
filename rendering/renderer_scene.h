@@ -26,6 +26,7 @@
 #include "drivers/render_device.h"
 #include "camera/camera.h"
 #include "rendering_scene.h"
+#include "rendering_directional_light.h"
 #include "rendering_coordinate_axis.h"
 #include "rendering_graphics.h"
 
@@ -36,7 +37,8 @@ public:
 
     // api
     void set_scene_camera(Camera *v_camera);
-    void get_scene_camera(Camera **p_camera);
+    Camera *get_scene_camera();
+    RenderingDirectionalLight* get_directional_light() { return directional_light; }
     void enable_coordinate_axis(bool is_enable);
     void list_render_object(std::vector<RenderObject *> **p_objects);
     void push_render_object(RenderObject *v_object);
@@ -48,6 +50,7 @@ private:
     SceneRenderData *render_data;
     RenderingScene *scene;
     RenderingCoordinateAxis *axisline;
+    RenderingDirectionalLight* directional_light;
     RenderingGraphics *graphics;
     VkCommandBuffer scene_cmd_buffer;
     Camera *camera;
