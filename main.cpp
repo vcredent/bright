@@ -110,13 +110,15 @@ void initialize()
     Renderer::initialize(rd);
 
     cube = RenderObject::load_obj("../assets/cube.obj");
-    cube->set_name("cube");
+    cube->set_node_name("立方体");
     Renderer::push_render_object(cube);
 
     camera = memnew(ProjectionCamera);
+    camera->set_node_name("场景相机");
     game_player_controller = memnew(GamePlayerCameraController);
     game_player_controller->make_current_camera(camera);
     camera->set_position(Vec3(0.0f, 0.0f, 6.0f));
+    Renderer::set_scene_camera(camera);
 }
 
 int main(int argc, char **argv)
@@ -132,7 +134,7 @@ int main(int argc, char **argv)
 
         /* render to scene */
         double scene_render_start_time = glfwGetTime();
-        Renderer::begin_scene(camera, scene_region.x, scene_region.y);
+        Renderer::begin_scene(scene_region.x, scene_region.y);
         Renderer::end_scene(&scene_preview_texture, &scene_depth_texture);
         double scene_render_end_time = glfwGetTime();
 
@@ -144,7 +146,6 @@ int main(int argc, char **argv)
             naveditor->cmd_begin_naveditor_render(screen_cmd_buffer);
             {
                 naveditor->cmd_draw_debugger_editor_ui();
-                naveditor->cmd_draw_camera_editor_ui(camera);
                 naveditor->cmd_draw_scene_node_browser();
                 naveditor->cmd_draw_scene_viewport_ui(scene_preview_texture, scene_depth_texture, &scene_region);
             }

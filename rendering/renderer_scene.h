@@ -35,10 +35,12 @@ public:
    ~RendererScene();
 
     // api
+    void set_scene_camera(Camera *v_camera);
+    void get_scene_camera(Camera **p_camera);
     void enable_coordinate_axis(bool is_enable);
     void list_render_object(std::vector<RenderObject *> **p_objects);
     void push_render_object(RenderObject *v_object);
-    void cmd_begin_scene_renderer(Camera *v_camera, uint32_t v_width, uint32_t v_height);
+    void cmd_begin_scene_renderer(uint32_t v_width, uint32_t v_height);
     void cmd_end_scene_renderer(RenderDevice::Texture2D **scene_texture, RenderDevice::Texture2D **scene_depth);
 
 private:
@@ -48,6 +50,7 @@ private:
     RenderingCoordinateAxis *axisline;
     RenderingGraphics *graphics;
     VkCommandBuffer scene_cmd_buffer;
+    Camera *camera;
 
     bool show_coordinate_axis = true;
 };

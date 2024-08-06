@@ -45,6 +45,18 @@ void Renderer::destroy()
     memdel(scene);
 }
 
+void Renderer::set_scene_camera(Camera *v_camera)
+{
+    _CHECK_RENDERER_INIT();
+    scene->set_scene_camera(v_camera);
+}
+
+void Renderer::get_scene_camera(Camera **p_camera)
+{
+    _CHECK_RENDERER_INIT();
+    scene->get_scene_camera(p_camera);
+}
+
 void Renderer::enable_coordinate_axis(bool is_enable)
 {
     _CHECK_RENDERER_INIT();
@@ -63,10 +75,10 @@ void Renderer::push_render_object(RenderObject *v_object)
     scene->push_render_object(v_object);
 }
 
-void Renderer::begin_scene(Camera *v_camera, uint32_t v_width, uint32_t v_height)
+void Renderer::begin_scene(uint32_t v_width, uint32_t v_height)
 {
     _CHECK_RENDERER_INIT();
-    scene->cmd_begin_scene_renderer(v_camera, v_width, v_height);
+    scene->cmd_begin_scene_renderer(v_width, v_height);
 }
 
 void Renderer::end_scene(RenderDevice::Texture2D **texture, RenderDevice::Texture2D **depth)

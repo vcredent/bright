@@ -23,29 +23,46 @@
 #ifndef _NAVEDITOR_COMPONENT_SCENE_BROWSER_H_
 #define _NAVEDITOR_COMPONENT_SCENE_BROWSER_H_
 
-struct _ObjectSelected {
+struct _NodeSelected {
     const char *name = NULL;
-    RenderObject *object = NULL;
+    ClassProperties *node = NULL;
 };
 
-static void _cmd_draw_scene_node_browser(std::vector<RenderObject *> *objects, ImTextureID icon_cube)
+static void _cmd_draw_scene_node_browser(const std::vector<ClassProperties *> &v_properties, Naveditor *naveditor)
 {
-    static _ObjectSelected current;
+    static _NodeSelected current;
 
-    if (current.name == NULL && !objects->empty())
-        current = { (*objects)[0]->get_name(), (*objects)[0] };
+    if (current.name == NULL && !v_properties.empty())
+        current = { v_properties[0]->get_node_name(), v_properties[0]};
 
     if (NavUI::Begin("场景节点浏览器")) {
         ImGui::Indent(32.0f);
-        for (const auto &item: *objects) {
-            const char *name = item->get_name();
-            NavUI::DrawTexture(icon_cube, ImVec2(18.0f, 18.0f));
+        for (const auto &item: v_properties) {
+            Naveditor::Navicon *icon = naveditor->geticon(item->get_icon());
+            const char *name = item->get_node_name();
+            NavUI::DrawTexture(icon->texture, ImVec2(18.0f, 18.0f));
             ImGui::SameLine();
             if (ImGui::Selectable(name, (current.name == name))) {
-                current = { item->get_name(), item };
+                current = { item->get_node_name(), item };
             }
         }
         ImGui::Unindent(32.0f);
+        NavUI::End();
+    }
+
+    if (current.name != NULL) {
+        NavUI::Begin("属性面板");
+        ClassProperties *node = current.node;
+        auto properties = node->get_properties();
+        for (const auto &item: properties) {
+            const char *name = item.first;
+            ClassProperties::Property property = item.second;
+            switch(property.type) {
+                case FLOAT: NavUI::DragFloat(name, (float *) property.ptr, 0.01f); break;
+                case FLOAT2: NavUI::DragFloat2(name, (float *) property.ptr, 0.01f); break;
+                case FLOAT3: NavUI::DragFloat3(name, (float *) property.ptr, 0.01f); break;
+            }
+        }
         NavUI::End();
     }
 }

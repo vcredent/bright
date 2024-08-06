@@ -25,8 +25,9 @@
 
 #include "drivers/render_device.h"
 #include <copilot/math.h>
+#include <copilot/properties.h>
 
-class RenderObject {
+class RenderObject : public ClassProperties {
 public:
     RenderObject();
     ~RenderObject();

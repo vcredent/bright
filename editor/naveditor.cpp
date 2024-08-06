@@ -25,7 +25,6 @@
 
 // components
 #include "components/debugger.h"
-#include "components/camera.h"
 #include "components/scene.h"
 #include "components/settings.h"
 #include "components/scene_node_browser.h"
@@ -63,8 +62,12 @@ Naveditor::Naveditor(RenderDevice *v_rd, RenderingScreen *v_screen)
 
 Naveditor::~Naveditor()
 {
-    NavUI::RemoveTexture(icon_cube);
-    rd->destroy_texture(icon_cube_texture);
+    for (const auto &item: icons) {
+        NavUI::RemoveTexture(item.second->texture);
+        rd->destroy_texture(item.second->image);
+        free(item.second);
+    }
+
     rd->destroy_sampler(sampler);
     NavUI::Destroy();
 }
@@ -104,11 +107,6 @@ void Naveditor::cmd_draw_debugger_editor_ui()
     _draw_debugger_editor_ui(Debugger::v_debugger_properties);
 }
 
-void Naveditor::cmd_draw_camera_editor_ui(Camera *v_camera)
-{
-    _draw_camera_editor_ui(v_camera);
-}
-
 void Naveditor::cmd_draw_scene_viewport_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region)
 {
     _draw_scene_editor_ui(v_texture, v_depth, p_region);
@@ -118,7 +116,16 @@ void Naveditor::cmd_draw_scene_node_browser()
 {
     std::vector<RenderObject *> *objects;
     Renderer::list_render_object(&objects);
-    _cmd_draw_scene_node_browser(objects, icon_cube);
+
+    Camera *camera;
+    Renderer::get_scene_camera(&camera);
+
+    std::vector<ClassProperties *> properties;
+    properties.push_back(camera);
+    for (const auto &item: *objects)
+        properties.push_back(item);
+
+    _cmd_draw_scene_node_browser(properties, this);
 }
 
 void Naveditor::_initialize_icon()
@@ -129,11 +136,26 @@ void Naveditor::_initialize_icon()
     rd->create_sampler(&sampler);
 
     // cube.png
+
+    Navicon *cube = (Navicon *) imalloc(sizeof(Navicon));
+    cube->name = "cube";
     pixels = stbi_load("../resource/icon/cube.png", &width, &height, &channels, STBI_rgb_alpha);
-    icon_cube_texture = rd->create_texture(width, height, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM , VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-    rd->bind_texture_sampler(icon_cube_texture, sampler);
-    rd->write_texture(icon_cube_texture, pixels);
-    icon_cube = NavUI::AddTexture(icon_cube_texture->sampler, icon_cube_texture->image_view, icon_cube_texture->image_layout);
+    cube->image = rd->create_texture(width, height, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM , VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    rd->bind_texture_sampler(cube->image, sampler);
+    rd->write_texture(cube->image, pixels);
+    cube->texture = NavUI::AddTexture(cube->image->sampler, cube->image->image_view, cube->image->image_layout);
+    icons[cube->name] = cube;
+    stbi_image_free(pixels);
+
+    // camera.png
+    Navicon *camera = (Navicon *) imalloc(sizeof(Navicon));
+    camera->name = "camera";
+    pixels = stbi_load("../resource/icon/camera.png", &width, &height, &channels, STBI_rgb_alpha);
+    camera->image = rd->create_texture(width, height, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM , VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    rd->bind_texture_sampler(camera->image, sampler);
+    rd->write_texture(camera->image, pixels);
+    camera->texture = NavUI::AddTexture(camera->image->sampler, camera->image->image_view, camera->image->image_layout);
+    icons[camera->name] = camera;
     stbi_image_free(pixels);
 }
 

@@ -27,6 +27,10 @@ ProjectionCamera::ProjectionCamera(float v_fov, float v_near, float v_far)
    fov = v_fov;
    near = v_near;
    far = v_far;
+
+    add_property("景深", PropertyType::FLOAT, &fov);
+    add_property("近点", PropertyType::FLOAT, &near);
+    add_property("远点", PropertyType::FLOAT, &far);
 }
 
 ProjectionCamera::~ProjectionCamera()

@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* camera.h                                                                 */
+/* properties.h                                                              */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,39 +20,58 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _NAVEDITOR_COMPONENT_CAMERA_H_
-#define _NAVEDITOR_COMPONENT_CAMERA_H_
+#ifndef _CLASS_PROPERTIES_H_
+#define _CLASS_PROPERTIES_H_
 
-static void _draw_camera_editor_ui(Camera *v_camera)
-{
-    NavUI::Begin("摄像机");
-    {
-        ImGui::SeparatorText("变换");
-        Vec3 position = v_camera->get_position();
-        NavUI::DragFloat3("位置: ", glm::value_ptr(position), 0.01f);
-        v_camera->set_position(position);
+#include <unordered_map>
 
-        Vec3 target = v_camera->get_target();
-        NavUI::DragFloat3("目标: ", glm::value_ptr(target), 0.01f);
-        v_camera->set_target(target);
+enum PropertyType {
+    FLOAT,
+    FLOAT2,
+    FLOAT3,
+};
 
-        float fov = v_camera->get_fov();
-        NavUI::DragFloat("景深: ", &fov, 0.01f);
-        v_camera->set_fov(fov);
+class ClassProperties {
+public:
+    struct Property {
+        void *ptr;
+        PropertyType type;
+    };
 
-        float near = v_camera->get_near();
-        NavUI::DragFloat("近点: ", &near, 0.01f);
-        v_camera->set_near(near);
+    void set_node_name(const char *v_name)
+      {
+        name = v_name;
+      }
 
-        float far = v_camera->get_far();
-        NavUI::DragFloat("远点: ", &far, 0.01f);
-        v_camera->set_far(far);
+    const char * get_node_name()
+      {
+        return name;
+      }
 
-        float speed = v_camera->get_speed();
-        NavUI::DragFloat("速度: ", &speed, 0.01f);
-        v_camera->set_speed(speed);
-    }
-    NavUI::End();
-}
+    void set_icon(const char *v_icon)
+      {
+        icon = v_icon;
+      }
 
-#endif /* _NAVEDITOR_COMPONENT_CAMERA_H_ */
+    const char *get_icon()
+      {
+        return icon;
+      }
+
+    void add_property(const char *name, PropertyType type, void *ptr)
+      {
+        properties.insert({ name, { ptr, type } });
+      }
+
+    const std::unordered_map<const char *, Property> &get_properties()
+      {
+        return properties;
+      }
+
+private:
+    const char *name;
+    const char *icon = NULL;
+    std::unordered_map<const char *, Property> properties;
+};
+
+#endif /* _CLASS_PROPERTIES_H_ */

@@ -47,9 +47,23 @@ public:
 
     // api
     void cmd_draw_debugger_editor_ui();
-    void cmd_draw_camera_editor_ui(Camera *v_camera);
     void cmd_draw_scene_node_browser();
     void cmd_draw_scene_viewport_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region);
+
+    // icons
+    struct Navicon {
+        const char *name;
+        ImTextureID texture;
+        RenderDevice::Texture2D *image;
+    };
+
+    Navicon *geticon(std::string name)
+      {
+        auto finded = icons.find(name);
+        if (finded != icons.end())
+            return finded->second;
+        return NULL;
+      }
 
 private:
     // manager window context and click state etc...
@@ -67,8 +81,8 @@ private:
     SettingValues setting_values;
 
     VkSampler sampler;
-    ImTextureID icon_cube = NULL;
-    RenderDevice::Texture2D *icon_cube_texture = NULL;
+
+    std::unordered_map<std::string, Navicon *> icons;
 };
 
 #endif /* _NAVEDITOR_H_ */

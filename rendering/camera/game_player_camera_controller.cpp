@@ -105,6 +105,4 @@ void GamePlayerCameraController::on_update_camera()
         position += glm::normalize(glm::cross(front, camera->get_camera_up())) * velocity;
 
     camera->set_position(position);
-
-    camera->update();
 }

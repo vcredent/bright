@@ -26,7 +26,10 @@
 
 RenderObject::RenderObject()
 {
-    /* do nothing... */
+    set_icon("cube");
+    add_property("位置", PropertyType::FLOAT3, glm::value_ptr(position));
+    add_property("旋转", PropertyType::FLOAT3, glm::value_ptr(rotation));
+    add_property("缩放", PropertyType::FLOAT3, glm::value_ptr(scaling));
 }
 
 RenderObject::~RenderObject()

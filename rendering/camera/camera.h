@@ -25,11 +25,18 @@
 
 #include <copilot/math.h>
 #include <copilot/typedefs.h>
+#include <copilot/properties.h>
 #include <algorithm>
 
-class Camera {
+class Camera : public ClassProperties {
 public:
-    U_MEMNEW_ONLY Camera();
+    U_MEMNEW_ONLY Camera()
+      {
+        set_icon("camera");
+        add_property("位置", PropertyType::FLOAT3, glm::value_ptr(position));
+        add_property("目标", PropertyType::FLOAT3, glm::value_ptr(target));
+      }
+
     virtual ~Camera() = default;
 
     V_FORCEINLINE inline Vec3& get_position() { return position; }

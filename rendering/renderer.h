@@ -35,11 +35,13 @@ public:
     static void destroy();
 
     // api
+    static void set_scene_camera(Camera *v_camera);
+    static void get_scene_camera(Camera **p_camera);
     static void enable_coordinate_axis(bool is_enable);
     static void list_render_object(std::vector<RenderObject *> **p_objects);
     static void push_render_object(RenderObject *v_object);
 
-    static void begin_scene(Camera *v_camera, uint32_t v_width, uint32_t v_height);
+    static void begin_scene(uint32_t v_width, uint32_t v_height);
     static void end_scene(RenderDevice::Texture2D **texture, RenderDevice::Texture2D **depth);
 
 private:

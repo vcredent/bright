@@ -46,6 +46,16 @@ RendererScene::~RendererScene()
     memdel(render_data);
 }
 
+void RendererScene::set_scene_camera(Camera *v_camera)
+{
+    camera = v_camera;
+}
+
+void RendererScene::get_scene_camera(Camera **p_camera)
+{
+    *p_camera = camera;
+}
+
 void RendererScene::enable_coordinate_axis(bool is_enable)
 {
     show_coordinate_axis = is_enable;
@@ -61,17 +71,18 @@ void RendererScene::push_render_object(RenderObject *v_object)
     graphics->push_render_object(v_object);
 }
 
-void RendererScene::cmd_begin_scene_renderer(Camera *v_camera, uint32_t v_width, uint32_t v_height)
+void RendererScene::cmd_begin_scene_renderer(uint32_t v_width, uint32_t v_height)
 {
     scene->set_scene_extent(v_width, v_height);
     scene->cmd_begin_scene_rendering(&scene_cmd_buffer);
 
+    camera->update();
     render_data->set_render_data(
         v_width,
         v_height,
-        v_camera->get_position(),
-        v_camera->get_projection_matrix(),
-        v_camera->get_view_matrix()
+        camera->get_position(),
+        camera->get_projection_matrix(),
+        camera->get_view_matrix()
     );
 
     if (show_coordinate_axis)
