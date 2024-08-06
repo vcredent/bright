@@ -8,10 +8,10 @@ layout(location = 3) in vec3 camera_pos;
 layout(set = 0, binding = 1) uniform DirectionalLight {
     vec3 direction;
     float intensity;
-    float specular_exponent;
-    float ambient;
     vec3 color;
+    float specular_exponent;
     vec3 specular_color;
+    float ambient;
 } light;
 
 // out

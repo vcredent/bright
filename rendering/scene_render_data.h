@@ -40,10 +40,10 @@ public:
     struct DirectionalLight {
         Vec3 direction;
         float intensity;
-        float specular_exponent;
-        float ambient;
         Vec3 color;
+        float specular_exponent;
         Vec3 specular_color;
+        float ambient;
     };
 
     // api
