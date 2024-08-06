@@ -20,9 +20,13 @@
 #! limitations under the License.                                           !#
 #!                                                                          !#
 #! ======================================================================== !#
-
 cmake_minimum_required(VERSION 3.26)
 project(copilot)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  add_compile_options("/source-charset:utf-8")
+  add_compile_options("/execution-charset:utf-8")
+endif()
 
 set(CMAKE_CXX_STANDARD 23)
 set(PROGRAM_NAME copilot)
