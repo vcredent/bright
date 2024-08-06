@@ -32,8 +32,14 @@ set(INCLUDE_DIRS
   "thirdparty"
 )
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(glfw_link_dir "thirdparty/GLFW/lib-mingw-w64")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  set(glfw_link_dir "thirdparty/GLFW/lib-vc2022")
+endif()
+
 set(LINK_DIRS
-  "thirdparty/GLFW/lib-mingw-w64"
+  ${glfw_link_dir}
   "thirdparty/vulkan"
 )
 
@@ -63,7 +69,7 @@ target_link_libraries(glfw_vulkan_links INTERFACE
   "glfw3"
   "vulkan-1"
 )
-target_include_directories(glfw_vulkan_links INTERFACE "thirdparty")
+target_include_directories(glfw_vulkan_links INTERFACE "include" "thirdparty")
 
 add_subdirectory(navui)
 

@@ -39,8 +39,8 @@ public:
 
     void uncontinual() { continual_dragging_flag = false; }
 
-    V_FORCEINLINE inline void make_current_camera(Camera *v_camera) { camera = v_camera; }
-    V_FORCEINLINE inline Camera *get_current_camera() { return camera; }
+    V_FORCEINLINE void make_current_camera(Camera *v_camera) { camera = v_camera; }
+    V_FORCEINLINE Camera *get_current_camera() { return camera; }
 
 protected:
     struct MouseEvent {

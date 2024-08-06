@@ -85,7 +85,7 @@ static VkShaderModule load_shader_module(VkDevice device, const char *name, cons
     VkResult U_ASSERT_ONLY err;
 
     char path[255];
-    snprintf(path, sizeof(path), "../shader/%s.%s.spv", name, stage);
+    snprintf(path, sizeof(path), _CURDIR("shader/%s.%s.spv"), name, stage);
 
     buf = io_read_bytecode(path, &size);
 

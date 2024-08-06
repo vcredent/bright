@@ -27,12 +27,15 @@
 #include <copilot/typedefs.h>
 #include <direct.h>
 
-V_FORCEINLINE
-inline static void compile_shader()
+V_FORCEINLINE static void compile_shader()
 {
+    char cwd[512];
+
     system("chcp 65001");
-    _chdir("../shader");
+    getcwd(cwd, sizeof(cwd));
+    _chdir(_CURDIR("shader"));
     system("compile.bat");
+    _chdir(cwd);
 }
 
 #endif /* _SHADER_COMPILE_H_ */

@@ -1,4 +1,4 @@
-/* ======================================================================== */
+﻿/* ======================================================================== */
 /* main.cpp                                                                 */
 /* ======================================================================== */
 /*                        This file is part of:                             */
@@ -31,6 +31,7 @@
 #include "editor/naveditor.h"
 // misc
 #include "misc/shader_compile.h"
+#include <copilot/ioutils.h>
 
 Window *window;
 RenderDeviceContext *rdc;
@@ -109,7 +110,7 @@ void initialize()
 
     Renderer::initialize(rd);
 
-    cube = RenderObject::load_obj("../assets/cube.obj");
+    cube = RenderObject::load_obj(_CURDIR("assets/cube.obj"));
     cube->set_node_name("立方体");
     Renderer::push_render_object(cube);
 

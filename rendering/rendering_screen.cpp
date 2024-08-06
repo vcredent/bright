@@ -211,8 +211,9 @@ void RenderingScreen::_create_swap_chain()
     /* initialize swap chain resources */
     window->swap_chain_resources = (SwapchainResource *) imalloc(sizeof(SwapchainResource) * window->image_buffer_count);
 
-    VkImage swap_chain_images[window->image_buffer_count];
-    err = vkGetSwapchainImagesKHR(vk_device, window->swap_chain, &window->image_buffer_count, swap_chain_images);
+    std::vector<VkImage> swap_chain_images;
+    swap_chain_images.resize(window->image_buffer_count);
+    err = vkGetSwapchainImagesKHR(vk_device, window->swap_chain, &window->image_buffer_count, std::data(swap_chain_images));
     assert(!err);
 
     for (uint32_t i = 0; i < window->image_buffer_count; i++) {

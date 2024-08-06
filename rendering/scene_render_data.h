@@ -44,12 +44,12 @@ public:
                          const Mat4 &projection,
                          const Mat4 &view);
 
-    V_FORCEINLINE inline uint32_t get_scene_width() { return width; }
-    V_FORCEINLINE inline uint32_t get_scene_height() { return height; }
-    V_FORCEINLINE inline RenderDevice::Buffer *get_uniform_buffer() { return buffer; }
+    V_FORCEINLINE uint32_t get_scene_width() { return width; }
+    V_FORCEINLINE uint32_t get_scene_height() { return height; }
+    V_FORCEINLINE RenderDevice::Buffer *get_uniform_buffer() { return buffer; }
 
     // static
-    V_FORCEINLINE inline static size_t GetUniformSize() { return sizeof(UniformBuffer); }
+    V_FORCEINLINE static size_t GetUniformSize() { return sizeof(UniformBuffer); }
 
     /* get descriptor bind zero. */
     static VkDescriptorSetLayoutBinding GetDescriptorBindZero()

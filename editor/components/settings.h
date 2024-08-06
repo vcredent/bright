@@ -1,4 +1,4 @@
-/* ======================================================================== */
+﻿/* ======================================================================== */
 /* settings.h                                                               */
 /* ======================================================================== */
 /*                        This file is part of:                             */
@@ -41,7 +41,7 @@ namespace _child {
     //
     // scene settings
     //
-    static void _settings_scene_render(Naveditor::SettingValues *p_values)
+    static void _settings_scene_render(Naveditor::SettingValues* p_values)
     {
         _CHECK_OPTION(v_option, Options::SCENE_RENDER);
 
@@ -54,7 +54,7 @@ namespace _child {
     //
     // engine settings
     //
-    static void _settings_engine(Naveditor::SettingValues *p_values)
+    static void _settings_engine(Naveditor::SettingValues* p_values)
     {
         _CHECK_OPTION(v_option, Options::ENGINE_SETTINGS);
 
@@ -79,7 +79,7 @@ namespace _child {
     }
 
     // value set
-    static void values(Naveditor::SettingValues *p_values)
+    static void values(Naveditor::SettingValues* p_values)
     {
         _settings_scene_render(p_values);
         _settings_engine(p_values);
@@ -87,10 +87,10 @@ namespace _child {
 
 }
 
-static void _draw_engine_settings_editor_ui(bool *p_enable, Naveditor::SettingValues *p_values)
+static void _draw_engine_settings_editor_ui(bool* p_enable, Naveditor::SettingValues* p_values)
 {
     if (*p_enable) {
-        if (NavUI::Begin("引擎设置", p_enable, ImGuiWindowFlags_NoCollapse ))
+        if (NavUI::Begin("引擎设置", p_enable, ImGuiWindowFlags_NoCollapse))
         {
             ImGui::BeginChild("选项", ImVec2(150, 0), true);
             _child::options();

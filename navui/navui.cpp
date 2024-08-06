@@ -23,6 +23,7 @@
 #include "navui/navui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
+#include <copilot/typedefs.h>
 
 static GLFWwindow *_window = NULL;
 
@@ -125,18 +126,15 @@ void _CheckDraggingCursor()
         is_dragging = false;
         glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         current_drag_item = 0x7FFFFFFF;
-        goto _CHECK_DRAGGING_CURSOR_RETURN_TAG;
+        return;
     }
 
     if (!is_dragging && check_active) {
         is_dragging = true;
         current_drag_item = item;
         glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        goto _CHECK_DRAGGING_CURSOR_RETURN_TAG;
+        return;
     }
-
-    _CHECK_DRAGGING_CURSOR_RETURN_TAG:
-    /* do nothing.... */
   }
 
 namespace NavUI {
@@ -154,11 +152,10 @@ namespace NavUI {
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
         io.ConfigViewportsNoAutoMerge = true;
         io.ConfigViewportsNoTaskBarIcon = true;
-        io.IniFilename = "../naveditor.ini";
+        io.IniFilename = _CURDIR("naveditor.ini");
 
         // set default font.
-
-        io.Fonts->AddFontFromFileTTF("../resource/fonts/Microsoft Yahei UI/Microsoft Yahei UI.ttf", 18.0f,
+        io.Fonts->AddFontFromFileTTF(_CURDIR("resource/fonts/Microsoft Yahei UI/Microsoft Yahei UI.ttf"), 18.0f,
                                      nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
         io.FontDefault = io.Fonts->Fonts.back();
 

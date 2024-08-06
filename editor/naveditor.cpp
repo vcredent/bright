@@ -1,4 +1,4 @@
-/* ======================================================================== */
+﻿/* ======================================================================== */
 /* naveditor.cpp                                                            */
 /* ======================================================================== */
 /*                        This file is part of:                             */
@@ -22,6 +22,7 @@
 /* ======================================================================== */
 #include "naveditor.h"
 #include "rendering/renderer.h"
+#include <copilot/typedefs.h>
 
 // components
 #include "components/debugger.h"
@@ -139,7 +140,7 @@ void Naveditor::_initialize_icon()
 
     Navicon *cube = (Navicon *) imalloc(sizeof(Navicon));
     cube->name = "cube";
-    pixels = stbi_load("../resource/icon/cube.png", &width, &height, &channels, STBI_rgb_alpha);
+    pixels = stbi_load(_CURDIR("resource/icon/cube.png"), &width, &height, &channels, STBI_rgb_alpha);
     cube->image = rd->create_texture(width, height, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM , VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     rd->bind_texture_sampler(cube->image, sampler);
     rd->write_texture(cube->image, pixels);
@@ -150,7 +151,7 @@ void Naveditor::_initialize_icon()
     // camera.png
     Navicon *camera = (Navicon *) imalloc(sizeof(Navicon));
     camera->name = "camera";
-    pixels = stbi_load("../resource/icon/camera.png", &width, &height, &channels, STBI_rgb_alpha);
+    pixels = stbi_load(_CURDIR("resource/icon/camera.png"), &width, &height, &channels, STBI_rgb_alpha);
     camera->image = rd->create_texture(width, height, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM , VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     rd->bind_texture_sampler(camera->image, sampler);
     rd->write_texture(camera->image, pixels);
