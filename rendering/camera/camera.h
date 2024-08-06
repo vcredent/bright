@@ -34,7 +34,8 @@ public:
       {
         set_icon("camera");
         add_property("位置", PropertyType::FLOAT3, glm::value_ptr(position));
-        add_property("目标", PropertyType::FLOAT3, glm::value_ptr(target));
+        add_property("速度", PropertyType::FLOAT, &speed);
+        add_property("灵敏", PropertyType::FLOAT, &sensitivity);
       }
 
     virtual ~Camera() = default;
@@ -43,7 +44,6 @@ public:
     V_FORCEINLINE inline Vec3& get_world_right() { return world_right; }
     V_FORCEINLINE inline Vec3& get_world_up() { return world_up; }
     V_FORCEINLINE inline Vec3& get_camera_up() { return up; }
-    V_FORCEINLINE inline Vec3& get_target() { return target; }
     V_FORCEINLINE inline Vec3& get_front() { return front; }
     V_FORCEINLINE inline float get_fov() { return fov; }
     V_FORCEINLINE inline float get_near() { return near; }
@@ -60,7 +60,6 @@ public:
     V_FORCEINLINE inline void set_position(Vec3 v_position) { position = v_position; }
     V_FORCEINLINE inline void set_world_right(Vec3 v_world_right) { world_right = v_world_right; }
     V_FORCEINLINE inline void set_world_up(Vec3 v_world_up) { world_up = v_world_up; }
-    V_FORCEINLINE inline void set_target(Vec3 v_target) { target = v_target; }
     V_FORCEINLINE inline void set_front(Vec3 v_front) { front = v_front; }
     V_FORCEINLINE inline void set_fov(float v_fov) { fov = v_fov; }
     V_FORCEINLINE inline void set_near(float v_near) { near = v_near; }
@@ -81,7 +80,6 @@ protected:
     Vec3 world_right = Vec3(1.0f, 0.0f, 0.0f);
     Vec3 world_up = Vec3(0.0f, -1.0f, 0.0f);
     Vec3 up = Vec3(0.0f, -1.0f, 0.0f);
-    Vec3 target = Vec3(0.0f, 0.0f, 0.0f);
     Vec3 front = Vec3(0.0f, 0.0f, -1.0f);
 
     float fov = 1.0f;
