@@ -27,7 +27,7 @@
 static GLFWwindow *_window = NULL;
 
 void _DarkNavUITheme()
-{
+  {
     ImVec4* colors = ImGui::GetStyle().Colors;
     colors[ImGuiCol_Text]                   = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
     colors[ImGuiCol_TextDisabled]           = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
@@ -111,10 +111,10 @@ void _DarkNavUITheme()
     style.GrabRounding                      = 3;
     style.LogSliderDeadzone                 = 4;
     style.TabRounding                       = 4;
-}
+  }
 
 void _CheckDraggingCursor()
-{
+  {
     static bool     is_dragging = false;
     static ImGuiID  current_drag_item = 0x7FFFFFFF;
 
@@ -137,12 +137,12 @@ void _CheckDraggingCursor()
 
     _CHECK_DRAGGING_CURSOR_RETURN_TAG:
     /* do nothing.... */
-}
+  }
 
 namespace NavUI {
 
     void Initialize(InitializeInfo *p_initialize_info)
-    {
+      {
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -192,25 +192,25 @@ namespace NavUI {
         ImGui_ImplVulkan_Init(&init_info);
 
         _window = p_initialize_info->window;
-    }
+      }
 
     void Destroy()
-    {
+      {
         ImGui_ImplGlfw_Shutdown();
         ImGui_ImplVulkan_Shutdown();
-    }
+      }
 
     void BeginNewFrame(VkCommandBuffer cmd_buffer)
-    {
+      {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         // docking
         ImGui::DockSpaceOverViewport();
-    }
+      }
 
     void EndNewFrame(VkCommandBuffer cmd_buffer)
-    {
+      {
         ImGuiIO& io = ImGui::GetIO(); (void)io;
 
         // Rendering
@@ -223,10 +223,10 @@ namespace NavUI {
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
         }
-    }
+      }
 
     bool Begin(const char *title, bool* p_open, ImGuiWindowFlags flags)
-    {
+      {
         bool retval;
         ImGuiStyle &style = ImGui::GetStyle();
         ImVec2 padding = style.FramePadding;
@@ -235,62 +235,62 @@ namespace NavUI {
         retval = ImGui::Begin(title, p_open, flags);
         ImGui::PopStyleVar();
         return retval;
-    }
+      }
 
     void End()
-    {
+      {
         ImGui::End();
-    }
+      }
 
     void BeginViewport(const char *title)
-    {
+      {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         Begin(title);
-    }
+      }
 
     void EndViewport()
-    {
+      {
         End();
         ImGui::PopStyleVar();
-    }
+      }
 
     void DrawTexture(ImTextureID v_texture, const ImVec2& v_size)
-    {
+      {
         ImGui::Image(v_texture, v_size);
-    }
+      }
 
     void DragFloat(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
-    {
+      {
         _DragScalarN(label, v, 1, v_speed, v_min, v_max, format);
-    }
+      }
 
     void DragFloat2(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
-    {
+      {
         _DragScalarN(label, v, 2, v_speed, v_min, v_max, format);
-    }
+      }
 
     void DragFloat3(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
-    {
+      {
         _DragScalarN(label, v, 3, v_speed, v_min, v_max, format);
-    }
+      }
 
     void DragFloat4(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format)
-    {
+      {
         _DragScalarN(label, v, 4, v_speed, v_min, v_max, format);
-    }
+      }
 
     ImTextureID AddTexture(VkSampler v_sampler, VkImageView v_image, VkImageLayout v_layout)
-    {
+      {
         return ImGui_ImplVulkan_AddTexture(v_sampler, v_image, v_layout);
-    }
+      }
 
     void RemoveTexture(ImTextureID v_texture)
-    {
+      {
         ImGui_ImplVulkan_RemoveTexture((VkDescriptorSet) v_texture);
-    }
+      }
 
     void _DragScalarN(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format)
-    {
+      {
         assert(v_number <= 4);
 
         ImGui::BeginGroup();
@@ -333,6 +333,6 @@ namespace NavUI {
         ImGui::Unindent(32.0f);
         ImGui::PopID();
         ImGui::EndGroup();
-    }
+      }
 
 }

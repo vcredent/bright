@@ -48,6 +48,7 @@ public:
     // api
     void cmd_draw_debugger_editor_ui();
     void cmd_draw_camera_editor_ui(Camera *v_camera);
+    void cmd_draw_scene_node_browser();
     void cmd_draw_scene_viewport_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region);
 
 private:
@@ -56,11 +57,18 @@ private:
         bool enable_engine_settings = false;
     };
 
+    void _initialize_icon();
     void _check_values();
     void _draw_main_editor();
 
+    RenderDevice *rd;
+
     Mger mger;
     SettingValues setting_values;
+
+    VkSampler sampler;
+    ImTextureID icon_cube = NULL;
+    RenderDevice::Texture2D *icon_cube_texture = NULL;
 };
 
 #endif /* _NAVEDITOR_H_ */

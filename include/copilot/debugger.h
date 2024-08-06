@@ -34,24 +34,24 @@ struct DebuggerProperties {
 
 namespace Debugger
 {
-    extern DebuggerProperties *_debugger_properties;
+    extern DebuggerProperties *v_debugger_properties;
 
 V_FORCEINLINE
 inline static void set_fps_value(int fps)
   {
-      _debugger_properties->fps = fps;
+      v_debugger_properties->fps = fps;
   }
 
 V_FORCEINLINE
 inline static void set_scene_render_time_value(float time)
   {
-      _debugger_properties->scene_render_time = time;
+      v_debugger_properties->scene_render_time = time;
   }
 
 V_FORCEINLINE
 inline static void set_screen_render_time(float time)
   {
-      _debugger_properties->screen_render_time = time;
+      v_debugger_properties->screen_render_time = time;
   }
 }
 

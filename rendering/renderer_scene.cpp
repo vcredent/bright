@@ -51,6 +51,11 @@ void RendererScene::enable_coordinate_axis(bool is_enable)
     show_coordinate_axis = is_enable;
 }
 
+void RendererScene::list_render_object(std::vector<RenderObject *> **p_objects)
+{
+    graphics->list_render_object(p_objects);
+}
+
 void RendererScene::push_render_object(RenderObject *v_object)
 {
     graphics->push_render_object(v_object);

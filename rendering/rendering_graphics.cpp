@@ -84,6 +84,11 @@ void RenderingGraphics::initialize(VkRenderPass render_pass)
     pipeline = rd->create_graphics_pipeline(&create_info, &shader_info);
 }
 
+void RenderingGraphics::list_render_object(std::vector<RenderObject *> **p_objects)
+{
+    *p_objects = &render_objects;
+}
+
 void RenderingGraphics::push_render_object(RenderObject *object)
 {
     object->initialize(rd);

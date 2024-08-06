@@ -52,6 +52,7 @@ file(GLOB_RECURSE SOURCES
   "misc/*.cpp"
   "thirdparty/vma/*.cpp"
   "thirdparty/tinyobjloader/*.cpp"
+  "thirdparty/stb/*.cpp"
 )
 
 link_directories(${LINK_DIRS})

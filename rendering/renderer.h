@@ -36,6 +36,7 @@ public:
 
     // api
     static void enable_coordinate_axis(bool is_enable);
+    static void list_render_object(std::vector<RenderObject *> **p_objects);
     static void push_render_object(RenderObject *v_object);
 
     static void begin_scene(Camera *v_camera, uint32_t v_width, uint32_t v_height);

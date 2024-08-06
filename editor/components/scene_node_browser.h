@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* rendering_graphics.h                                                     */
+/* scene_node_browser.h                                                     */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -15,35 +15,39 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _RENDERER_GRAPHICS_H_
-#define _RENDERER_GRAPHICS_H_
+#ifndef _NAVEDITOR_COMPONENT_SCENE_BROWSER_H_
+#define _NAVEDITOR_COMPONENT_SCENE_BROWSER_H_
 
-#include "render_object.h"
-#include "scene_render_data.h"
-
-class RenderingGraphics {
-public:
-    U_MEMNEW_ONLY RenderingGraphics(RenderDevice *v_rd, SceneRenderData *v_render_data);
-    ~RenderingGraphics();
-
-    void initialize(VkRenderPass render_pass);
-    void list_render_object(std::vector<RenderObject *> **p_objects);
-    void push_render_object(RenderObject *object);
-    void cmd_draw_object_list(VkCommandBuffer cmd_buffer);
-
-private:
-    RenderDevice *rd;
-    SceneRenderData *render_data;
-    VkDescriptorSetLayout descriptor_set_layout;
-    VkDescriptorSet descriptor_set;
-    RenderDevice::Pipeline *pipeline;
-
-    std::vector<RenderObject *> render_objects;
+struct _ObjectSelected {
+    const char *name = NULL;
+    RenderObject *object = NULL;
 };
 
-#endif /* _RENDERER_GRAPHICS_H_ */
+static void _cmd_draw_scene_node_browser(std::vector<RenderObject *> *objects, ImTextureID icon_cube)
+{
+    static _ObjectSelected current;
+
+    if (current.name == NULL && !objects->empty())
+        current = { (*objects)[0]->get_name(), (*objects)[0] };
+
+    if (NavUI::Begin("场景节点浏览器")) {
+        ImGui::Indent(32.0f);
+        for (const auto &item: *objects) {
+            const char *name = item->get_name();
+            NavUI::DrawTexture(icon_cube, ImVec2(18.0f, 18.0f));
+            ImGui::SameLine();
+            if (ImGui::Selectable(name, (current.name == name))) {
+                current = { item->get_name(), item };
+            }
+        }
+        ImGui::Unindent(32.0f);
+        NavUI::End();
+    }
+}
+
+#endif /* _NAVEDITOR_COMPONENT_SCENE_BROWSER_H_ */

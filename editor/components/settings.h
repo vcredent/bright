@@ -92,7 +92,6 @@ static void _draw_engine_settings_editor_ui(bool *p_enable, Naveditor::SettingVa
     if (*p_enable) {
         if (NavUI::Begin("引擎设置", p_enable, ImGuiWindowFlags_NoCollapse ))
         {
-            ImGui::BeginGroup();
             ImGui::BeginChild("选项", ImVec2(150, 0), true);
             _child::options();
             ImGui::EndChild();
@@ -100,7 +99,6 @@ static void _draw_engine_settings_editor_ui(bool *p_enable, Naveditor::SettingVa
             ImGui::BeginChild("设置", ImVec2(0, 0), true);
             _child::values(p_values);
             ImGui::EndChild();
-            ImGui::EndGroup();
             NavUI::End();
         }
     }

@@ -69,6 +69,7 @@ public:
 
     Texture2D *create_texture(uint32_t width, uint32_t height, VkSampleCountFlagBits samples, VkFormat format, VkImageAspectFlags aspect_mask, VkImageUsageFlags usage);
     void destroy_texture(Texture2D *p_texture);
+    void write_texture(Texture2D *texture, void *pixels);
     void create_framebuffer(uint32_t width, uint32_t height, uint32_t image_view_count, VkImageView *p_image_view, VkRenderPass render_pass, VkFramebuffer *p_framebuffer);
     void destroy_framebuffer(VkFramebuffer framebuffer);
     void create_sampler(VkSampler *p_sampler);

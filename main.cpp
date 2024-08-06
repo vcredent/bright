@@ -110,8 +110,17 @@ void initialize()
 
     Renderer::initialize(rd);
 
-    cube = RenderObject::load_obj("../assets/cube.obj");
-    Renderer::push_render_object(cube);
+    RenderObject *cube1 = RenderObject::load_obj("../assets/cube.obj");
+    cube1->set_name("cube1");
+    Renderer::push_render_object(cube1);
+
+    RenderObject *cube2 = RenderObject::load_obj("../assets/cube.obj");
+    cube2->set_name("cube2");
+    Renderer::push_render_object(cube2);
+
+    RenderObject *cube3 = RenderObject::load_obj("../assets/cube.obj");
+    cube3->set_name("cube3");
+    Renderer::push_render_object(cube3);
 
     camera = memnew(ProjectionCamera);
     game_player_controller = memnew(GamePlayerCameraController);
@@ -145,6 +154,7 @@ int main(int argc, char **argv)
             {
                 naveditor->cmd_draw_debugger_editor_ui();
                 naveditor->cmd_draw_camera_editor_ui(camera);
+                naveditor->cmd_draw_scene_node_browser();
                 naveditor->cmd_draw_scene_viewport_ui(scene_preview_texture, scene_depth_texture, &scene_region);
             }
             naveditor->cmd_end_naveditor_render(screen_cmd_buffer);

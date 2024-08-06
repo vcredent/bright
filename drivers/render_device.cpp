@@ -190,6 +190,53 @@ void RenderDevice::destroy_texture(Texture2D *p_texture)
         free_descriptor_set(p_texture->descriptor_set);
 }
 
+void RenderDevice::write_texture(Texture2D *texture, void *pixels)
+{
+    VkDeviceSize size = texture->width * texture->height * 4;
+    Buffer *buffer = create_buffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, size);
+    write_buffer(buffer, 0, size, pixels);
+
+    VkCommandBuffer cmd_buffer;
+    cmd_buffer_one_time_begin(&cmd_buffer);
+
+    PipelineMemoryBarrier barrier;
+    barrier.image.texture = texture;
+    barrier.image.old_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+    barrier.image.new_image_layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier.image.src_access_mask = 0;
+    barrier.image.dst_access_mask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    cmd_pipeline_barrier(cmd_buffer, &barrier);
+
+    VkBufferImageCopy region = {};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = 1;
+    region.imageOffset = {0, 0, 0};
+    region.imageExtent = { texture->width, texture->height, 1 };
+
+    vkCmdCopyBufferToImage(
+        cmd_buffer,
+        buffer->vk_buffer,
+        texture->image,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1,
+        &region
+    );
+
+    barrier.image.old_image_layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier.image.new_image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    barrier.image.src_access_mask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.image.dst_access_mask = VK_ACCESS_SHADER_READ_BIT;
+    cmd_pipeline_barrier(cmd_buffer, &barrier);
+
+    cmd_buffer_one_time_end(cmd_buffer);
+    destroy_buffer(buffer);
+}
+
 void
 RenderDevice::create_framebuffer(uint32_t width, uint32_t height, uint32_t image_view_count, VkImageView *p_image_view, VkRenderPass render_pass, VkFramebuffer *p_framebuffer)
 {
