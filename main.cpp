@@ -38,7 +38,6 @@ RenderDevice *rd;
 RenderingScreen *screen;
 Naveditor *naveditor;
 RenderObject *cube;
-RenderObject *sphere;
 ProjectionCamera *camera;
 CameraController *game_player_controller;
 RenderDevice::Texture2D *scene_preview_texture;
@@ -110,17 +109,9 @@ void initialize()
 
     Renderer::initialize(rd);
 
-    RenderObject *cube1 = RenderObject::load_obj("../assets/cube.obj");
-    cube1->set_name("cube1");
-    Renderer::push_render_object(cube1);
-
-    RenderObject *cube2 = RenderObject::load_obj("../assets/cube.obj");
-    cube2->set_name("cube2");
-    Renderer::push_render_object(cube2);
-
-    RenderObject *cube3 = RenderObject::load_obj("../assets/cube.obj");
-    cube3->set_name("cube3");
-    Renderer::push_render_object(cube3);
+    cube = RenderObject::load_obj("../assets/cube.obj");
+    cube->set_name("cube");
+    Renderer::push_render_object(cube);
 
     camera = memnew(ProjectionCamera);
     game_player_controller = memnew(GamePlayerCameraController);
@@ -168,7 +159,6 @@ int main(int argc, char **argv)
         Debugger::set_fps_value(fps_counter.fps());
     }
 
-    memdel(sphere);
     memdel(cube);
     memdel(camera);
     Renderer::destroy();
