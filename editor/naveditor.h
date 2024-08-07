@@ -71,6 +71,7 @@ private:
         bool enable_engine_settings = false;
     };
 
+    void _load_icon(const char *name, const char *icon);
     void _initialize_icon();
     void _check_values();
     void _draw_main_editor();

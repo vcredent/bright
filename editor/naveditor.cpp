@@ -124,7 +124,7 @@ void Naveditor::cmd_draw_scene_node_browser()
     _cmd_draw_scene_node_browser(properties, this);
 }
 
-void Naveditor::_initialize_icon()
+void Naveditor::_load_icon(const char* name, const char* icon)
 {
     unsigned char* pixels;
     int width, height, channels;
@@ -140,57 +140,25 @@ void Naveditor::_initialize_icon()
     texture_create_info.image_view_type = VK_IMAGE_VIEW_TYPE_2D;
     texture_create_info.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-    // cube.png
-    Navicon *cube = (Navicon *) imalloc(sizeof(Navicon));
-    cube->name = "cube";
-    pixels = stbi_load(_CURDIR("resource/icon/cube.png"), &width, &height, &channels, STBI_rgb_alpha);
+    Navicon* navicon = (Navicon*)imalloc(sizeof(Navicon));
+    navicon->name = name;
+    pixels = stbi_load(icon, &width, &height, &channels, STBI_rgb_alpha);
     texture_create_info.width = width;
     texture_create_info.height = height;
-    cube->image = rd->create_texture(&texture_create_info);
-    rd->bind_texture_sampler(cube->image, sampler);
-    rd->write_texture(cube->image, width * height * 4, pixels);
-    cube->texture = NavUI::AddTexture(cube->image->sampler, cube->image->image_view, cube->image->image_layout);
-    icons[cube->name] = cube;
+    navicon->image = rd->create_texture(&texture_create_info);
+    rd->bind_texture_sampler(navicon->image, sampler);
+    rd->write_texture(navicon->image, width * height * 4, pixels);
+    navicon->texture = NavUI::AddTexture(navicon->image->sampler, navicon->image->image_view, navicon->image->image_layout);
+    icons[navicon->name] = navicon;
     stbi_image_free(pixels);
+}
 
-    // camera.png
-    Navicon *camera = (Navicon *) imalloc(sizeof(Navicon));
-    camera->name = "camera";
-    pixels = stbi_load(_CURDIR("resource/icon/camera.png"), &width, &height, &channels, STBI_rgb_alpha);
-    texture_create_info.width = width;
-    texture_create_info.height = height;
-    camera->image = rd->create_texture(&texture_create_info);
-    rd->bind_texture_sampler(camera->image, sampler);
-    rd->write_texture(camera->image, width * height * 4, pixels);
-    camera->texture = NavUI::AddTexture(camera->image->sampler, camera->image->image_view, camera->image->image_layout);
-    icons[camera->name] = camera;
-    stbi_image_free(pixels);
-
-    // sun.png
-    Navicon *sun = (Navicon *) imalloc(sizeof(Navicon));
-    sun->name = "sun";
-    pixels = stbi_load(_CURDIR("resource/icon/sun.png"), &width, &height, &channels, STBI_rgb_alpha);
-    texture_create_info.width = width;
-    texture_create_info.height = height;
-    sun->image = rd->create_texture(&texture_create_info);
-    rd->bind_texture_sampler(sun->image, sampler);
-    rd->write_texture(sun->image, width * height * 4, pixels);
-    sun->texture = NavUI::AddTexture(sun->image->sampler, sun->image->image_view, sun->image->image_layout);
-    icons[sun->name] = sun;
-    stbi_image_free(pixels);
-
-    // planet.png
-    Navicon* planet = (Navicon*)imalloc(sizeof(Navicon));
-    planet->name = "planet";
-    pixels = stbi_load(_CURDIR("resource/icon/planet.png"), &width, &height, &channels, STBI_rgb_alpha);
-    texture_create_info.width = width;
-    texture_create_info.height = height;
-    planet->image = rd->create_texture(&texture_create_info);
-    rd->bind_texture_sampler(planet->image, sampler);
-    rd->write_texture(planet->image, width * height * 4, pixels);
-    planet->texture = NavUI::AddTexture(planet->image->sampler, planet->image->image_view, planet->image->image_layout);
-    icons[planet->name] = planet;
-    stbi_image_free(pixels);
+void Naveditor::_initialize_icon()
+{
+    _load_icon("cube", _CURDIR("resource/icon/cube.png"));
+    _load_icon("camera", _CURDIR("resource/icon/camera.png"));
+    _load_icon("sun", _CURDIR("resource/icon/sun.png"));
+    _load_icon("planet", _CURDIR("resource/icon/planet.png"));
 }
 
 void Naveditor::_check_values()
