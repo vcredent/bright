@@ -1,6 +1,6 @@
-# Copilot Engine
+# Bright Engine
 
-Welcome to Copilot!
+Welcome to BrightEngine!
 
 This game engine project is a learning experience for me and for everyone. 
 You can clone this repository to your machine. Hope you enjoy learning.
