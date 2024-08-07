@@ -26,12 +26,18 @@ RenderingDirectionalLight::RenderingDirectionalLight(RenderDevice *v_rd)
 {
     set_node_name("定向光源");
     set_node_icon("sun");
-    add_node_property("方向", FLOAT3, glm::value_ptr(direction));
-    add_node_property("颜色", FLOAT3, glm::value_ptr(color));
-    add_node_property("高光", FLOAT3, glm::value_ptr(specular_color));
-    add_node_property("强度", FLOAT, &intensity);
-    add_node_property("指数", FLOAT, &specular_exponent);
-    add_node_property("环境", FLOAT, &ambient);
+
+    NodeGroup* group;
+
+    group = get_node_group("变换");
+    group->add_property("方向", NodePropertyType::FLOAT3, glm::value_ptr(direction));
+
+    group = get_node_group("属性");
+    group->add_property("颜色", NodePropertyType::FLOAT3, glm::value_ptr(color));
+    group->add_property("高光", NodePropertyType::FLOAT3, glm::value_ptr(specular_color));
+    group->add_property("强度", NodePropertyType::FLOAT, &intensity);
+    group->add_property("指数", NodePropertyType::FLOAT, &specular_exponent);
+    group->add_property("环境", NodePropertyType::FLOAT, &ambient);
 }
 
 RenderingDirectionalLight::~RenderingDirectionalLight()

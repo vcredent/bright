@@ -118,7 +118,7 @@ void Naveditor::cmd_draw_scene_node_browser()
     std::vector<RenderObject *> *objects;
     Renderer::list_render_object(&objects);
 
-    std::vector<ClassProperties *> properties;
+    std::vector<NodeProperties *> properties;
     properties.push_back(Renderer::get_scene_camera());
     properties.push_back(Renderer::get_scene_directional_light());
 

@@ -27,7 +27,7 @@
 #include "scene_render_data.h"
 #include <copilot/properties.h>
 
-class RenderingDirectionalLight : public ClassProperties {
+class RenderingDirectionalLight : public NodeProperties {
 public:
     RenderingDirectionalLight(RenderDevice* v_rd);
    ~RenderingDirectionalLight();

@@ -27,9 +27,13 @@
 RenderObject::RenderObject()
 {
     set_node_icon("cube");
-    add_node_property("位置", PropertyType::FLOAT3, glm::value_ptr(position));
-    add_node_property("旋转", PropertyType::FLOAT3, glm::value_ptr(rotation));
-    add_node_property("缩放", PropertyType::FLOAT3, glm::value_ptr(scaling));
+
+    NodeGroup* group;
+
+    group = get_node_group("变换");
+    group->add_property("位置", NodePropertyType::FLOAT3, glm::value_ptr(position));
+    group->add_property("旋转", NodePropertyType::FLOAT3, glm::value_ptr(rotation));
+    group->add_property("缩放", NodePropertyType::FLOAT3, glm::value_ptr(scaling));
 }
 
 RenderObject::~RenderObject()

@@ -28,9 +28,10 @@ ProjectionCamera::ProjectionCamera(float v_fov, float v_near, float v_far)
    near = v_near;
    far = v_far;
 
-    add_node_property("景深", PropertyType::FLOAT, &fov);
-    add_node_property("近点", PropertyType::FLOAT, &near);
-    add_node_property("远点", PropertyType::FLOAT, &far);
+   NodeGroup *group = get_node_group("属性");
+   group->add_property("景深", NodePropertyType::FLOAT, &fov);
+   group->add_property("近点", NodePropertyType::FLOAT, &near);
+   group->add_property("远点", NodePropertyType::FLOAT, &far);
 }
 
 ProjectionCamera::~ProjectionCamera()

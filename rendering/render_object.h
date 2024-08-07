@@ -27,7 +27,7 @@
 #include <copilot/math.h>
 #include <copilot/properties.h>
 
-class RenderObject : public ClassProperties {
+class RenderObject : public NodeProperties {
 public:
     RenderObject();
     ~RenderObject();

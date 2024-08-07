@@ -23,36 +23,56 @@
 #ifndef _CLASS_PROPERTIES_H_
 #define _CLASS_PROPERTIES_H_
 
-#include <unordered_map>
+#include <string>
+#include <vector>
+#include <map>
 
-enum PropertyType {
+enum NodePropertyType {
     FLOAT,
     FLOAT2,
     FLOAT3,
+    COLOR,
 };
 
-class ClassProperties {
+class NodeProperties {
 public:
     struct Property {
+        const char* name;
+        NodePropertyType type;
         void *ptr;
-        PropertyType type;
+    };
+
+    struct NodeGroup {
+        std::string name;
+        std::vector<Property> properties;
+        void add_property(const char* name, NodePropertyType type, void* ptr)
+          {
+            properties.push_back({ name, type, ptr });
+          }
     };
 
     void set_node_name(const char *v_name) { name = v_name; }
     const char *get_node_name() { return name; }
     void set_node_icon(const char *v_icon) { icon = v_icon; }
     const char *get_node_icon() { return icon; }
-    const std::unordered_map<const char*, Property>& get_node_properties() { return properties; }
+    const std::map<std::string, NodeGroup>& get_node_groups() { return groups; }
 
-    void add_node_property(const char *name, PropertyType type, void *ptr) 
+    NodeGroup* get_node_group(std::string name) 
       { 
-        properties.insert({ name, { ptr, type } }); 
+        auto it = groups.find(name);
+        if (it == groups.end()) {
+            NodeGroup group = {};
+            group.name = name;
+            groups.insert({ name, group });
+            it = groups.find(name);
+        }
+        return &it->second;
       }
 
 private:
     const char *name;
     const char *icon = NULL;
-    std::unordered_map<const char *, Property> properties;
+    std::map<std::string, NodeGroup> groups;
 };
 
 #endif /* _CLASS_PROPERTIES_H_ */

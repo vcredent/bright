@@ -25,10 +25,34 @@
 
 struct _NodeSelected {
     const char* name = NULL;
-    ClassProperties* node = NULL;
+    NodeProperties* node = NULL;
 };
 
-static void _cmd_draw_scene_node_browser(const std::vector<ClassProperties*>& v_properties, Naveditor* naveditor)
+static void _draw_node_proeprties(NodeProperties *node)
+{
+    ImGui::Begin("属性");
+    auto groups = node->get_node_groups();
+    for (const auto& it : groups) {
+        // property group
+        NodeProperties::NodeGroup group = it.second;
+
+        if (ImGui::CollapsingHeader(group.name.c_str())) {
+            std::vector<NodeProperties::Property>& properties = group.properties;
+            for (const auto& property : properties) {
+                switch (property.type)
+                {
+                    case NodePropertyType::FLOAT: NavUI::DragFloat(property.name, (float*)property.ptr); break;
+                    case NodePropertyType::FLOAT2: NavUI::DragFloat2(property.name, (float*)property.ptr); break;
+                    case NodePropertyType::FLOAT3: NavUI::DragFloat3(property.name, (float*)property.ptr); break;
+                }
+            }
+        }
+
+    }
+    ImGui::End();
+}
+
+static void _cmd_draw_scene_node_browser(const std::vector<NodeProperties*>& v_properties, Naveditor* naveditor)
 {
     static _NodeSelected current;
 
@@ -50,21 +74,8 @@ static void _cmd_draw_scene_node_browser(const std::vector<ClassProperties*>& v_
         NavUI::End();
     }
 
-    if (current.name != NULL) {
-        NavUI::Begin("属性面板");
-        ClassProperties* node = current.node;
-        auto properties = node->get_node_properties();
-        for (const auto& item : properties) {
-            const char* name = item.first;
-            ClassProperties::Property property = item.second;
-            switch (property.type) {
-            case FLOAT: NavUI::DragFloat(name, (float*) property.ptr, 0.01f); break;
-            case FLOAT2: NavUI::DragFloat2(name, (float*) property.ptr, 0.01f); break;
-            case FLOAT3: NavUI::DragFloat3(name, (float*) property.ptr, 0.01f); break;
-            }
-        }
-        NavUI::End();
-    }
+    if (current.name != NULL)
+        _draw_node_proeprties(current.node);
 }
 
 #endif /* _NAVEDITOR_COMPONENT_SCENE_BROWSER_H_ */
