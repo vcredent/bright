@@ -32,11 +32,6 @@
 
 #include <stb/stb_image.h>
 
-namespace Debugger {
-    DebuggerProperties *v_debugger_properties =
-            (DebuggerProperties *) imalloc(sizeof(DebuggerProperties));
-}
-
 #define MENU_ITEM(title) ImGui::MenuItem("        " title)
 
 Naveditor::Naveditor(RenderDevice *v_rd, RenderingScreen *v_screen)

@@ -48,6 +48,18 @@ static void _draw_debugger_editor_ui(DebuggerProperties *v_debugger)
         ImGui::PlotLines("##", std::data(fps_list), std::size(fps_list), 0, NULL, 0.0f, 144.0f, ImVec2(0.0f, 32.0f));
         ImGui::Unindent(12.0f);
         ImGui::Unindent(32.0f);
+
+        std::vector<Debugger::Temporary> temporary = Debugger::get_temporaries();
+        if (!temporary.empty()) {
+            ImGui::SeparatorText("临时数据调试");
+            for (const auto& tmp : temporary) {
+                switch (tmp.type) {
+                    case Debugger::ValueType::FLOAT : NavUI::DragFloat(tmp.name, (float*) tmp.ptr);  break;
+                    case Debugger::ValueType::FLOAT3: NavUI::DragFloat3(tmp.name, (float*) tmp.ptr); break;
+                }
+            }
+        }
+
     }
     NavUI::End();
 }

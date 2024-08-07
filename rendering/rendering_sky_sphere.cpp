@@ -23,6 +23,7 @@
 #include "rendering_sky_sphere.h"
 #include <stb/stb_image.h>
 #include "modules/obj.h"
+#include <copilot/debugger.h>
 
 RenderingSkySphere::RenderingSkySphere(RenderDevice* v_rd, SceneRenderData* v_render_data)\
     : rd(v_rd), render_data(v_render_data)
@@ -121,7 +122,9 @@ void RenderingSkySphere::cmd_draw_sky_sphere(VkCommandBuffer cmd_buffer)
     R = glm::rotate(R, glm::radians(0.0f), Vec3(0.0f, 0.0f, 1.0f));
 
     Mat4 S(1.0f);
-    S = glm::scale(S, Vec3(10.0f));
+    static float scale_value = 1.0f;
+    Debugger::add_temporary_value("scale", Debugger::ValueType::FLOAT, &scale_value);
+    S = glm::scale(S, Vec3(scale_value));
 
     mat = T * R * S;
     rd->cmd_push_const(cmd_buffer, pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Mat4), glm::value_ptr(mat));

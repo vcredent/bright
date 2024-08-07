@@ -56,6 +56,7 @@ file(GLOB_RECURSE SOURCES
   "main.cpp"
   "drivers/*.cpp"
   "editor/*.cpp"
+  "misc/*.cpp"
   "platform/*.cpp"
   "modules/*.cpp"
   "rendering/*.cpp"
