@@ -154,9 +154,7 @@ void RenderingSkySphere::cmd_draw_sky_sphere(VkCommandBuffer cmd_buffer)
     Mat4 mat(1.0f);
 
     Mat4 T(1.0f);
-    static Vec3 vec = Vec3(0.0f);
-    Debugger::add_temporary_value("pos", Debugger::ValueType::FLOAT3, glm::value_ptr(vec));
-    T = glm::translate(T, vec);
+    T = glm::translate(T, Vec3(0.0f));
 
     Mat4 R(1.0f);
     R = glm::rotate(R, glm::radians(0.0f), Vec3(1.0f, 0.0f, 0.0f));
@@ -164,9 +162,7 @@ void RenderingSkySphere::cmd_draw_sky_sphere(VkCommandBuffer cmd_buffer)
     R = glm::rotate(R, glm::radians(0.0f), Vec3(0.0f, 0.0f, 1.0f));
 
     Mat4 S(1.0f);
-    static float scale_value = 4000.0f;
-    Debugger::add_temporary_value("scale", Debugger::ValueType::FLOAT, &scale_value);
-    S = glm::scale(S, Vec3(scale_value));
+    S = glm::scale(S, Vec3(4000.0f));
 
     mat = T * R * S;
 
