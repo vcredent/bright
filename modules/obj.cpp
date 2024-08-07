@@ -2,7 +2,7 @@
 /* obj.cpp                                                                  */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -21,8 +21,8 @@
 /*                                                                          */
 /* ======================================================================== */
 #include "obj.h"
-#include <copilot/memalloc.h>
-#include <copilot/error.h>
+#include <bright/memalloc.h>
+#include <bright/error.h>
 #include <tinyobjloader/tiny_obj_loader.h>
 #include <unordered_map>
 

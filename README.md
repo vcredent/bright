@@ -38,9 +38,9 @@ The IDE:
 
 **Start**
 
-![Preview1](https://github.com/vcredent/copilot/blob/master/document/references/preview1.png)
+![Preview1](https://github.com/vcredent/bright/blob/master/document/references/preview1.png)
 
 **Move**
 
-![Preview1](https://github.com/vcredent/copilot/blob/master/document/references/preview2.png)
+![Preview1](https://github.com/vcredent/bright/blob/master/document/references/preview2.png)
 

@@ -2,7 +2,7 @@
 /* debugger.h                                                               */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -20,7 +20,7 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include <copilot/debugger.h>
+#include <bright/debugger.h>
 
 namespace Debugger {
 

@@ -2,7 +2,7 @@
 /* navui.cpp                                                                */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -23,7 +23,7 @@
 #include "navui/navui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
-#include <copilot/typedefs.h>
+#include <bright/typedefs.h>
 
 static GLFWwindow *_window = NULL;
 

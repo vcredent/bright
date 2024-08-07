@@ -2,7 +2,7 @@
 /* render_device_context.h                                                  */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -31,8 +31,8 @@
 
 #include <vma/vk_mem_alloc.h>
 
-#include <copilot/error.h>
-#include <copilot/typedefs.h>
+#include <bright/error.h>
+#include <bright/typedefs.h>
 #include <time.h>
 #include <vector>
 

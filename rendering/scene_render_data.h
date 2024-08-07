@@ -2,7 +2,7 @@
 /* scene_render_data.h                                                      */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -24,7 +24,7 @@
 #define _SCENE_RENDER_DATA_H_
 
 #include "drivers/render_device.h"
-#include <copilot/math.h>
+#include <bright/math.h>
 
 class SceneRenderData {
 public:

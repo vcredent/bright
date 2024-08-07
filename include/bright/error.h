@@ -1,8 +1,8 @@
 /* ************************************************************************ */
-/* typedefs.h                                                               */
+/* Error.h                                                                  */
 /* ************************************************************************ */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ************************************************************************ */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -20,36 +20,30 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ************************************************************************ */
-#ifndef _TYPEDEFS_H_
-#define _TYPEDEFS_H_
+#ifndef _ERROR_H_
+#define _ERROR_H_
 
-#define stackalloc() {/* 0 */}
+#include <stdio.h>
+#include <stdexcept>
+#include <assert.h>
 
-#if defined(__MINGW32__)
-#  define V_FORCEINLINE __attribute__((__always_inline__)) inline
-#elif defined(_MSC_VER)
-#  define V_FORCEINLINE __forceinline
-#else
-#  define V_FORCEINLINE
-#endif
+#define EXIT(status) exit(status)
+#define EXIT_ERR() EXIT(1)
 
-#if defined(__MINGW32__)
-#  define U_MAYBE_UNUSED __attribute__((unused))
-#else
-#  define U_MAYBE_UNUSED
-#endif
+#define EXIT_FAIL(...) do {         \
+    fprintf(stderr, __VA_ARGS__);   \
+    EXIT(1);                        \
+} while(0)
 
-#define U_ASSERT_ONLY U_MAYBE_UNUSED
-#define U_MEMNEW_ONLY U_MAYBE_UNUSED
-#define ARRAY_SIZE(a) ( sizeof(a) / sizeof(a[0]) )
+#define EXIT_FAIL_COND_V(retval, ...) do {   \
+    if (!(retval)) {                         \
+        EXIT_FAIL(__VA_ARGS__);              \
+    }                                        \
+} while(0)
 
-#if defined(__MINGW32__)
-#  define _CURDIR(path) "../" path
-#elif defined(_MSC_VER)
-#  define _CURDIR(path) "../../../" path
-#endif
+enum Error {
+    OK = 0,
+    FAIL,
+};
 
-// std::string to const char *
-#define getpchar(str) ( str.c_str() )
-
-#endif /* _TYPEDEFS_H_ */
+#endif /* _ERROR_H_ */

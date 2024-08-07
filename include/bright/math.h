@@ -2,7 +2,7 @@
 /* math.h                                                              */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -20,8 +20,8 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _COPILOT_MATH_H_
-#define _COPILOT_MATH_H_
+#ifndef _BRIGHT_MATH_H_
+#define _BRIGHT_MATH_H_
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -60,4 +60,4 @@ typedef glm::quat Quat;
 } while(0)
 
 
-#endif /* _COPILOT_MATH_H_ */
+#endif /* _BRIGHT_MATH_H_ */

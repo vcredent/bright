@@ -2,7 +2,7 @@
 /* window.h                                                                 */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -20,11 +20,11 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _COPILOT_WINDOW_H_
-#define _COPILOT_WINDOW_H_
+#ifndef _BRIGHT_WINDOW_H_
+#define _BRIGHT_WINDOW_H_
 
 #include <GLFW/glfw3.h>
-#include <copilot/error.h>
+#include <bright/error.h>
 #include <unordered_map>
 #include "event/inpdefs.h"
 
@@ -118,4 +118,4 @@ private:
     PFN_WindowScrollCallback fnWindowScrollCallback = NULL;
 };
 
-#endif /* _COPILOT_WINDOW_H_ */
+#endif /* _BRIGHT_WINDOW_H_ */

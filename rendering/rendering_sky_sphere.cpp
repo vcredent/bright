@@ -2,7 +2,7 @@
 /* rendering_sky_sphere.cpp                                                 */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -23,7 +23,7 @@
 #include "rendering_sky_sphere.h"
 #include <stb/stb_image.h>
 #include "modules/obj.h"
-#include <copilot/debugger.h>
+#include <bright/debugger.h>
 #include <stb/stb_image.h>
 
 RenderingSkySphere::RenderingSkySphere(RenderDevice* v_rd, SceneRenderData* v_render_data)

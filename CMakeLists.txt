@@ -2,7 +2,7 @@
 #! PortableMain.cpp                                                         !#
 #! ======================================================================== !#
 #!                        This file is part of:                             !#
-#!                           COPILOT ENGINE                                 !#
+#!                            BRIGHT ENGINE                                 !#
 #! ======================================================================== !#
 #!                                                                          !#
 #! Copyright (C) 2022 Vcredent All rights reserved.                         !#
@@ -21,7 +21,7 @@
 #!                                                                          !#
 #! ======================================================================== !#
 cmake_minimum_required(VERSION 3.26)
-project(copilot)
+project(bright)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options("/source-charset:utf-8")
@@ -29,7 +29,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 set(CMAKE_CXX_STANDARD 23)
-set(PROGRAM_NAME copilot)
+set(PROGRAM_NAME bright)
 
 set(INCLUDE_DIRS
   "include"

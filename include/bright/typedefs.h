@@ -1,9 +1,9 @@
-/* ======================================================================== */
-/* ioutils.h                                                                */
-/* ======================================================================== */
+/* ************************************************************************ */
+/* typedefs.h                                                               */
+/* ************************************************************************ */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
-/* ======================================================================== */
+/*                            BRIGHT ENGINE                                 */
+/* ************************************************************************ */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
 /*                                                                          */
@@ -19,33 +19,37 @@
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
-/* ======================================================================== */
-#ifndef _IOUTILS_H_
-#define _IOUTILS_H_
+/* ************************************************************************ */
+#ifndef _TYPEDEFS_H_
+#define _TYPEDEFS_H_
 
-#include <fstream>
-#include <copilot/memalloc.h>
+#define stackalloc() {/* 0 */}
 
-static char *io_read_bytecode(const char *path, size_t *size)
-{
-    std::ifstream file(path, std::ios::ate | std::ios::binary);
-    if (!file.is_open())
-        throw std::runtime_error("error open file failed!");
+#if defined(__MINGW32__)
+#  define V_FORCEINLINE __attribute__((__always_inline__)) inline
+#elif defined(_MSC_VER)
+#  define V_FORCEINLINE __forceinline
+#else
+#  define V_FORCEINLINE
+#endif
 
-    *size = file.tellg();
-    file.seekg(0);
+#if defined(__MINGW32__)
+#  define U_MAYBE_UNUSED __attribute__((unused))
+#else
+#  define U_MAYBE_UNUSED
+#endif
 
-    /* malloc buffer */
-    char *buf = (char *) imalloc(*size);
-    file.read(buf, *size);
-    file.close();
+#define U_ASSERT_ONLY U_MAYBE_UNUSED
+#define U_MEMNEW_ONLY U_MAYBE_UNUSED
+#define ARRAY_SIZE(a) ( sizeof(a) / sizeof(a[0]) )
 
-    return buf;
-}
+#if defined(__MINGW32__)
+#  define _CURDIR(path) "../" path
+#elif defined(_MSC_VER)
+#  define _CURDIR(path) "../../../" path
+#endif
 
-static void io_free_buf(char *buf)
-{
-    free(buf);
-}
+// std::string to const char *
+#define getpchar(str) ( str.c_str() )
 
-#endif /* _IOUTILS_H_ */
+#endif /* _TYPEDEFS_H_ */

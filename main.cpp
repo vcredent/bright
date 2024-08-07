@@ -2,7 +2,7 @@
 /* main.cpp                                                                 */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -31,7 +31,7 @@
 #include "editor/naveditor.h"
 // misc
 #include "misc/shader_compile.h"
-#include <copilot/ioutils.h>
+#include <bright/ioutils.h>
 
 Window *window;
 RenderDeviceContext *rdc;
@@ -91,7 +91,7 @@ void update()
 
 void initialize()
 {
-    window = memnew(Window, "CopilotEngine", 1980, 1080);
+    window = memnew(Window, "BrightEngine", 1980, 1080);
 
     window->set_window_scroll_callbacks([](Window *window, float x, float y) {
         mouse_scroll_xoffset = x;

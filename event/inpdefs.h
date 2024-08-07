@@ -2,7 +2,7 @@
 /* inpdefs.h                                                                */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -20,8 +20,8 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _COPILOT_INPDEFS_H_
-#define _COPILOT_INPDEFS_H_
+#ifndef _BRIGHT_INPDEFS_H_
+#define _BRIGHT_INPDEFS_H_
 
 #define EVENT_INPUT_RELEASE                0
 #define EVENT_INPUT_PRESS                  1
@@ -170,4 +170,4 @@
 
 #define EVENT_INPUT_KEY_LAST               EVENT_INPUT_KEY_MENU
 
-#endif /* _COPILOT_INPDEFS_H_ */
+#endif /* _BRIGHT_INPDEFS_H_ */

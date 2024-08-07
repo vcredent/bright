@@ -2,7 +2,7 @@
 /* debugger.h                                                              */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -23,8 +23,8 @@
 #ifndef _ENGINE_DEBUGGER_H_
 #define _ENGINE_DEBUGGER_H_
 
-#include <copilot/typedefs.h>
-#include <copilot/memalloc.h>
+#include <bright/typedefs.h>
+#include <bright/memalloc.h>
 #include <vector>
 
 struct DebuggerProperties {

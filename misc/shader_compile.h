@@ -2,7 +2,7 @@
 /* shader_compile.h                                                         */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -24,7 +24,7 @@
 #define _SHADER_COMPILE_H_
 
 #include <stdlib.h>
-#include <copilot/typedefs.h>
+#include <bright/typedefs.h>
 #include <direct.h>
 
 V_FORCEINLINE static void compile_shader()

@@ -2,7 +2,7 @@
 /* naveditor.h                                                              */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -24,7 +24,7 @@
 #define _NAVEDITOR_H_
 
 #include <navui/navui.h>
-#include <copilot/debugger.h>
+#include <bright/debugger.h>
 #include <vector>
 
 // rendering

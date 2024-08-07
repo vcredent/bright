@@ -2,7 +2,7 @@
 /* vulkan_utils.h                                                           */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -25,7 +25,7 @@
 
 #include <fstream>
 #include <stdexcept>
-#include <copilot/ioutils.h>
+#include <bright/ioutils.h>
 
 // pick surface format
 static VkSurfaceFormatKHR pick_surface_format(const VkSurfaceFormatKHR *surface_formats, uint32_t count)

@@ -2,7 +2,7 @@
 /* render_object.h                                                          */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -24,8 +24,8 @@
 #define _GRAPHICS_OBJECT_H_
 
 #include "drivers/render_device.h"
-#include <copilot/math.h>
-#include <copilot/properties.h>
+#include <bright/math.h>
+#include <bright/properties.h>
 
 class RenderObject : public NodeProperties {
 public:

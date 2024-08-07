@@ -2,7 +2,7 @@
 /* camera.h                                                                 */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -23,9 +23,9 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 
-#include <copilot/math.h>
-#include <copilot/typedefs.h>
-#include <copilot/properties.h>
+#include <bright/math.h>
+#include <bright/typedefs.h>
+#include <bright/properties.h>
 #include <algorithm>
 
 class Camera : public NodeProperties {

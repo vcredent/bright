@@ -1,9 +1,9 @@
-/* ************************************************************************ */
-/* Error.h                                                                  */
-/* ************************************************************************ */
+/* ======================================================================== */
+/* ioutils.h                                                                */
+/* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
-/* ************************************************************************ */
+/*                            BRIGHT ENGINE                                 */
+/* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
 /*                                                                          */
@@ -19,31 +19,33 @@
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
-/* ************************************************************************ */
-#ifndef _ERROR_H_
-#define _ERROR_H_
+/* ======================================================================== */
+#ifndef _IOUTILS_H_
+#define _IOUTILS_H_
 
-#include <stdio.h>
-#include <stdexcept>
-#include <assert.h>
+#include <fstream>
+#include <bright/memalloc.h>
 
-#define EXIT(status) exit(status)
-#define EXIT_ERR() EXIT(1)
+static char *io_read_bytecode(const char *path, size_t *size)
+{
+    std::ifstream file(path, std::ios::ate | std::ios::binary);
+    if (!file.is_open())
+        throw std::runtime_error("error open file failed!");
 
-#define EXIT_FAIL(...) do {         \
-    fprintf(stderr, __VA_ARGS__);   \
-    EXIT(1);                        \
-} while(0)
+    *size = file.tellg();
+    file.seekg(0);
 
-#define EXIT_FAIL_COND_V(retval, ...) do {   \
-    if (!(retval)) {                         \
-        EXIT_FAIL(__VA_ARGS__);              \
-    }                                        \
-} while(0)
+    /* malloc buffer */
+    char *buf = (char *) imalloc(*size);
+    file.read(buf, *size);
+    file.close();
 
-enum Error {
-    OK = 0,
-    FAIL,
-};
+    return buf;
+}
 
-#endif /* _ERROR_H_ */
+static void io_free_buf(char *buf)
+{
+    free(buf);
+}
+
+#endif /* _IOUTILS_H_ */

@@ -2,7 +2,7 @@
 /* tiny_obj_loader.cpp                                                      */
 /* ************************************************************************ */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ************************************************************************ */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */

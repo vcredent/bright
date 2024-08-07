@@ -2,7 +2,7 @@
 /* obj.h                                                                    */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -23,8 +23,8 @@
 #ifndef _FORMAT_OBJ_H_
 #define _FORMAT_OBJ_H_
 
-#include <copilot/math.h>
-#include <copilot/typedefs.h>
+#include <bright/math.h>
+#include <bright/typedefs.h>
 #include <vector>
 
 class ObjLoader {

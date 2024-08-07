@@ -2,7 +2,7 @@
 /* window.cpp                                                               */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -33,7 +33,7 @@ Window::Window(const char *title, int width, int height)
     }
 
     handle = glfwCreateWindow(width, height, title, NULL, NULL);
-    EXIT_FAIL_COND_V(handle, "-copilot engine error: create glfw window failed.");
+    EXIT_FAIL_COND_V(handle, "-bright engine error: create glfw window failed.");
 
     glfwSetWindowUserPointer(handle, this);
 

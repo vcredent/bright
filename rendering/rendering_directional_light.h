@@ -2,7 +2,7 @@
 /* rendering_directional_light.h                                            */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -25,7 +25,7 @@
 
 #include "drivers/render_device.h"
 #include "scene_render_data.h"
-#include <copilot/properties.h>
+#include <bright/properties.h>
 
 class RenderingDirectionalLight : public NodeProperties {
 public:
