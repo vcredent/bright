@@ -25,6 +25,7 @@ setlocal
 
 call :makeall graph
 call :makeall coordaxis
+call :makeall sky_sphere
 
 exit
 

@@ -27,12 +27,13 @@ RendererScene::RendererScene(RenderDevice *v_rd)
     rd = v_rd;
 
     render_data = memnew(SceneRenderData, rd);
-
-
     directional_light = memnew(RenderingDirectionalLight, rd);
 
     scene = memnew(RenderingScene, rd);
     scene->initialize();
+
+    skysphere = memnew(RenderingSkySphere, rd, render_data);
+    skysphere->initialize(scene->get_render_pass());
 
     axisline = memnew(RenderingCoordinateAxis, rd, render_data);
     axisline->initialize(scene->get_render_pass());
@@ -45,6 +46,7 @@ RendererScene::~RendererScene()
 {
     memdel(axisline);
     memdel(graphics);
+    memdel(skysphere);
     memdel(directional_light);
     memdel(scene);
     memdel(render_data);
@@ -101,6 +103,8 @@ void RendererScene::cmd_begin_scene_renderer(uint32_t v_width, uint32_t v_height
 
     if (show_coordinate_axis)
         axisline->cmd_draw_coordinate_axis(scene_cmd_buffer);
+
+    skysphere->cmd_draw_sky_sphere(scene_cmd_buffer);
     graphics->cmd_draw_object_list(scene_cmd_buffer);
 }
 

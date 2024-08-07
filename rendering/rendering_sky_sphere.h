@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_scene.h                                                              */
+/* rendering_sky_sphere.h                                                   */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -20,44 +20,37 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _RENDERER_SCENE_H_
-#define _RENDERER_SCENE_H_
+#ifndef _RENDERING_SKY_SPHERE_H_
+#define _RENDERING_SKY_SPHERE_H_
 
 #include "drivers/render_device.h"
-#include "camera/camera.h"
-#include "rendering_scene.h"
-#include "rendering_directional_light.h"
-#include "rendering_coordinate_axis.h"
-#include "rendering_graphics.h"
-#include "rendering_sky_sphere.h"
+#include "scene_render_data.h"
 
-class RendererScene {
+class RenderingSkySphere {
 public:
-    U_MEMNEW_ONLY RendererScene(RenderDevice *v_rd);
-   ~RendererScene();
+    U_MEMNEW_ONLY RenderingSkySphere(RenderDevice* v_rd, SceneRenderData* v_render_data);
+   ~RenderingSkySphere();
 
-    // api
-    void set_scene_camera(Camera *v_camera);
-    Camera *get_scene_camera();
-    RenderingDirectionalLight* get_directional_light() { return directional_light; }
-    void enable_coordinate_axis(bool is_enable);
-    void list_render_object(std::vector<RenderObject *> **p_objects);
-    void push_render_object(RenderObject *v_object);
-    void cmd_begin_scene_renderer(uint32_t v_width, uint32_t v_height);
-    void cmd_end_scene_renderer(RenderDevice::Texture2D **scene_texture, RenderDevice::Texture2D **scene_depth);
+    void initialize(VkRenderPass v_render_pass);
+    void cmd_draw_sky_sphere(VkCommandBuffer cmd_buffer);
 
 private:
-    RenderDevice *rd;
-    SceneRenderData *render_data;
-    RenderingScene *scene;
-    RenderingCoordinateAxis *axisline;
-    RenderingSkySphere *skysphere;
-    RenderingDirectionalLight* directional_light;
-    RenderingGraphics *graphics;
-    VkCommandBuffer scene_cmd_buffer;
-    Camera *camera;
+    struct Vertex {
+        Vec3 position;
+        Vec2 texcoord;
+        Vec3 normal;
+    };
 
-    bool show_coordinate_axis = true;
+    RenderDevice* rd;
+    SceneRenderData* render_data;
+
+    RenderDevice::Pipeline* pipeline;
+    VkDescriptorSetLayout descriptor_set_layout;
+    VkDescriptorSet descriptor_set;
+    RenderDevice::Texture2D* hdr;
+    RenderDevice::Buffer* vertex_buffer;
+    RenderDevice::Buffer* index_buffer;
+    uint32_t index_count;
 };
 
-#endif /* _RENDERER_SCENE_H_ */
+#endif /* _RENDERING_SKY_SPHERE_H_ */

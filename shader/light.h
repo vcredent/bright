@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer_scene.h                                                              */
+/* light.h                                                                  */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                           COPILOT ENGINE                                 */
@@ -15,49 +15,33 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _RENDERER_SCENE_H_
-#define _RENDERER_SCENE_H_
 
-#include "drivers/render_device.h"
-#include "camera/camera.h"
-#include "rendering_scene.h"
-#include "rendering_directional_light.h"
-#include "rendering_coordinate_axis.h"
-#include "rendering_graphics.h"
-#include "rendering_sky_sphere.h"
-
-class RendererScene {
-public:
-    U_MEMNEW_ONLY RendererScene(RenderDevice *v_rd);
-   ~RendererScene();
-
-    // api
-    void set_scene_camera(Camera *v_camera);
-    Camera *get_scene_camera();
-    RenderingDirectionalLight* get_directional_light() { return directional_light; }
-    void enable_coordinate_axis(bool is_enable);
-    void list_render_object(std::vector<RenderObject *> **p_objects);
-    void push_render_object(RenderObject *v_object);
-    void cmd_begin_scene_renderer(uint32_t v_width, uint32_t v_height);
-    void cmd_end_scene_renderer(RenderDevice::Texture2D **scene_texture, RenderDevice::Texture2D **scene_depth);
-
-private:
-    RenderDevice *rd;
-    SceneRenderData *render_data;
-    RenderingScene *scene;
-    RenderingCoordinateAxis *axisline;
-    RenderingSkySphere *skysphere;
-    RenderingDirectionalLight* directional_light;
-    RenderingGraphics *graphics;
-    VkCommandBuffer scene_cmd_buffer;
-    Camera *camera;
-
-    bool show_coordinate_axis = true;
+struct DirectionalLight {
+    vec3 direction;
+    float intensity;
+    vec3 color;
+    float specular_exponent;
+    vec3 specular_color;
+    float ambient;
 };
 
-#endif /* _RENDERER_SCENE_H_ */
+vec3 lighting(DirectionalLight light, vec3 v_world_normal, vec3 v_world_position, vec3 v_camera_position)
+{
+    vec3 light_dir = normalize(light.direction);
+
+    vec3 normal = normalize(v_world_normal);
+    float diff = max(dot(normal, light_dir), 0.0f);
+    vec3 diffuse = light.color * diff;
+
+    vec3 view_dir = normalize(v_camera_position - v_world_position);
+    vec3 reflect_dir = reflect(-light_dir, normal);
+    float spec = pow(max(dot(view_dir, reflect_dir), 0.0f), light.specular_exponent);
+    vec3 specular = light.specular_color * spec;
+
+    return (vec3(light.ambient) + diffuse + specular);
+}
