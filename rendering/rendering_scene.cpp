@@ -114,7 +114,8 @@ void RenderingScene::initialize()
     subpass_dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
     rd->create_render_pass(ARRAY_SIZE(attachments), attachments, 1, &subpass, 1, &subpass_dependency, &render_pass);
-    rd->create_sampler(&sampler);
+    RenderDevice::SamplerCreateInfo sampler_create_info;
+    rd->create_sampler(&sampler_create_info, &sampler);
     rd->allocate_cmd_buffer(&scene_cmd_buffer);
 
     _create_scene_texture(width, height);
@@ -164,9 +165,28 @@ void RenderingScene::cmd_end_scene_rendering()
 
 void RenderingScene::_create_scene_texture(uint32_t width, uint32_t height)
 {
-    texture = rd->create_texture(width, height, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-    depth = rd->create_texture(width, height, rd->get_msaa_samples(), depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-    msaa = rd->create_texture(width, height, rd->get_msaa_samples(), VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    RenderDevice::TextureCreateInfo texture_create_info = {};
+    texture_create_info.width = width;
+    texture_create_info.height = height;
+    texture_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
+    texture_create_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+    texture_create_info.aspect_mask = VK_IMAGE_ASPECT_COLOR_BIT;
+    texture_create_info.image_type = VK_IMAGE_TYPE_2D;
+    texture_create_info.image_view_type = VK_IMAGE_VIEW_TYPE_2D;
+    texture_create_info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    texture = rd->create_texture(&texture_create_info);
+
+    texture_create_info.samples = rd->get_msaa_samples();
+    texture_create_info.format = depth_format;
+    texture_create_info.aspect_mask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    texture_create_info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    depth = rd->create_texture(&texture_create_info);
+
+    texture_create_info.samples = rd->get_msaa_samples();
+    texture_create_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+    texture_create_info.aspect_mask = VK_IMAGE_ASPECT_COLOR_BIT;
+    texture_create_info.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    msaa = rd->create_texture(&texture_create_info);
 
     rd->bind_texture_sampler(texture, sampler);
     rd->bind_texture_sampler(depth, sampler);

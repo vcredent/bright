@@ -24,6 +24,7 @@
 #include <stb/stb_image.h>
 #include "modules/obj.h"
 #include <copilot/debugger.h>
+#include <stb/stb_image.h>
 
 RenderingSkySphere::RenderingSkySphere(RenderDevice* v_rd, SceneRenderData* v_render_data)\
     : rd(v_rd), render_data(v_render_data)
@@ -33,6 +34,8 @@ RenderingSkySphere::RenderingSkySphere(RenderDevice* v_rd, SceneRenderData* v_re
 
 RenderingSkySphere::~RenderingSkySphere()
 {
+    rd->destroy_texture(hdr);
+    rd->destroy_sampler(hdr_sampler);
     rd->destroy_buffer(index_buffer);
     rd->destroy_buffer(vertex_buffer);
     rd->free_descriptor_set(descriptor_set);
@@ -42,6 +45,7 @@ RenderingSkySphere::~RenderingSkySphere()
 
 void RenderingSkySphere::initialize(VkRenderPass v_render_pass)
 {
+    // obj
     ObjLoader *loader = ObjLoader::load(_CURDIR("resource/obj/sphere.obj"));
     std::vector<ObjLoader::Vertex> vertices = loader->get_vertices();
     std::vector<uint32_t> indices = loader->get_indices();
@@ -57,6 +61,32 @@ void RenderingSkySphere::initialize(VkRenderPass v_render_pass)
 
     ObjLoader::destroy(loader);
 
+    // hdr
+    int width, height, channels;
+    float* pixels = stbi_loadf(_CURDIR("resource/hdr/puresky_2k.hdr"), &width, &height, &channels, STBI_rgb_alpha);
+
+    RenderDevice::TextureCreateInfo texture_create_info = {
+        /* width= */ (uint32_t) width,
+        /* height= */ (uint32_t) height,
+        /* samples= */ VK_SAMPLE_COUNT_1_BIT,
+        /* format= */ VK_FORMAT_R32G32B32A32_SFLOAT,
+        /* aspect_mask= */ VK_IMAGE_ASPECT_COLOR_BIT,
+        /* image_type= */ VK_IMAGE_TYPE_2D,
+        /* image_view_type= */ VK_IMAGE_VIEW_TYPE_2D,
+        /* usage= */ VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+    };
+
+    hdr = rd->create_texture(&texture_create_info);
+    RenderDevice::SamplerCreateInfo sampler_create_info = {};
+    sampler_create_info.u = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_create_info.v = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_create_info.w = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_create_info.border_color = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
+    rd->create_sampler(&sampler_create_info, &hdr_sampler);
+    rd->bind_texture_sampler(hdr, hdr_sampler);
+    rd->write_texture(hdr, width * height * 16, pixels);
+
+    // pipeline
     VkVertexInputBindingDescription binds[] = {
         { 0, sizeof(ObjLoader::Vertex), VK_VERTEX_INPUT_RATE_VERTEX  }
     };
@@ -70,11 +100,13 @@ void RenderingSkySphere::initialize(VkRenderPass v_render_pass)
     VkDescriptorSetLayoutBinding desciprotr_layout_binds[] = {
         SceneRenderData::GetPerspectiveDescriptorBindZero(),
         SceneRenderData::GetLightDescriptorBindOne(),
+        { 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, VK_NULL_HANDLE },
     };
 
     rd->create_descriptor_set_layout(ARRAY_SIZE(desciprotr_layout_binds), desciprotr_layout_binds, &descriptor_set_layout);
     rd->allocate_descriptor_set(descriptor_set_layout, &descriptor_set);
     render_data->set_descriptor_buffers(descriptor_set);
+    rd->update_descriptor_set_image(hdr, 2, descriptor_set);
 
     VkPushConstantRange range = {
         /* stageFlags= */ VK_SHADER_STAGE_VERTEX_BIT,
@@ -99,6 +131,7 @@ void RenderingSkySphere::initialize(VkRenderPass v_render_pass)
         /* render_pass= */ v_render_pass,
         /* polygon= */ VK_POLYGON_MODE_FILL,
         /* topology= */ VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+        /* cull_mode= */ VK_CULL_MODE_NONE,
         /* samples= */ rd->get_msaa_samples(),
     };
 
@@ -114,7 +147,9 @@ void RenderingSkySphere::cmd_draw_sky_sphere(VkCommandBuffer cmd_buffer)
     Mat4 mat(1.0f);
 
     Mat4 T(1.0f);
-    T = glm::translate(T, Vec3(0.0f));
+    static Vec3 vec = Vec3(0.0f);
+    Debugger::add_temporary_value("pos", Debugger::ValueType::FLOAT3, glm::value_ptr(vec));
+    T = glm::translate(T, vec);
 
     Mat4 R(1.0f);
     R = glm::rotate(R, glm::radians(0.0f), Vec3(1.0f, 0.0f, 0.0f));
@@ -122,7 +157,7 @@ void RenderingSkySphere::cmd_draw_sky_sphere(VkCommandBuffer cmd_buffer)
     R = glm::rotate(R, glm::radians(0.0f), Vec3(0.0f, 0.0f, 1.0f));
 
     Mat4 S(1.0f);
-    static float scale_value = 1.0f;
+    static float scale_value = 4000.0f;
     Debugger::add_temporary_value("scale", Debugger::ValueType::FLOAT, &scale_value);
     S = glm::scale(S, Vec3(scale_value));
 

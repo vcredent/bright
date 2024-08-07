@@ -65,14 +65,34 @@ public:
         VkFormat format;
         VkSampler sampler = VK_NULL_HANDLE;
         VkImageAspectFlags aspect_mask;
+        size_t size = 0;
     };
 
-    Texture2D *create_texture(uint32_t width, uint32_t height, VkSampleCountFlagBits samples, VkFormat format, VkImageAspectFlags aspect_mask, VkImageUsageFlags usage);
+    struct TextureCreateInfo {
+        uint32_t width;
+        uint32_t height;
+        VkSampleCountFlagBits samples;
+        VkFormat format;
+        VkImageAspectFlags aspect_mask;
+        VkImageType image_type;
+        VkImageViewType image_view_type;
+        VkImageUsageFlags usage;
+    };
+
+    Texture2D *create_texture(TextureCreateInfo *p_create_info);
     void destroy_texture(Texture2D *p_texture);
-    void write_texture(Texture2D *texture, void *pixels);
+    void write_texture(Texture2D *texture, size_t size, void *pixels);
     void create_framebuffer(uint32_t width, uint32_t height, uint32_t image_view_count, VkImageView *p_image_view, VkRenderPass render_pass, VkFramebuffer *p_framebuffer);
     void destroy_framebuffer(VkFramebuffer framebuffer);
-    void create_sampler(VkSampler *p_sampler);
+
+    struct SamplerCreateInfo {
+        VkSamplerAddressMode u = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        VkSamplerAddressMode v = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        VkSamplerAddressMode w = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        VkBorderColor border_color = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    };
+
+    void create_sampler(SamplerCreateInfo* p_create_info, VkSampler *p_sampler);
     void destroy_sampler(VkSampler sampler);
     void bind_texture_sampler(Texture2D *texture, VkSampler sampler);
 
@@ -81,6 +101,7 @@ public:
     void allocate_descriptor_set(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor_set);
     void free_descriptor_set(VkDescriptorSet descriptor_set);
     void update_descriptor_set_buffer(Buffer *p_buffer, uint32_t binding, VkDescriptorSet descriptor_set);
+    void update_descriptor_set_image(Texture2D *p_texture, uint32_t binding, VkDescriptorSet descriptor_set);
 
     struct ShaderInfo {
         const char *vertex = NULL;
@@ -107,6 +128,7 @@ public:
         VkRenderPass render_pass;
         VkPolygonMode polygon;
         VkPrimitiveTopology topology;
+        VkCullModeFlags cull_mode = VK_CULL_MODE_BACK_BIT;
         VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;
         float line_width = 1.0f;
         VkBool32 blend_enable = VK_FALSE;

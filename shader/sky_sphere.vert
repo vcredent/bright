@@ -36,7 +36,18 @@ layout(push_constant) uniform PushConst {
     mat4 model;
 } push_const;
 
+// out
+layout(location = 0) out vec2 v_texcoord;
+layout(location = 1) out vec3 v_world_normal;
+layout(location = 2) out vec3 v_world_position;
+layout(location = 3) out vec3 v_camera_position;
+
 void main()
 {
-    gl_Position = scene.projection * scene.view * push_const.model * vec4(vertex, 1.0f);
+    vec4 world_position = push_const.model * vec4(vertex, 1.0f);
+    gl_Position = scene.projection * scene.view * world_position;
+    v_texcoord = texcoord;
+    v_world_normal = mat3(transpose(inverse(push_const.model))) * normal;
+    v_world_position = vec3(world_position);
+    v_camera_position = scene.camera_pos.xyz;
 }

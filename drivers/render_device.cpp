@@ -118,29 +118,29 @@ void RenderDevice::free_cmd_buffer(VkCommandBuffer cmd_buffer)
     vk_rdc->free_cmd_buffer(cmd_buffer);
 }
 
-RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t height, VkSampleCountFlagBits samples, VkFormat format, VkImageAspectFlags aspect_mask, VkImageUsageFlags usage)
+RenderDevice::Texture2D *RenderDevice::create_texture(TextureCreateInfo *p_create_info)
 {
     VkResult U_ASSERT_ONLY err;
     Texture2D *texture = VK_NULL_HANDLE;
 
     texture = (Texture2D *) imalloc(sizeof(Texture2D));
-    texture->format = format;
-    texture->width = width;
-    texture->height = height;
-    texture->aspect_mask = aspect_mask;
+    texture->format = p_create_info->format;
+    texture->width = p_create_info->width;
+    texture->height = p_create_info->height;
+    texture->aspect_mask = p_create_info->aspect_mask;
 
     VkImageCreateInfo image_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
             /* pNext */ nextptr,
             /* flags */ no_flag_bits,
-            /* imageType */ VK_IMAGE_TYPE_2D,
+            /* imageType */ p_create_info->image_type,
             /* format */ texture->format,
-            /* extent */ { width, height, 1 },
+            /* extent */ { p_create_info->width, p_create_info->height, 1 },
             /* mipLevels */ 1,
             /* arrayLayers */ 1,
-            /* samples */ samples,
+            /* samples */ p_create_info->samples,
             /* tiling */ VK_IMAGE_TILING_OPTIMAL,
-            /* usage */ usage,
+            /* usage */ p_create_info->usage,
             /* sharingMode */ VK_SHARING_MODE_EXCLUSIVE,
             /* queueFamilyIndexCount */ 0,
             /* pQueueFamilyIndices */ nullptr,
@@ -157,7 +157,7 @@ RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t h
             /* pNext */ nextptr,
             /* flags */ no_flag_bits,
             /* image */ texture->image,
-            /* viewType */ VK_IMAGE_VIEW_TYPE_2D,
+            /* viewType */ p_create_info->image_view_type,
             /* format */ texture->format,
             /* components */
                 {
@@ -168,7 +168,7 @@ RenderDevice::Texture2D *RenderDevice::create_texture(uint32_t width, uint32_t h
                 },
             /* subresourceRange */
                 {
-                    .aspectMask = aspect_mask,
+                    .aspectMask = p_create_info->aspect_mask,
                     .baseMipLevel = 0,
                     .levelCount = 1,
                     .baseArrayLayer = 0,
@@ -190,11 +190,12 @@ void RenderDevice::destroy_texture(Texture2D *p_texture)
         free_descriptor_set(p_texture->descriptor_set);
 }
 
-void RenderDevice::write_texture(Texture2D *texture, void *pixels)
+void RenderDevice::write_texture(Texture2D *texture, size_t size, void *pixels)
 {
-    VkDeviceSize size = texture->width * texture->height * 4;
     Buffer *buffer = create_buffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, size);
     write_buffer(buffer, 0, size, pixels);
+
+    texture->size = size;
 
     VkCommandBuffer cmd_buffer;
     cmd_buffer_one_time_begin(&cmd_buffer);
@@ -263,18 +264,18 @@ void RenderDevice::destroy_framebuffer(VkFramebuffer framebuffer)
     vkDestroyFramebuffer(vk_device, framebuffer, allocation_callbacks);
 }
 
-void RenderDevice::create_sampler(VkSampler *p_sampler)
+void RenderDevice::create_sampler(SamplerCreateInfo* p_create_info, VkSampler* p_sampler)
 {
     VkSamplerCreateInfo sampler_create_info = {};
     sampler_create_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     sampler_create_info.magFilter = VK_FILTER_LINEAR;
     sampler_create_info.minFilter = VK_FILTER_LINEAR;
-    sampler_create_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler_create_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler_create_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_create_info.addressModeU = p_create_info->u;
+    sampler_create_info.addressModeV = p_create_info->v;
+    sampler_create_info.addressModeW = p_create_info->w;
     sampler_create_info.anisotropyEnable = VK_FALSE;
     sampler_create_info.maxAnisotropy = 16;
-    sampler_create_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    sampler_create_info.borderColor = p_create_info->border_color;
     sampler_create_info.unnormalizedCoordinates = VK_FALSE;
     sampler_create_info.compareEnable = VK_FALSE;
     sampler_create_info.compareOp = VK_COMPARE_OP_ALWAYS;
@@ -353,6 +354,30 @@ void RenderDevice::update_descriptor_set_buffer(Buffer *p_buffer, uint32_t bindi
             /* descriptorType */ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             /* pImageInfo */ VK_NULL_HANDLE,
             /* pBufferInfo */ &buffer_info,
+            /* pTexelBufferView */ VK_NULL_HANDLE,
+    };
+
+    vkUpdateDescriptorSets(vk_device, 1, &write_info, 0, nullptr);
+}
+
+void RenderDevice::update_descriptor_set_image(Texture2D *p_texture, uint32_t binding, VkDescriptorSet descriptor_set)
+{
+    VkDescriptorImageInfo image_info = {
+            /* sampler= */ p_texture->sampler,
+            /* imageView= */ p_texture->image_view,
+            /* imageLayout= */ p_texture->image_layout,
+    };
+
+    VkWriteDescriptorSet write_info = {
+            /* sType */ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            /* pNext */ nextptr,
+            /* dstSet */ descriptor_set,
+            /* dstBinding */ binding,
+            /* dstArrayElement */ 0,
+            /* descriptorCount */ 1,
+            /* descriptorType */ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            /* pImageInfo */ &image_info,
+            /* pBufferInfo */ VK_NULL_HANDLE,
             /* pTexelBufferView */ VK_NULL_HANDLE,
     };
 
@@ -446,7 +471,7 @@ RenderDevice::Pipeline *RenderDevice::create_graphics_pipeline(PipelineCreateInf
     rasterization_state_create_info.rasterizerDiscardEnable = VK_FALSE;
     rasterization_state_create_info.polygonMode = p_create_info->polygon;
     rasterization_state_create_info.lineWidth = p_create_info->line_width;
-    rasterization_state_create_info.cullMode = VK_CULL_MODE_BACK_BIT;
+    rasterization_state_create_info.cullMode = p_create_info->cull_mode;
     rasterization_state_create_info.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterization_state_create_info.depthBiasEnable = VK_FALSE;
     rasterization_state_create_info.depthBiasConstantFactor = 0.0f;

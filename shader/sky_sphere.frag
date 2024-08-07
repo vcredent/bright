@@ -25,14 +25,30 @@
 
 #include "light.h"
 
+layout(location = 0) in vec2 texcoord;
+layout(location = 1) in vec3 world_normal;
+layout(location = 2) in vec3 world_position;
+layout(location = 3) in vec3 camera_position;
+
 layout(set = 0, binding = 1) uniform DescriptorSetBlock {
     DirectionalLight light;
 };
 
-// out
+layout(set = 0, binding = 2) uniform sampler2D hdr;
+
+// outf
 layout(location = 0) out vec4 final_color;
 
 void main()
 {
-    final_color = vec4(vec3(0.5f), 1.0f);
+    // vec3 light = lighting(light, world_normal, world_position, camera_position);
+    // vec4 tex = texture(hdr, texcoord);
+    // final_color = vec4(light * tex.rgb, tex.a);
+
+    vec3 hdr_color = texture(hdr, texcoord).rgb;
+    float exposure = 0.5f;
+    vec3 color = hdr_color * exposure;
+    vec3 gamma_corrected = pow(color, vec3(1.0f / 2.2f));
+
+    final_color = vec4(gamma_corrected, 1.0f);
 }

@@ -57,6 +57,7 @@ void RenderingCoordinateAxis::initialize(VkRenderPass render_pass)
             /* render_pass= */ render_pass,
             /* polygon= */ VK_POLYGON_MODE_FILL,
             /* topology= */ VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
+            /* cull_mode= */ VK_CULL_MODE_BACK_BIT,
             /* samples= */ rd->get_msaa_samples(),
             /* line_width= */ 2.0f,
     };

@@ -48,6 +48,7 @@ private:
     VkDescriptorSetLayout descriptor_set_layout;
     VkDescriptorSet descriptor_set;
     RenderDevice::Texture2D* hdr;
+    VkSampler hdr_sampler;
     RenderDevice::Buffer* vertex_buffer;
     RenderDevice::Buffer* index_buffer;
     uint32_t index_count;

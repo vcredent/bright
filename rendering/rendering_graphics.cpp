@@ -79,6 +79,7 @@ void RenderingGraphics::initialize(VkRenderPass render_pass)
             /* render_pass= */ render_pass,
             /* polygon= */ VK_POLYGON_MODE_FILL,
             /* topology= */ VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+            /* cull_mode= */ VK_CULL_MODE_BACK_BIT,
             /* sample_count= */ rd->get_msaa_samples(),
     };
 
