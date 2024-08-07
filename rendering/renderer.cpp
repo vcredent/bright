@@ -63,6 +63,12 @@ RenderingDirectionalLight *Renderer::get_scene_directional_light()
     return scene->get_directional_light();
 }
 
+RenderingSkySphere *Renderer::get_scene_sky_sphere()
+{
+    _CHECK_RENDERER_INIT();
+    return scene->get_sky_shpere();
+}
+
 void Renderer::enable_coordinate_axis(bool is_enable)
 {
     _CHECK_RENDERER_INIT();

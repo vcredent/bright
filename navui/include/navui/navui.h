@@ -61,6 +61,7 @@ namespace NavUI {
     void DragFloat3(const char *label, float v[3], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
     void DragFloat4(const char *label, float v[4], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, const char* format = "%.3f");
     void ColorEdit3(const char* label, float col[3], ImGuiColorEditFlags flags = 0);
+    void SliderFloat(const char* label, float* v, float v_min, float v_max, const char* format = "%.2f", ImGuiSliderFlags flags = 0);
 
     // vulkan
     ImTextureID AddTexture(VkSampler v_sampler, VkImageView v_image, VkImageLayout v_layout);

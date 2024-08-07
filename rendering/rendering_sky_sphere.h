@@ -25,8 +25,9 @@
 
 #include "drivers/render_device.h"
 #include "scene_render_data.h"
+#include <copilot/properties.h>
 
-class RenderingSkySphere {
+class RenderingSkySphere : public NodeProperties {
 public:
     U_MEMNEW_ONLY RenderingSkySphere(RenderDevice* v_rd, SceneRenderData* v_render_data);
    ~RenderingSkySphere();
@@ -41,6 +42,12 @@ private:
         Vec3 normal;
     };
 
+    struct PushConst {
+        Mat4 transform;
+        float exposure;
+        float gamma;
+    };
+
     RenderDevice* rd;
     SceneRenderData* render_data;
 
@@ -52,6 +59,9 @@ private:
     RenderDevice::Buffer* vertex_buffer;
     RenderDevice::Buffer* index_buffer;
     uint32_t index_count;
+
+    float exposure = 0.5f;
+    float gamma = 2.02f;
 };
 
 #endif /* _RENDERING_SKY_SPHERE_H_ */

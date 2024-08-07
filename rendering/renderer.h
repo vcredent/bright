@@ -38,6 +38,7 @@ public:
     static Camera *get_scene_camera();
     static void set_scene_camera(Camera *v_camera);
     static RenderingDirectionalLight *get_scene_directional_light();
+    static RenderingSkySphere* get_scene_sky_sphere();
     static void enable_coordinate_axis(bool is_enable);
     static void list_render_object(std::vector<RenderObject *> **p_objects);
     static void push_render_object(RenderObject *v_object);

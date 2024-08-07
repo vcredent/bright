@@ -32,6 +32,7 @@ enum NodePropertyType {
     FLOAT2,
     FLOAT3,
     COLOR,
+    SLIDER,
 };
 
 class NodeProperties {
@@ -40,14 +41,17 @@ public:
         const char* name;
         NodePropertyType type;
         void *ptr;
+        float min;
+        float max;
+        float speed;
     };
 
     struct NodeGroup {
         std::string name;
         std::vector<Property> properties;
-        void add_property(const char* name, NodePropertyType type, void* ptr)
+        void add_property(const char* name, NodePropertyType type, void* ptr, float min = 0.0f, float max = 10.0f, float speed = 0.01f)
           {
-            properties.push_back({ name, type, ptr });
+            properties.push_back({ name, type, ptr, min, max, speed });
           }
     };
 

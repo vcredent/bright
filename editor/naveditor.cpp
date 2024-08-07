@@ -116,6 +116,7 @@ void Naveditor::cmd_draw_scene_node_browser()
     std::vector<NodeProperties *> properties;
     properties.push_back(Renderer::get_scene_camera());
     properties.push_back(Renderer::get_scene_directional_light());
+    properties.push_back(Renderer::get_scene_sky_sphere());
 
     for (const auto &item: *objects)
         properties.push_back(item);
@@ -176,6 +177,19 @@ void Naveditor::_initialize_icon()
     rd->write_texture(sun->image, width * height * 4, pixels);
     sun->texture = NavUI::AddTexture(sun->image->sampler, sun->image->image_view, sun->image->image_layout);
     icons[sun->name] = sun;
+    stbi_image_free(pixels);
+
+    // planet.png
+    Navicon* planet = (Navicon*)imalloc(sizeof(Navicon));
+    planet->name = "planet";
+    pixels = stbi_load(_CURDIR("resource/icon/planet.png"), &width, &height, &channels, STBI_rgb_alpha);
+    texture_create_info.width = width;
+    texture_create_info.height = height;
+    planet->image = rd->create_texture(&texture_create_info);
+    rd->bind_texture_sampler(planet->image, sampler);
+    rd->write_texture(planet->image, width * height * 4, pixels);
+    planet->texture = NavUI::AddTexture(planet->image->sampler, planet->image->image_view, planet->image->image_layout);
+    icons[planet->name] = planet;
     stbi_image_free(pixels);
 }
 

@@ -281,9 +281,20 @@ namespace NavUI {
       {
         ImGui::PushID(label);
         ImGui::Indent(32.0f);
-        ImGui::Text(label);
+        ImGui::TextUnformatted(label);
         ImGui::SameLine();
         ImGui::ColorEdit3("", col, flags);
+        ImGui::Unindent(32.0f);
+        ImGui::PopID();
+      }
+
+    void SliderFloat(const char* label, float* v, float v_min, float v_max, const char* format, ImGuiSliderFlags flags)
+      {
+        ImGui::PushID(label);
+        ImGui::Indent(32.0f);
+        ImGui::TextUnformatted(label);
+        ImGui::SameLine();
+        ImGui::SliderFloat("", v, v_min, v_max, format, flags);
         ImGui::Unindent(32.0f);
         ImGui::PopID();
       }

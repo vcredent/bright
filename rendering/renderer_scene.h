@@ -40,6 +40,7 @@ public:
     void set_scene_camera(Camera *v_camera);
     Camera *get_scene_camera();
     RenderingDirectionalLight* get_directional_light() { return directional_light; }
+    RenderingSkySphere* get_sky_shpere() { return skysphere; }
     void enable_coordinate_axis(bool is_enable);
     void list_render_object(std::vector<RenderObject *> **p_objects);
     void push_render_object(RenderObject *v_object);

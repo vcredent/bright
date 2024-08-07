@@ -34,6 +34,8 @@ layout(set = 0, binding = 0) uniform Scene {
 
 layout(push_constant) uniform PushConst {
     mat4 model;
+    float exposure;
+    float gamma;
 } push_const;
 
 // out
@@ -41,6 +43,8 @@ layout(location = 0) out vec2 v_texcoord;
 layout(location = 1) out vec3 v_world_normal;
 layout(location = 2) out vec3 v_world_position;
 layout(location = 3) out vec3 v_camera_position;
+layout(location = 4) out float v_exposure;
+layout(location = 5) out float v_gamma;
 
 void main()
 {
@@ -50,4 +54,6 @@ void main()
     v_world_normal = mat3(transpose(inverse(push_const.model))) * normal;
     v_world_position = vec3(world_position);
     v_camera_position = scene.camera_pos.xyz;
+    v_exposure = push_const.exposure;
+    v_gamma = push_const.gamma;
 }

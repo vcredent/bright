@@ -26,10 +26,17 @@
 #include <copilot/debugger.h>
 #include <stb/stb_image.h>
 
-RenderingSkySphere::RenderingSkySphere(RenderDevice* v_rd, SceneRenderData* v_render_data)\
+RenderingSkySphere::RenderingSkySphere(RenderDevice* v_rd, SceneRenderData* v_render_data)
     : rd(v_rd), render_data(v_render_data)
 {
-    /* do nothing... */
+    set_node_name("天空球");
+    set_node_icon("planet");
+    NodeGroup* group;
+    group = get_node_group("曝光");
+    group->add_property("曝光度", NodePropertyType::SLIDER, &exposure, 0.1f, 10.0f, 0.1f);
+
+    group = get_node_group("伽马");
+    group->add_property("伽马值", NodePropertyType::SLIDER, &gamma, 1.0f, 3.0f, 0.1f);
 }
 
 RenderingSkySphere::~RenderingSkySphere()
@@ -111,7 +118,7 @@ void RenderingSkySphere::initialize(VkRenderPass v_render_pass)
     VkPushConstantRange range = {
         /* stageFlags= */ VK_SHADER_STAGE_VERTEX_BIT,
         /* offset= */ 0,
-        /* size= */ sizeof(Mat4)
+        /* size= */ sizeof(PushConst)
     };
 
     RenderDevice::ShaderInfo shader_info = {
@@ -162,7 +169,14 @@ void RenderingSkySphere::cmd_draw_sky_sphere(VkCommandBuffer cmd_buffer)
     S = glm::scale(S, Vec3(scale_value));
 
     mat = T * R * S;
-    rd->cmd_push_const(cmd_buffer, pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Mat4), glm::value_ptr(mat));
+
+    PushConst push_const = {
+        /* transform= */ mat,
+        /* exposure= */ exposure,
+        /* gamma= */ gamma,
+    };
+
+    rd->cmd_push_const(cmd_buffer, pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConst), &push_const);
 
     rd->cmd_bind_vertex_buffer(cmd_buffer, vertex_buffer);
     rd->cmd_bind_index_buffer(cmd_buffer, VK_INDEX_TYPE_UINT32, index_buffer);
