@@ -146,6 +146,15 @@ int main(int argc, char **argv)
             /* ImGui */
             naveditor->cmd_begin_naveditor_render(screen_cmd_buffer);
             {
+                ImGui::Begin("Demo");
+                {
+                    if (ImGui::CollapsingHeader("Hello")) {
+                        float v;
+                        ImGui::DragFloat("view", &v);
+                    }
+                }
+                ImGui::End();
+
                 naveditor->cmd_draw_debugger_editor_ui();
                 naveditor->cmd_draw_scene_node_browser();
                 naveditor->cmd_draw_scene_viewport_ui(scene_preview_texture, scene_depth_texture, &scene_region);
