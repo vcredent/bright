@@ -277,6 +277,17 @@ namespace NavUI {
         _DragScalarN(label, v, 4, v_speed, v_min, v_max, format);
       }
 
+    void ColorEdit3(const char* label, float *col, ImGuiColorEditFlags flags)
+      {
+        ImGui::PushID(label);
+        ImGui::Indent(32.0f);
+        ImGui::Text(label);
+        ImGui::SameLine();
+        ImGui::ColorEdit3("", col, flags);
+        ImGui::Unindent(32.0f);
+        ImGui::PopID();
+      }
+
     ImTextureID AddTexture(VkSampler v_sampler, VkImageView v_image, VkImageLayout v_layout)
       {
         return ImGui_ImplVulkan_AddTexture(v_sampler, v_image, v_layout);

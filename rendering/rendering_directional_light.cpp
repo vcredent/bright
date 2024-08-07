@@ -33,8 +33,8 @@ RenderingDirectionalLight::RenderingDirectionalLight(RenderDevice *v_rd)
     group->add_property("方向", NodePropertyType::FLOAT3, glm::value_ptr(direction));
 
     group = get_node_group("属性");
-    group->add_property("颜色", NodePropertyType::FLOAT3, glm::value_ptr(color));
-    group->add_property("高光", NodePropertyType::FLOAT3, glm::value_ptr(specular_color));
+    group->add_property("颜色", NodePropertyType::COLOR, glm::value_ptr(color));
+    group->add_property("高光", NodePropertyType::COLOR, glm::value_ptr(specular_color));
     group->add_property("强度", NodePropertyType::FLOAT, &intensity);
     group->add_property("指数", NodePropertyType::FLOAT, &specular_exponent);
     group->add_property("环境", NodePropertyType::FLOAT, &ambient);

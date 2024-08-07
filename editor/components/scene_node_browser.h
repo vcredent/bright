@@ -44,6 +44,7 @@ static void _draw_node_proeprties(NodeProperties *node)
                     case NodePropertyType::FLOAT: NavUI::DragFloat(property.name, (float*)property.ptr); break;
                     case NodePropertyType::FLOAT2: NavUI::DragFloat2(property.name, (float*)property.ptr); break;
                     case NodePropertyType::FLOAT3: NavUI::DragFloat3(property.name, (float*)property.ptr); break;
+                    case NodePropertyType::COLOR: NavUI::ColorEdit3(property.name, (float*)property.ptr); break;
                 }
             }
         }
