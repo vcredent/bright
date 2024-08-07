@@ -70,7 +70,7 @@ void RenderingSkySphere::initialize(VkRenderPass v_render_pass)
 
     // hdr
     int width, height, channels;
-    float* pixels = stbi_loadf(_CURDIR("resource/hdr/puresky_2k.hdr"), &width, &height, &channels, STBI_rgb_alpha);
+    float* pixels = stbi_loadf(_CURDIR("resource/hdr/sunset_jhbcentral_4k.hdr"), &width, &height, &channels, STBI_rgb_alpha);
 
     RenderDevice::TextureCreateInfo texture_create_info = {
         /* width= */ (uint32_t) width,
