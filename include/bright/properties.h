@@ -33,6 +33,7 @@ enum NodePropertyType {
     FLOAT3,
     COLOR,
     SLIDER,
+    TRANSFORM, /* TRS transform*/
 };
 
 class NodeProperties {
@@ -55,6 +56,8 @@ public:
           }
     };
 
+    void set_node_model(Mat4 *p_model) { model = p_model;}
+    Mat4 *get_node_mode() { return model; }
     void set_node_name(const char *v_name) { name = v_name; }
     const char *get_node_name() { return name; }
     void set_node_icon(const char *v_icon) { icon = v_icon; }
@@ -76,6 +79,7 @@ public:
 private:
     const char *name;
     const char *icon = NULL;
+    Mat4 *model = NULL;
     std::map<std::string, NodeGroup> groups;
 };
 

@@ -23,6 +23,8 @@
 #ifndef _NAVEDITOR_COMPONENT_SCENE_BROWSER_H_
 #define _NAVEDITOR_COMPONENT_SCENE_BROWSER_H_
 
+#include <navui/ImGuizmo.h>
+
 struct _NodeSelected {
     const char* name = NULL;
     NodeProperties* node = NULL;
@@ -46,11 +48,10 @@ static void _draw_node_proeprties(NodeProperties *node)
                 case NodePropertyType::FLOAT2: NavUI::DragFloat2(property.name, (float*)property.ptr, drag_float_speed); break;
                 case NodePropertyType::FLOAT3: NavUI::DragFloat3(property.name, (float*)property.ptr, drag_float_speed); break;
                 case NodePropertyType::COLOR: NavUI::ColorEdit3(property.name, (float*)property.ptr); break;
-                case NodePropertyType::SLIDER: NavUI::SliderFloat(property.name, (float*) property.ptr, property.min, property.max); break;
+                case NodePropertyType::SLIDER: NavUI::SliderFloat(property.name, (float*)property.ptr, property.min, property.max); break;
                 }
             }
         }
-
     }
     ImGui::End();
 }

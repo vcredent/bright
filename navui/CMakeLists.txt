@@ -35,6 +35,7 @@ add_library(${LIBRARY_NAME} STATIC
   "imgui/imgui_widgets.cpp"
   "imgui/backends/imgui_impl_vulkan.cpp"
   "imgui/backends/imgui_impl_glfw.cpp"
+  "zmo/ImGuizmo.cpp"
 )
 
 target_link_libraries(${LIBRARY_NAME} PRIVATE glfw_vulkan_links)
