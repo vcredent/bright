@@ -21,7 +21,7 @@
 /*                                                                          */
 /* ======================================================================== */
 #include "naveditor.h"
-#include "rendering/renderer.h"
+#include "rendering/renderer3d.h"
 #include <bright/typedefs.h>
 
 // components
@@ -111,12 +111,12 @@ void Naveditor::cmd_draw_scene_viewport_ui(RenderDevice::Texture2D *v_texture, R
 void Naveditor::cmd_draw_scene_node_browser()
 {
     std::vector<RenderObject *> *objects;
-    Renderer::list_render_object(&objects);
+    Renderer3D::list_render_object(&objects);
 
     std::vector<NodeProperties *> properties;
-    properties.push_back(Renderer::get_scene_camera());
-    properties.push_back(Renderer::get_scene_directional_light());
-    properties.push_back(Renderer::get_scene_sky_sphere());
+    properties.push_back(Renderer3D::get_scene_camera());
+    properties.push_back(Renderer3D::get_scene_directional_light());
+    properties.push_back(Renderer3D::get_scene_sky_sphere());
 
     for (const auto &item: *objects)
         properties.push_back(item);
@@ -163,7 +163,7 @@ void Naveditor::_initialize_icon()
 
 void Naveditor::_check_values()
 {
-    Renderer::enable_coordinate_axis(setting_values.render_show_coordinate);
+    Renderer3D::enable_coordinate_axis(setting_values.render_show_coordinate);
 
     if (setting_values.imgui_show_demo_window)
         ImGui::ShowDemoWindow(&setting_values.imgui_show_demo_window);

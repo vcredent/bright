@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* renderer.h                                                               */
+/* renderer3d.h                                                             */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                            BRIGHT ENGINE                                 */
@@ -28,7 +28,7 @@
 // renderer
 #include "renderer_scene.h"
 
-class Renderer {
+class Renderer3D {
 public:
     // initialize and destroy
     static void initialize(RenderDevice *v_rd);

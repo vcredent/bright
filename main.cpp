@@ -26,7 +26,7 @@
 #include "rendering/camera/game_player_camera_controller.h"
 #include "rendering/rendering_screen.h"
 #include "utils/fps_counter.h"
-#include "rendering/renderer.h"
+#include "rendering/renderer3d.h"
 // editor ui
 #include "editor/naveditor.h"
 // misc
@@ -108,18 +108,18 @@ void initialize()
 
     naveditor = memnew(Naveditor, rd, screen);
 
-    Renderer::initialize(rd);
+    Renderer3D::initialize(rd);
 
     cube = RenderObject::load_obj(_CURDIR("assets/cube.obj"));
     cube->set_node_name("立方体");
-    Renderer::push_render_object(cube);
+    Renderer3D::push_render_object(cube);
 
     camera = memnew(ProjectionCamera);
     camera->set_node_name("场景相机");
     game_player_controller = memnew(GamePlayerCameraController);
     game_player_controller->make_current_camera(camera);
     camera->set_position(vec3(0.0f, 0.0f, 6.0f));
-    Renderer::set_scene_camera(camera);
+    Renderer3D::set_scene_camera(camera);
 }
 
 int main(int argc, char **argv)
@@ -135,8 +135,8 @@ int main(int argc, char **argv)
 
         /* render to scene */
         double scene_render_start_time = glfwGetTime();
-        Renderer::begin_scene(scene_region.x, scene_region.y);
-        Renderer::end_scene(&scene_preview_texture, &scene_depth_texture);
+        Renderer3D::begin_scene(scene_region.x, scene_region.y);
+        Renderer3D::end_scene(&scene_preview_texture, &scene_depth_texture);
         double scene_render_end_time = glfwGetTime();
 
         double screen_render_start_time = glfwGetTime();
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 
     memdel(cube);
     memdel(camera);
-    Renderer::destroy();
+    Renderer3D::destroy();
     memdel(naveditor);
     memdel(screen);
     ((RenderDeviceContextWin32 *) rdc)->destroy_render_device(rd);
