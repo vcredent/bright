@@ -32,17 +32,17 @@ public:
    ~SceneRenderData();
 
     struct Perspective {
-        Vec4 camera_pos;
-        Mat4 projection;
-        Mat4 view;
+        vec4 camera_pos;
+        mat4 projection;
+        mat4 view;
     };
 
     struct DirectionalLight {
-        Vec3 direction;
+        vec3 direction;
         float intensity;
-        Vec3 color;
+        vec3 color;
         float specular_exponent;
-        Vec3 specular_color;
+        vec3 specular_color;
         float ambient;
     };
 

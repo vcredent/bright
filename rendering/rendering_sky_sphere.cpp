@@ -151,18 +151,18 @@ void RenderingSkySphere::cmd_draw_sky_sphere(VkCommandBuffer cmd_buffer)
     rd->cmd_setval_viewport(cmd_buffer, render_data->get_scene_width(), render_data->get_scene_height());
     rd->cmd_bind_descriptor_set(cmd_buffer, pipeline, descriptor_set);
 
-    Mat4 mat(1.0f);
+    mat4 mat(1.0f);
 
-    Mat4 T(1.0f);
-    T = glm::translate(T, Vec3(0.0f));
+    mat4 T(1.0f);
+    T = glm::translate(T, vec3(0.0f));
 
-    Mat4 R(1.0f);
-    R = glm::rotate(R, glm::radians(0.0f), Vec3(1.0f, 0.0f, 0.0f));
-    R = glm::rotate(R, glm::radians(0.0f), Vec3(0.0f, 1.0f, 0.0f));
-    R = glm::rotate(R, glm::radians(0.0f), Vec3(0.0f, 0.0f, 1.0f));
+    mat4 R(1.0f);
+    R = glm::rotate(R, glm::radians(0.0f), vec3(1.0f, 0.0f, 0.0f));
+    R = glm::rotate(R, glm::radians(0.0f), vec3(0.0f, 1.0f, 0.0f));
+    R = glm::rotate(R, glm::radians(0.0f), vec3(0.0f, 0.0f, 1.0f));
 
-    Mat4 S(1.0f);
-    S = glm::scale(S, Vec3(4000.0f));
+    mat4 S(1.0f);
+    S = glm::scale(S, vec3(4000.0f));
 
     mat = T * R * S;
 

@@ -34,17 +34,17 @@ public:
 
     void copy_data(SceneRenderData::DirectionalLight *v_light);
 
-    V_FORCEINLINE Vec3 &get_direction() { return direction; }
-    V_FORCEINLINE Vec3 &get_color() { return color; }
-    V_FORCEINLINE Vec3 &get_specular_color() { return specular_color; }
+    V_FORCEINLINE vec3 &get_direction() { return direction; }
+    V_FORCEINLINE vec3 &get_color() { return color; }
+    V_FORCEINLINE vec3 &get_specular_color() { return specular_color; }
     V_FORCEINLINE float get_intensity() { return intensity; }
     V_FORCEINLINE float get_specular_exponent() { return specular_exponent; }
     V_FORCEINLINE float get_ambient() { return ambient; }
 
 private:
-    Vec3 direction = Vec3(-1.0f);
-    Vec3 color = Vec3(1.0f);
-    Vec3 specular_color = Vec3(1.0f);
+    vec3 direction = vec3(-1.0f);
+    vec3 color = vec3(1.0f);
+    vec3 specular_color = vec3(1.0f);
     float intensity = 1.0f;
     float specular_exponent = 32.0f;
     float ambient = 0.3f;

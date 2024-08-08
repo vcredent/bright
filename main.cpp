@@ -118,7 +118,7 @@ void initialize()
     camera->set_node_name("场景相机");
     game_player_controller = memnew(GamePlayerCameraController);
     game_player_controller->make_current_camera(camera);
-    camera->set_position(Vec3(0.0f, 0.0f, 6.0f));
+    camera->set_position(vec3(0.0f, 0.0f, 6.0f));
     Renderer::set_scene_camera(camera);
 }
 

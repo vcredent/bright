@@ -59,7 +59,7 @@ void RenderingGraphics::initialize(VkRenderPass render_pass)
     VkPushConstantRange push_const_range = {
             /* stageFlags= */ VK_SHADER_STAGE_VERTEX_BIT,
             /* offset= */ 0,
-            /* size= */ sizeof(Mat4)
+            /* size= */ sizeof(mat4)
     };
 
     RenderDevice::ShaderInfo shader_info = {

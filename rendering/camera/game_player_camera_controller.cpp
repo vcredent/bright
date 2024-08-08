@@ -84,8 +84,8 @@ void GamePlayerCameraController::on_event_scroll(float x, float y)
 
 void GamePlayerCameraController::on_update_camera()
 {
-    Vec3 position = camera->get_position();
-    Vec3 front = camera->get_front();
+    vec3 position = camera->get_position();
+    vec3 front = camera->get_front();
     float speed = camera->get_speed();
 
     static float last_time = 0.0f;

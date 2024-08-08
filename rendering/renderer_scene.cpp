@@ -86,7 +86,7 @@ void RendererScene::cmd_begin_scene_renderer(uint32_t v_width, uint32_t v_height
     directional_light->copy_data(&light);
     
     SceneRenderData::Perspective perspective;
-    perspective.camera_pos = Vec4(camera->get_position(), 1.0f);
+    perspective.camera_pos = vec4(camera->get_position(), 1.0f);
     perspective.view = camera->get_view_matrix();
     perspective.projection = camera->get_projection_matrix();
 

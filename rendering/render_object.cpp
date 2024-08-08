@@ -45,18 +45,18 @@ RenderObject::~RenderObject()
 
 void RenderObject::update()
 {
-	Mat4 translate(1.0f);
-    Mat4 rotate(1.0f);
-    Mat4 scale(1.0f);
+	mat4 translate(1.0f);
+    mat4 rotate(1.0f);
+    mat4 scale(1.0f);
 
     // T
 	translate = glm::translate(translate, position);
 
     // R
     static float sensitivity = 8.0f;
-    rotate = glm::rotate(rotate, glm::radians(rotation.x * sensitivity), Vec3(1.0f, 0.0f, 0.0f));
-    rotate = glm::rotate(rotate, glm::radians(rotation.y * sensitivity), Vec3(0.0f, 1.0f, 0.0f));
-    rotate = glm::rotate(rotate, glm::radians(rotation.z * sensitivity), Vec3(0.0f, 0.0f, 1.0f));
+    rotate = glm::rotate(rotate, glm::radians(rotation.x * sensitivity), vec3(1.0f, 0.0f, 0.0f));
+    rotate = glm::rotate(rotate, glm::radians(rotation.y * sensitivity), vec3(0.0f, 1.0f, 0.0f));
+    rotate = glm::rotate(rotate, glm::radians(rotation.z * sensitivity), vec3(0.0f, 0.0f, 1.0f));
 
     // S
 	scale = glm::scale(scale, scaling);
@@ -89,7 +89,7 @@ void RenderObject::cmd_bind(VkCommandBuffer cmd_buffer)
 void RenderObject::cmd_draw(VkCommandBuffer cmd_buffer, RenderDevice::Pipeline *pipeline)
 {
     cmd_bind(cmd_buffer);
-    rd->cmd_push_const(cmd_buffer, pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Mat4), &transform);
+    rd->cmd_push_const(cmd_buffer, pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mat4), &transform);
     rd->cmd_draw_indexed(cmd_buffer, std::size(indices));
 }
 

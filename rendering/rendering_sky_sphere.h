@@ -37,13 +37,13 @@ public:
 
 private:
     struct Vertex {
-        Vec3 position;
-        Vec2 texcoord;
-        Vec3 normal;
+        vec3 position;
+        vec2 texcoord;
+        vec3 normal;
     };
 
     struct PushConst {
-        Mat4 transform;
+        mat4 transform;
         float exposure;
         float gamma;
     };

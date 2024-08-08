@@ -28,11 +28,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <stdio.h>
 
-typedef glm::vec2 Vec2;
-typedef glm::vec3 Vec3;
-typedef glm::vec4 Vec4;
-typedef glm::mat4 Mat4;
-typedef glm::quat Quat;
+typedef glm::vec2 vec2;
+typedef glm::vec3 vec3;
+typedef glm::vec4 vec4;
+typedef glm::mat4 mat4;
+typedef glm::quat quat;
 
 #define CONSOLE_WRITE_MATRIX_4x4(matrix) do {   \
     printf(                                     \

@@ -33,24 +33,24 @@ public:
     ~RenderObject();
 
     struct Mesh {
-        Vec3 vertex;
-        Vec2 texcoord;
-        Vec3 normal;
+        vec3 vertex;
+        vec2 texcoord;
+        vec3 normal;
     };
 
     void update();
     void initialize(RenderDevice *v_rd);
 
     V_FORCEINLINE const char *get_name() { return name; }
-    V_FORCEINLINE Vec3 &get_object_position() { return position; }
-    V_FORCEINLINE Vec3 &get_object_rotation() { return rotation; }
-    V_FORCEINLINE Vec3 &get_object_scaling() { return scaling; }
-    V_FORCEINLINE Mat4 &get_model_matrix() { return transform; }
+    V_FORCEINLINE vec3 &get_object_position() { return position; }
+    V_FORCEINLINE vec3 &get_object_rotation() { return rotation; }
+    V_FORCEINLINE vec3 &get_object_scaling() { return scaling; }
+    V_FORCEINLINE mat4 &get_model_matrix() { return transform; }
 
     V_FORCEINLINE void set_name(const char *v_name) { name = v_name; }
-    V_FORCEINLINE void set_object_position(Vec3 &v_position) { position = v_position; }
-    V_FORCEINLINE void set_object_rotation(Vec3 &v_rotation) { rotation = v_rotation; }
-    V_FORCEINLINE void set_object_scaling(Vec3 &v_scaling) { scaling = v_scaling; }
+    V_FORCEINLINE void set_object_position(vec3 &v_position) { position = v_position; }
+    V_FORCEINLINE void set_object_rotation(vec3 &v_rotation) { rotation = v_rotation; }
+    V_FORCEINLINE void set_object_scaling(vec3 &v_scaling) { scaling = v_scaling; }
 
     void cmd_bind(VkCommandBuffer cmd_buffer);
     void cmd_draw(VkCommandBuffer cmd_buffer, RenderDevice::Pipeline *pipeline);
@@ -60,12 +60,12 @@ public:
 private:
     std::vector<Mesh> meshes;
     std::vector<uint32_t> indices;
-    Mat4 transform = Mat4(1.0f);
+    mat4 transform = mat4(1.0f);
     RenderDevice *rd;
 
-    Vec3 position = Vec3(0.0f);
-    Vec3 rotation = Vec3(0.0f);
-    Vec3 scaling = Vec3(1.0f);
+    vec3 position = vec3(0.0f);
+    vec3 rotation = vec3(0.0f);
+    vec3 scaling = vec3(1.0f);
 
     const char *name;
     RenderDevice::Buffer *vertex_buffer = VK_NULL_HANDLE;

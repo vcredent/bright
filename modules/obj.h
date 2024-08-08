@@ -32,9 +32,9 @@ public:
     ~ObjLoader() { /* do nothing... */ }
 
     struct Vertex {
-        Vec3 position;
-        Vec2 texcoord;
-        Vec3 normal;
+        vec3 position;
+        vec2 texcoord;
+        vec3 normal;
 
         // eq
         bool operator==(const Vertex &other) const {
