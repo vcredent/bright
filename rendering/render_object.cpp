@@ -62,7 +62,7 @@ void RenderObject::update()
 	scale = glm::scale(scale, scaling);
 
     // T * R * S
-    // transform = translate * rotate * scale;
+    transform = translate * rotate * scale;
 }
 
 void RenderObject::initialize(RenderDevice *v_rd)
