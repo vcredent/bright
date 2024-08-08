@@ -23,8 +23,6 @@
 #ifndef _NAVEDITOR_COMPONENT_SCENE_BROWSER_H_
 #define _NAVEDITOR_COMPONENT_SCENE_BROWSER_H_
 
-#include <navui/ImGuizmo.h>
-
 struct _NodeSelected {
     const char* name = NULL;
     NodeProperties* node = NULL;

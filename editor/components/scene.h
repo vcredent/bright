@@ -23,12 +23,8 @@
 #ifndef _NAVEDITOR_COMPONENT_SCENE_H_
 #define _NAVEDITOR_COMPONENT_SCENE_H_
 
-#include <navui/ImGuizmo.h>
-
 static void _draw_scene_editor_ui(RenderDevice::Texture2D *v_texture, RenderDevice::Texture2D *v_depth, ImVec2 *p_region)
 {
-    ImGuizmo::BeginFrame();
-
     NavUI::BeginViewport("场景");
     {
         static ImTextureID preview = NULL;
