@@ -129,9 +129,6 @@ void Naveditor::_load_icon(const char* name, const char* icon)
     unsigned char* pixels;
     int width, height, channels;
 
-    RenderDevice::SamplerCreateInfo sampler_create_info;
-    rd->create_sampler(&sampler_create_info, &sampler);
-
     RenderDevice::TextureCreateInfo texture_create_info = {};
     texture_create_info.format = VK_FORMAT_R8G8B8A8_UNORM;
     texture_create_info.aspect_mask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -155,6 +152,9 @@ void Naveditor::_load_icon(const char* name, const char* icon)
 
 void Naveditor::_initialize_icon()
 {
+    RenderDevice::SamplerCreateInfo sampler_create_info;
+    rd->create_sampler(&sampler_create_info, &sampler);
+
     _load_icon("cube", _CURDIR("resource/icon/cube.png"));
     _load_icon("camera", _CURDIR("resource/icon/camera.png"));
     _load_icon("sun", _CURDIR("resource/icon/sun.png"));
