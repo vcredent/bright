@@ -162,7 +162,7 @@ void RenderingSkySphere::cmd_draw_sky_sphere(VkCommandBuffer cmd_buffer)
     R = glm::rotate(R, glm::radians(0.0f), vec3(0.0f, 0.0f, 1.0f));
 
     mat4 S(1.0f);
-    S = glm::scale(S, vec3(4000.0f));
+    S = glm::scale(S, vec3(3000.0f * 2.0f));
 
     mat = T * R * S;
 

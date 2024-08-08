@@ -34,7 +34,7 @@ RenderObject::RenderObject()
     group->add_property("旋转", NodePropertyType::FLOAT3, glm::value_ptr(rotation));
     group->add_property("缩放", NodePropertyType::FLOAT3, glm::value_ptr(scaling));
 
-    set_node_model(&transform);
+    set_node_transform(glm::value_ptr(transform));
 }
 
 RenderObject::~RenderObject()
@@ -62,7 +62,7 @@ void RenderObject::update()
 	scale = glm::scale(scale, scaling);
 
     // T * R * S
-    transform = translate * rotate * scale;
+    // transform = translate * rotate * scale;
 }
 
 void RenderObject::initialize(RenderDevice *v_rd)

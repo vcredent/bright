@@ -33,6 +33,7 @@ struct _NodeSelected {
 static void _draw_node_proeprties(NodeProperties *node)
 {
     ImGui::Begin("属性");
+
     auto groups = node->get_node_groups();
     for (const auto& it : groups) {
         // property group

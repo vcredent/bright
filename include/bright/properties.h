@@ -56,8 +56,8 @@ public:
           }
     };
 
-    void set_node_model(mat4 *p_model) { model = p_model;}
-    mat4 *get_node_mode() { return model; }
+    void set_node_transform(float *p_model) { transform = p_model;}
+    float *get_node_transform() { return transform; }
     void set_node_name(const char *v_name) { name = v_name; }
     const char *get_node_name() { return name; }
     void set_node_icon(const char *v_icon) { icon = v_icon; }
@@ -79,7 +79,7 @@ public:
 private:
     const char *name;
     const char *icon = NULL;
-    mat4 *model = NULL;
+    float *transform = NULL; // mat4
     std::map<std::string, NodeGroup> groups;
 };
 
