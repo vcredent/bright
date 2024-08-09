@@ -31,16 +31,16 @@ public:
     RenderDevice(RenderDeviceContext *driver_context);
     ~RenderDevice();
 
-    RenderDeviceContext *GetDeviceContext() { return vk_rdc; }
-    VkDescriptorPool GetDescriptorPool() { return descriptor_pool; }
-    VkFormat GetSurfaceFormat() { return vk_rdc->GetWindowFormat(); }
-    VkSampleCountFlagBits GetMSAASampleCounts() { return msaa_sample_counts; }
+    RenderDeviceContext *GetDeviceContext() { return rdc; }
+    VkDescriptorPool GetDescriptorPool() { return descriptorPool; }
+    VkFormat GetSurfaceFormat() { return rdc->GetWindowFormat(); }
+    VkSampleCountFlagBits GetMSAASampleCounts() { return msaaSampleCounts; }
 
     struct Buffer {
-        VkBuffer vk_buffer;
+        VkBuffer vkBuffer;
         VkDeviceSize size;
         VmaAllocation allocation;
-        VmaAllocationInfo allocation_info;
+        VmaAllocationInfo allocationInfo;
     };
 
     Buffer *CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize size);
@@ -55,11 +55,11 @@ public:
 
     struct Texture2D {
         VkImage image;
-        VkImageView image_view;
-        VkImageLayout image_layout;
-        VkDescriptorSet descriptor_set;
+        VkImageView imageView;
+        VkImageLayout imageLayout;
+        VkDescriptorSet descriptorSet;
         VmaAllocation allocation;
-        VmaAllocationInfo allocation_info;
+        VmaAllocationInfo allocationInfo;
         uint32_t width;
         uint32_t height;
         VkFormat format;
@@ -106,40 +106,40 @@ public:
     struct ShaderInfo {
         const char *vertex = NULL;
         const char *fragment = NULL;
-        uint32_t attribute_count = 0;
+        uint32_t attributeCount = 0;
         VkVertexInputAttributeDescription *attributes = NULL;
-        uint32_t bind_count = 0;
+        uint32_t bindCount = 0;
         VkVertexInputBindingDescription *binds = NULL;
-        uint32_t descriptor_set_layout_count = 0;
-        VkDescriptorSetLayout *p_descriptor_set_layouts = NULL;
-        uint32_t push_const_count = 0;
-        VkPushConstantRange *p_push_const_range = NULL;
+        uint32_t descriptorSetLayoutCount = 0;
+        VkDescriptorSetLayout *pDescriptorSetLayouts = NULL;
+        uint32_t pushConstantCount = 0;
+        VkPushConstantRange *pPushConstantRange = NULL;
     };
 
     struct ComputeShaderInfo {
         const char *compute = NULL;
-        uint32_t descriptor_set_layout_count = 0;
-        VkDescriptorSetLayout *p_descriptor_set_layouts = NULL;
-        uint32_t push_const_count = 0;
-        VkPushConstantRange *p_push_const_range = NULL;
+        uint32_t descriptorSetLayoutCount = 0;
+        VkDescriptorSetLayout *pDescriptorSetLayouts = NULL;
+        uint32_t pushConstantCount = 0;
+        VkPushConstantRange *pPushConstantRange = NULL;
     };
 
     struct PipelineCreateInfo {
-        VkRenderPass render_pass;
+        VkRenderPass renderPass;
         VkPolygonMode polygon;
         VkPrimitiveTopology topology;
-        VkCullModeFlags cull_mode = VK_CULL_MODE_BACK_BIT;
+        VkCullModeFlags cullMode = VK_CULL_MODE_BACK_BIT;
         VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;
-        float line_width = 1.0f;
-        VkBool32 blend_enable = VK_FALSE;
-        VkBlendFactor src_color_blend_factor = VK_BLEND_FACTOR_ONE;
-        VkBlendFactor dst_color_blend_factor = VK_BLEND_FACTOR_ZERO;
+        float lineWidth = 1.0f;
+        VkBool32 blendEnable = VK_FALSE;
+        VkBlendFactor srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+        VkBlendFactor dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
     };
 
     struct Pipeline {
         VkPipeline pipeline;
         VkPipelineLayout layout;
-        VkPipelineBindPoint bind_point;
+        VkPipelineBindPoint bindPoint;
     };
 
     Pipeline *CreateGraphicsPipeline(PipelineCreateInfo *p_create_info, ShaderInfo *p_shader_info);
@@ -154,10 +154,10 @@ public:
     struct PipelineMemoryBarrier {
         struct {
             Texture2D *texture = VK_NULL_HANDLE;
-            VkImageLayout old_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-            VkImageLayout new_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-            VkAccessFlags src_access_mask = 0;
-            VkAccessFlags dst_access_mask = 0;
+            VkImageLayout oldImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            VkImageLayout newImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            VkAccessFlags srcAccessMask = 0;
+            VkAccessFlags dstAccessMask = 0;
         } image;
     };
 
@@ -179,11 +179,11 @@ public:
 private:
     void _InitializeDescriptorPool();
 
-    RenderDeviceContext *vk_rdc;
-    VkDevice vk_device;
+    RenderDeviceContext *rdc;
+    VkDevice vkDevice;
     VmaAllocator allocator;
-    VkDescriptorPool descriptor_pool;
-    VkSampleCountFlagBits msaa_sample_counts;
+    VkDescriptorPool descriptorPool;
+    VkSampleCountFlagBits msaaSampleCounts;
 };
 
 #endif /* _RENDERING_DEVICE_DRIVER_VULKAN_H */

@@ -23,22 +23,22 @@
 #include "RenderDevice.h"
 
 RenderDevice::RenderDevice(RenderDeviceContext *driver_context)
-    : vk_rdc(driver_context)
+    : rdc(driver_context)
 {
-    vk_device = vk_rdc->GetDevice();
-    allocator = vk_rdc->GetAllocator();
+    vkDevice = rdc->GetDevice();
+    allocator = rdc->GetAllocator();
 
     _InitializeDescriptorPool();
 
-    msaa_sample_counts = vk_rdc->GetMaxMSAASampleCounts();
+    msaaSampleCounts = rdc->GetMaxMSAASampleCounts();
 
     // if sample counts > 4x，that default msaa samples set 4x otherwise 2x
-    msaa_sample_counts = msaa_sample_counts >= 4 ? VK_SAMPLE_COUNT_4_BIT : VK_SAMPLE_COUNT_2_BIT;
+    msaaSampleCounts = msaaSampleCounts >= 4 ? VK_SAMPLE_COUNT_4_BIT : VK_SAMPLE_COUNT_2_BIT;
 }
 
 RenderDevice::~RenderDevice()
 {
-    vkDestroyDescriptorPool(vk_device, descriptor_pool, VK_NULL_HANDLE);
+    vkDestroyDescriptorPool(vkDevice, descriptorPool, VK_NULL_HANDLE);
 }
 
 RenderDevice::Buffer *RenderDevice::CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize size)
@@ -56,7 +56,7 @@ RenderDevice::Buffer *RenderDevice::CreateBuffer(VkBufferUsageFlags usage, VkDev
     Buffer *buffer = (Buffer *) imalloc(sizeof(Buffer));
     buffer->size = size;
 
-    err = vmaCreateBuffer(allocator, &buffer_create_info, &allocation_create_info, &buffer->vk_buffer, &buffer->allocation, &buffer->allocation_info);
+    err = vmaCreateBuffer(allocator, &buffer_create_info, &allocation_create_info, &buffer->vkBuffer, &buffer->allocation, &buffer->allocationInfo);
     assert(!err);
 
     return buffer;
@@ -64,7 +64,7 @@ RenderDevice::Buffer *RenderDevice::CreateBuffer(VkBufferUsageFlags usage, VkDev
 
 void RenderDevice::DestroyBuffer(Buffer *p_buffer)
 {
-    vmaDestroyBuffer(allocator, p_buffer->vk_buffer, p_buffer->allocation);
+    vmaDestroyBuffer(allocator, p_buffer->vkBuffer, p_buffer->allocation);
     free(p_buffer);
 }
 
@@ -99,23 +99,23 @@ void RenderDevice::CreateRenderPass(uint32_t attachment_count, VkAttachmentDescr
     render_pass_create_info.dependencyCount = dependency_count;
     render_pass_create_info.pDependencies = p_dependencies;
 
-    err = vkCreateRenderPass(vk_device, &render_pass_create_info, VK_NULL_HANDLE, p_render_pass);
+    err = vkCreateRenderPass(vkDevice, &render_pass_create_info, VK_NULL_HANDLE, p_render_pass);
     assert(!err);
 }
 
 void RenderDevice::DestroyRenderPass(VkRenderPass render_pass)
 {
-    vkDestroyRenderPass(vk_device, render_pass, VK_NULL_HANDLE);
+    vkDestroyRenderPass(vkDevice, render_pass, VK_NULL_HANDLE);
 }
 
 void RenderDevice::AllocateCommandBuffer(VkCommandBuffer *p_cmd_buffer)
 {
-    vk_rdc->AllocateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, p_cmd_buffer);
+    rdc->AllocateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, p_cmd_buffer);
 }
 
 void RenderDevice::FreeCommandBuffer(VkCommandBuffer cmd_buffer)
 {
-    vk_rdc->FreeCommandBuffer(cmd_buffer);
+    rdc->FreeCommandBuffer(cmd_buffer);
 }
 
 RenderDevice::Texture2D *RenderDevice::CreateTexture(TextureCreateInfo *p_create_info)
@@ -149,7 +149,7 @@ RenderDevice::Texture2D *RenderDevice::CreateTexture(TextureCreateInfo *p_create
 
     VmaAllocationCreateInfo allocation_create_info = {};
     allocation_create_info.usage = VMA_MEMORY_USAGE_AUTO;
-    err = vmaCreateImage(allocator, &image_create_info, &allocation_create_info, &texture->image, &texture->allocation, &texture->allocation_info);
+    err = vmaCreateImage(allocator, &image_create_info, &allocation_create_info, &texture->image, &texture->allocation, &texture->allocationInfo);
     assert(!err);
 
     VkImageViewCreateInfo image_view_create_info = {
@@ -176,7 +176,7 @@ RenderDevice::Texture2D *RenderDevice::CreateTexture(TextureCreateInfo *p_create
                 },
     };
 
-    err = vkCreateImageView(vk_device, &image_view_create_info, VK_NULL_HANDLE, &texture->image_view);
+    err = vkCreateImageView(vkDevice, &image_view_create_info, VK_NULL_HANDLE, &texture->imageView);
     assert(!err);
 
     return texture;
@@ -185,9 +185,9 @@ RenderDevice::Texture2D *RenderDevice::CreateTexture(TextureCreateInfo *p_create
 void RenderDevice::DestroyTexture(Texture2D *p_texture)
 {
     vmaDestroyImage(allocator, p_texture->image, p_texture->allocation);
-    vkDestroyImageView(vk_device, p_texture->image_view, VK_NULL_HANDLE);
-    if (p_texture->descriptor_set)
-        FreeDescriptorSet(p_texture->descriptor_set);
+    vkDestroyImageView(vkDevice, p_texture->imageView, VK_NULL_HANDLE);
+    if (p_texture->descriptorSet)
+        FreeDescriptorSet(p_texture->descriptorSet);
 }
 
 void RenderDevice::WriteTexture(Texture2D *texture, size_t size, void *pixels)
@@ -202,10 +202,10 @@ void RenderDevice::WriteTexture(Texture2D *texture, size_t size, void *pixels)
 
     PipelineMemoryBarrier barrier;
     barrier.image.texture = texture;
-    barrier.image.old_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-    barrier.image.new_image_layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    barrier.image.src_access_mask = 0;
-    barrier.image.dst_access_mask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.image.oldImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    barrier.image.newImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier.image.srcAccessMask = 0;
+    barrier.image.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
     CmdPipelineBarrier(cmd_buffer, &barrier);
 
     VkBufferImageCopy region = {};
@@ -221,17 +221,17 @@ void RenderDevice::WriteTexture(Texture2D *texture, size_t size, void *pixels)
 
     vkCmdCopyBufferToImage(
         cmd_buffer,
-        buffer->vk_buffer,
+        buffer->vkBuffer,
         texture->image,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         1,
         &region
     );
 
-    barrier.image.old_image_layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    barrier.image.new_image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    barrier.image.src_access_mask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    barrier.image.dst_access_mask = VK_ACCESS_SHADER_READ_BIT;
+    barrier.image.oldImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier.image.newImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    barrier.image.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.image.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
     CmdPipelineBarrier(cmd_buffer, &barrier);
 
     CmdBufferOneTimeEnd(cmd_buffer);
@@ -255,13 +255,13 @@ RenderDevice::CreateFramebuffer(uint32_t width, uint32_t height, uint32_t image_
             /* layers */ 1,
     };
 
-    err = vkCreateFramebuffer(vk_device, &framebuffer_create_info, VK_NULL_HANDLE, p_framebuffer);
+    err = vkCreateFramebuffer(vkDevice, &framebuffer_create_info, VK_NULL_HANDLE, p_framebuffer);
     assert(!err);
 }
 
 void RenderDevice::DestroyFramebuffer(VkFramebuffer framebuffer)
 {
-    vkDestroyFramebuffer(vk_device, framebuffer, VK_NULL_HANDLE);
+    vkDestroyFramebuffer(vkDevice, framebuffer, VK_NULL_HANDLE);
 }
 
 void RenderDevice::CreateSampler(SamplerCreateInfo* p_create_info, VkSampler* p_sampler)
@@ -284,12 +284,12 @@ void RenderDevice::CreateSampler(SamplerCreateInfo* p_create_info, VkSampler* p_
     sampler_create_info.minLod = 0.0f;
     sampler_create_info.maxLod = 0.0f;
 
-    vkCreateSampler(vk_device, &sampler_create_info, VK_NULL_HANDLE, p_sampler);
+    vkCreateSampler(vkDevice, &sampler_create_info, VK_NULL_HANDLE, p_sampler);
 }
 
 void RenderDevice::DestroySampler(VkSampler sampler)
 {
-    vkDestroySampler(vk_device, sampler, VK_NULL_HANDLE);
+    vkDestroySampler(vkDevice, sampler, VK_NULL_HANDLE);
 }
 
 void RenderDevice::BindTextureSampler(RenderDevice::Texture2D *texture, VkSampler sampler)
@@ -309,13 +309,13 @@ void RenderDevice::CreateDescriptorSetLayout(uint32_t bind_count, VkDescriptorSe
             /* pBindings */ p_bind,
     };
 
-    err = vkCreateDescriptorSetLayout(vk_device, &descriptor_set_layout_create_info, VK_NULL_HANDLE, p_descriptor_set_layout);
+    err = vkCreateDescriptorSetLayout(vkDevice, &descriptor_set_layout_create_info, VK_NULL_HANDLE, p_descriptor_set_layout);
     assert(!err);
 }
 
 void RenderDevice::DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptor_set_layout)
 {
-    vkDestroyDescriptorSetLayout(vk_device, descriptor_set_layout, VK_NULL_HANDLE);
+    vkDestroyDescriptorSetLayout(vkDevice, descriptor_set_layout, VK_NULL_HANDLE);
 }
 
 void RenderDevice::AllocateDescriptorSet(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor_set)
@@ -323,23 +323,23 @@ void RenderDevice::AllocateDescriptorSet(VkDescriptorSetLayout descriptor_set_la
     VkDescriptorSetAllocateInfo descriptor_allocate_info = {
             /* sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
             /* pNext */ VK_NULL_HANDLE,
-            /* descriptorPool */ descriptor_pool,
+            /* descriptorPool */ descriptorPool,
             /* descriptorSetCount */ 1,
             /* pSetLayouts */ &descriptor_set_layout,
     };
 
-    vkAllocateDescriptorSets(vk_device, &descriptor_allocate_info, p_descriptor_set);
+    vkAllocateDescriptorSets(vkDevice, &descriptor_allocate_info, p_descriptor_set);
 }
 
 void RenderDevice::FreeDescriptorSet(VkDescriptorSet descriptor_set)
 {
-    vkFreeDescriptorSets(vk_device, descriptor_pool, 1, &descriptor_set);
+    vkFreeDescriptorSets(vkDevice, descriptorPool, 1, &descriptor_set);
 }
 
 void RenderDevice::UpdateDescriptorSetBuffer(Buffer *p_buffer, uint32_t binding, VkDescriptorSet descriptor_set)
 {
     VkDescriptorBufferInfo buffer_info = {
-            /* buffer */ p_buffer->vk_buffer,
+            /* buffer */ p_buffer->vkBuffer,
             /* offset */ 0,
             /* range */ p_buffer->size,
     };
@@ -357,15 +357,15 @@ void RenderDevice::UpdateDescriptorSetBuffer(Buffer *p_buffer, uint32_t binding,
             /* pTexelBufferView */ VK_NULL_HANDLE,
     };
 
-    vkUpdateDescriptorSets(vk_device, 1, &write_info, 0, nullptr);
+    vkUpdateDescriptorSets(vkDevice, 1, &write_info, 0, nullptr);
 }
 
 void RenderDevice::UpdateDescriptorSetImage(RenderDevice::Texture2D *p_texture, uint32_t binding, VkDescriptorSet descriptor_set)
 {
     VkDescriptorImageInfo image_info = {
             /* sampler= */ p_texture->sampler,
-            /* imageView= */ p_texture->image_view,
-            /* imageLayout= */ p_texture->image_layout,
+            /* imageView= */ p_texture->imageView,
+            /* imageLayout= */ p_texture->imageLayout,
     };
 
     VkWriteDescriptorSet write_info = {
@@ -381,7 +381,7 @@ void RenderDevice::UpdateDescriptorSetImage(RenderDevice::Texture2D *p_texture, 
             /* pTexelBufferView */ VK_NULL_HANDLE,
     };
 
-    vkUpdateDescriptorSets(vk_device, 1, &write_info, 0, nullptr);
+    vkUpdateDescriptorSets(vkDevice, 1, &write_info, 0, nullptr);
 }
 
 RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::PipelineCreateInfo *p_create_info, RenderDevice::ShaderInfo *p_shader_info)
@@ -392,20 +392,20 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
             /* pNext */ VK_NULL_HANDLE,
             /* flags */ VK_NONE_FLAGS,
-            /* setLayoutCount */ p_shader_info->descriptor_set_layout_count,
-            /* pSetLayouts */ p_shader_info->p_descriptor_set_layouts,
-            /* pushConstantRangeCount */ p_shader_info->push_const_count,
-            /* pPushConstantRanges */ p_shader_info->p_push_const_range,
+            /* setLayoutCount */ p_shader_info->descriptorSetLayoutCount,
+            /* pSetLayouts */ p_shader_info->pDescriptorSetLayouts,
+            /* pushConstantRangeCount */ p_shader_info->pushConstantCount,
+            /* pPushConstantRanges */ p_shader_info->pPushConstantRange,
     };
 
     VkPipelineLayout vk_pipeline_layout;
-    err = vkCreatePipelineLayout(vk_device, &pipeline_layout_creat_info, VK_NULL_HANDLE, &vk_pipeline_layout);
+    err = vkCreatePipelineLayout(vkDevice, &pipeline_layout_creat_info, VK_NULL_HANDLE, &vk_pipeline_layout);
     assert(!err);
 
     VkShaderModule vertex_shader_module, fragment_shader_module;
 
-    vertex_shader_module = load_shader_module(vk_device, p_shader_info->vertex, "vert");
-    fragment_shader_module = load_shader_module(vk_device, p_shader_info->fragment, "frag");
+    vertex_shader_module = load_shader_module(vkDevice, p_shader_info->vertex, "vert");
+    fragment_shader_module = load_shader_module(vkDevice, p_shader_info->fragment, "frag");
 
     VkPipelineShaderStageCreateInfo vertex_shader_create_info = {};
     vertex_shader_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -427,9 +427,9 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
             /* pNext */ VK_NULL_HANDLE,
             /* flags */ VK_NONE_FLAGS,
-            /* vertexBindingDescriptionCount */ p_shader_info->bind_count,
+            /* vertexBindingDescriptionCount */ p_shader_info->bindCount,
             /* pVertexBindingDescriptions */ p_shader_info->binds,
-            /* vertexAttributeDescriptionCount */ p_shader_info->attribute_count,
+            /* vertexAttributeDescriptionCount */ p_shader_info->attributeCount,
             /* pVertexAttributeDescriptions */ p_shader_info->attributes,
     };
 
@@ -470,8 +470,8 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
     rasterization_state_create_info.depthClampEnable = VK_FALSE;
     rasterization_state_create_info.rasterizerDiscardEnable = VK_FALSE;
     rasterization_state_create_info.polygonMode = p_create_info->polygon;
-    rasterization_state_create_info.lineWidth = p_create_info->line_width;
-    rasterization_state_create_info.cullMode = p_create_info->cull_mode;
+    rasterization_state_create_info.lineWidth = p_create_info->lineWidth;
+    rasterization_state_create_info.cullMode = p_create_info->cullMode;
     rasterization_state_create_info.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterization_state_create_info.depthBiasEnable = VK_FALSE;
     rasterization_state_create_info.depthBiasConstantFactor = 0.0f;
@@ -489,9 +489,9 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
 
     VkPipelineColorBlendAttachmentState color_blend_attachment_state = {};
     color_blend_attachment_state.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    color_blend_attachment_state.blendEnable = p_create_info->blend_enable;
-    color_blend_attachment_state.srcColorBlendFactor = p_create_info->src_color_blend_factor;
-    color_blend_attachment_state.dstColorBlendFactor = p_create_info->dst_color_blend_factor;
+    color_blend_attachment_state.blendEnable = p_create_info->blendEnable;
+    color_blend_attachment_state.srcColorBlendFactor = p_create_info->srcColorBlendFactor;
+    color_blend_attachment_state.dstColorBlendFactor = p_create_info->dstColorBlendFactor;
     color_blend_attachment_state.colorBlendOp = VK_BLEND_OP_ADD;
     color_blend_attachment_state.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
     color_blend_attachment_state.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
@@ -530,7 +530,7 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
             VK_DYNAMIC_STATE_SCISSOR,
     };
 
-    if (p_create_info->line_width > 1.0f)
+    if (p_create_info->lineWidth > 1.0f)
         dynamics.push_back(VK_DYNAMIC_STATE_LINE_WIDTH);
 
     VkPipelineDynamicStateCreateInfo dynamic_state_crate_info = {
@@ -557,23 +557,23 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
             /* pColorBlendState */ &color_blend_state_create_info,
             /* pDynamicState */ &dynamic_state_crate_info,
             /* layout */ vk_pipeline_layout,
-            /* renderPass */ p_create_info->render_pass,
+            /* renderPass */ p_create_info->renderPass,
             /* subpass */ 0,
             /* basePipelineHandle */ VK_NULL_HANDLE,
             /* basePipelineIndex */ -1,
     };
 
     VkPipeline vk_pipeline;
-    err = vkCreateGraphicsPipelines(vk_device, nullptr, 1, &pipeline_create_info, VK_NULL_HANDLE, &vk_pipeline);
+    err = vkCreateGraphicsPipelines(vkDevice, nullptr, 1, &pipeline_create_info, VK_NULL_HANDLE, &vk_pipeline);
     assert(!err);
 
     Pipeline *p_pipeline = (Pipeline*) imalloc(sizeof(Pipeline));
     p_pipeline->pipeline = vk_pipeline;
     p_pipeline->layout = vk_pipeline_layout;
-    p_pipeline->bind_point = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    p_pipeline->bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
-    vkDestroyShaderModule(vk_device, vertex_shader_module, VK_NULL_HANDLE);
-    vkDestroyShaderModule(vk_device, fragment_shader_module, VK_NULL_HANDLE);
+    vkDestroyShaderModule(vkDevice, vertex_shader_module, VK_NULL_HANDLE);
+    vkDestroyShaderModule(vkDevice, fragment_shader_module, VK_NULL_HANDLE);
 
     return p_pipeline;
 }
@@ -582,7 +582,7 @@ void RenderDevice::_InitializeDescriptorPool()
 {
     VkResult U_ASSERT_ONLY err;
 
-    VkDescriptorPoolSize pool_size[] = {
+    VkDescriptorPoolSize poolSize[] = {
             { VK_DESCRIPTOR_TYPE_SAMPLER,                256 },
             { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 256 },
             { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          256 },
@@ -596,37 +596,37 @@ void RenderDevice::_InitializeDescriptorPool()
             { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       256 },
     };
 
-    VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
-            /* sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            /* pNext */ VK_NULL_HANDLE,
-            /* flags */ VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
-            /* maxSets */ 1024,
-            /* poolSizeCount */ ARRAY_SIZE(pool_size),
-            /* pPoolSizes */ pool_size,
+    VkDescriptorPoolCreateInfo descriptorPool_create_info = {
+            /* STYPE */ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+            /* PNEXT */ VK_NULL_HANDLE,
+            /* FLAGS */ VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+            /* MAXSETS */ 1024,
+            /* POOLSIZECOUNT */ ARRAY_SIZE(poolSize),
+            /* PPOOLSIZES */ poolSize,
     };
 
-    err = vkCreateDescriptorPool(vk_device, &descriptor_pool_create_info, VK_NULL_HANDLE, &descriptor_pool);
+    err = vkCreateDescriptorPool(vkDevice, &descriptorPool_create_info, VK_NULL_HANDLE, &descriptorPool);
     assert(!err);
 }
 
 RenderDevice::Pipeline *RenderDevice::CreateComputePipeline(RenderDevice::ComputeShaderInfo *p_shader_info)
 {
     Pipeline *pipeline = (Pipeline *) imalloc(sizeof(Pipeline));
-    pipeline->bind_point = VK_PIPELINE_BIND_POINT_COMPUTE;
+    pipeline->bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
 
     VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
             /* sType= */ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
             /* pNext= */ VK_NULL_HANDLE,
             /* flags= */ VK_NONE_FLAGS,
-            /* setLayoutCount= */ p_shader_info->descriptor_set_layout_count,
-            /* pSetLayouts= */ p_shader_info->p_descriptor_set_layouts,
-            /* pushConstantRangeCount= */ p_shader_info->push_const_count,
-            /* pPushConstantRanges= */ p_shader_info->p_push_const_range,
+            /* setLayoutCount= */ p_shader_info->descriptorSetLayoutCount,
+            /* pSetLayouts= */ p_shader_info->pDescriptorSetLayouts,
+            /* pushConstantRangeCount= */ p_shader_info->pushConstantCount,
+            /* pPushConstantRanges= */ p_shader_info->pPushConstantRange,
     };
-    vkCreatePipelineLayout(vk_device, &pipeline_layout_create_info, VK_NULL_HANDLE, &pipeline->layout);
+    vkCreatePipelineLayout(vkDevice, &pipeline_layout_create_info, VK_NULL_HANDLE, &pipeline->layout);
 
     VkShaderModule compute_shader_module;
-    compute_shader_module = load_shader_module(vk_device, p_shader_info->compute, "vert");
+    compute_shader_module = load_shader_module(vkDevice, p_shader_info->compute, "vert");
 
     VkPipelineShaderStageCreateInfo shader_stage_create_info = {};
     shader_stage_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -639,16 +639,16 @@ RenderDevice::Pipeline *RenderDevice::CreateComputePipeline(RenderDevice::Comput
     pipeline_create_info.stage = shader_stage_create_info;
     pipeline_create_info.layout = pipeline->layout;
 
-    vkCreateComputePipelines(vk_device, VK_NULL_HANDLE, 1, &pipeline_create_info, VK_NULL_HANDLE, &pipeline->pipeline);
-    vkDestroyShaderModule(vk_device, compute_shader_module, VK_NULL_HANDLE);
+    vkCreateComputePipelines(vkDevice, VK_NULL_HANDLE, 1, &pipeline_create_info, VK_NULL_HANDLE, &pipeline->pipeline);
+    vkDestroyShaderModule(vkDevice, compute_shader_module, VK_NULL_HANDLE);
 
     return pipeline;
 }
 
 void RenderDevice::DestroyPipeline(RenderDevice::Pipeline *p_pipeline)
 {
-    vkDestroyPipelineLayout(vk_device, p_pipeline->layout, VK_NULL_HANDLE);
-    vkDestroyPipeline(vk_device, p_pipeline->pipeline, VK_NULL_HANDLE);
+    vkDestroyPipelineLayout(vkDevice, p_pipeline->layout, VK_NULL_HANDLE);
+    vkDestroyPipeline(vkDevice, p_pipeline->pipeline, VK_NULL_HANDLE);
 }
 
 void RenderDevice::CmdBufferBegin(VkCommandBuffer cmd_buffer, VkCommandBufferUsageFlags usage)
@@ -679,7 +679,7 @@ void RenderDevice::CmdBufferOneTimeEnd(VkCommandBuffer cmd_buffer)
 {
     CmdBufferEnd(cmd_buffer);
 
-    VkQueue graph_queue = vk_rdc->GetQueue();
+    VkQueue graph_queue = rdc->GetQueue();
     CmdBufferSubmit(cmd_buffer,
         0, VK_NULL_HANDLE,
         0, VK_NULL_HANDLE,
@@ -710,10 +710,10 @@ void RenderDevice::CmdPipelineBarrier(VkCommandBuffer cmd_buffer, const RenderDe
 {
     VkImageMemoryBarrier barrier = {};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    barrier.srcAccessMask = p_pipeline_memory_barrier->image.src_access_mask;
-    barrier.dstAccessMask = p_pipeline_memory_barrier->image.dst_access_mask;
-    barrier.oldLayout = p_pipeline_memory_barrier->image.old_image_layout;
-    barrier.newLayout = p_pipeline_memory_barrier->image.new_image_layout;
+    barrier.srcAccessMask = p_pipeline_memory_barrier->image.srcAccessMask;
+    barrier.dstAccessMask = p_pipeline_memory_barrier->image.dstAccessMask;
+    barrier.oldLayout = p_pipeline_memory_barrier->image.oldImageLayout;
+    barrier.newLayout = p_pipeline_memory_barrier->image.newImageLayout;
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.image = p_pipeline_memory_barrier->image.texture->image;
@@ -733,7 +733,7 @@ void RenderDevice::CmdPipelineBarrier(VkCommandBuffer cmd_buffer, const RenderDe
             1, &barrier
     );
 
-    p_pipeline_memory_barrier->image.texture->image_layout = barrier.newLayout;
+    p_pipeline_memory_barrier->image.texture->imageLayout = barrier.newLayout;
 }
 
 void RenderDevice::CmdEndRenderPass(VkCommandBuffer cmd_buffer)
@@ -743,14 +743,14 @@ void RenderDevice::CmdEndRenderPass(VkCommandBuffer cmd_buffer)
 
 void RenderDevice::CmdBindVertexBuffer(VkCommandBuffer cmd_buffer, RenderDevice::Buffer *p_buffer)
 {
-    VkBuffer buffers[] = { p_buffer->vk_buffer };
+    VkBuffer buffers[] = { p_buffer->vkBuffer };
     VkDeviceSize offsets[] = { 0 };
     vkCmdBindVertexBuffers(cmd_buffer, 0, ARRAY_SIZE(buffers), buffers, offsets);
 }
 
 void RenderDevice::CmdBindIndexBuffer(VkCommandBuffer cmd_buffer, VkIndexType type, RenderDevice::Buffer *p_buffer)
 {
-    vkCmdBindIndexBuffer(cmd_buffer, p_buffer->vk_buffer, 0, type);
+    vkCmdBindIndexBuffer(cmd_buffer, p_buffer->vkBuffer, 0, type);
 }
 
 void RenderDevice::CmdDraw(VkCommandBuffer cmd_buffer, uint32_t vertex_count)
@@ -765,7 +765,7 @@ void RenderDevice::CmdDrawIndexed(VkCommandBuffer cmd_buffer, uint32_t index_cou
 
 void RenderDevice::CmdBindPipeline(VkCommandBuffer cmd_buffer, RenderDevice::Pipeline *p_pipeline)
 {
-    vkCmdBindPipeline(cmd_buffer, p_pipeline->bind_point, p_pipeline->pipeline);
+    vkCmdBindPipeline(cmd_buffer, p_pipeline->bindPoint, p_pipeline->pipeline);
 }
 
 void RenderDevice::CmdBufferSubmit(VkCommandBuffer cmd_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence)
@@ -794,7 +794,7 @@ void RenderDevice::CmdBufferSubmit(VkCommandBuffer cmd_buffer, uint32_t wait_sem
 
 void RenderDevice::CmdBindDescriptorSet(VkCommandBuffer cmd_buffer, RenderDevice::Pipeline *p_pipeline, VkDescriptorSet descriptor)
 {
-    vkCmdBindDescriptorSets(cmd_buffer, p_pipeline->bind_point, p_pipeline->layout, 0, 1, &descriptor, 0, VK_NULL_HANDLE);
+    vkCmdBindDescriptorSets(cmd_buffer, p_pipeline->bindPoint, p_pipeline->layout, 0, 1, &descriptor, 0, VK_NULL_HANDLE);
 }
 
 void RenderDevice::CmdSetViewport(VkCommandBuffer cmd_buffer, uint32_t w, uint32_t h)
