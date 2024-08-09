@@ -93,7 +93,6 @@ void RenderingGraphics::list_render_object(std::vector<RenderObject *> **p_objec
 
 void RenderingGraphics::push_render_object(RenderObject *object)
 {
-    object->initialize(rd);
     render_objects.push_back(object);
 }
 

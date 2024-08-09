@@ -32,6 +32,8 @@
 // misc
 #include "misc/shader_compile.h"
 #include <bright/ioutils.h>
+// ode
+#include "rendering/physical3d/physical_3d.h"
 
 Window *window;
 RenderDeviceContext *rdc;
@@ -45,6 +47,7 @@ RenderDevice::Texture2D *scene_preview_texture;
 RenderDevice::Texture2D *scene_depth_texture;
 ImVec2 scene_region = ImVec2(32.0f, 32.0f);
 FPSCounter fps_counter;
+Physical3D *physical;
 
 static float mouse_scroll_xoffset = 0.0f;
 static float mouse_scroll_yoffset = 0.0f;
@@ -103,6 +106,8 @@ void initialize()
     rdc->initialize();
     rd = ((RenderDeviceContextWin32 *) rdc)->load_render_device();
 
+    physical = memnew(Physical3D);
+
     screen = memnew(RenderingScreen, rd);
     screen->initialize(window);
 
@@ -111,8 +116,28 @@ void initialize()
     Renderer3D::initialize(rd);
 
     cube = RenderObject::load_obj(_CURDIR("assets/cube.obj"));
-    cube->set_node_name("立方体");
+    cube->initialize(rd, physical);
+    cube->set_node_name("木头");
+
+    Physical3DRigidBody *cube_rb = cube->build_rigid_body_attributes();
+    cube_rb->set_body_density(5000.0f);
+    cube_rb->set_body_volume(80.0f, 80.0f, 80.0f);
+    cube_rb->set_body_position(cube->get_object_position());
+    cube_rb->create_rigid_body();
     Renderer3D::push_render_object(cube);
+
+    RenderObject *plan = RenderObject::load_obj(_CURDIR("assets/cube.obj"));
+    plan->set_node_name("地板");
+    plan->set_object_position(vec3(0.0f, 30.0f, 0.0f));
+    plan->set_object_scaling(vec3(30.0f, 1.0f, 30.0f));
+    plan->initialize(rd, physical);
+
+    Physical3DRigidBody *plan_rb = plan->build_rigid_body_attributes();
+    plan_rb->set_body_density(10.0f);
+    plan_rb->set_body_volume(30.0f, 1.0f, 30.0f);
+    plan_rb->set_body_position(plan->get_object_position());
+    plan_rb->create_rigid_body();
+    Renderer3D::push_render_object(plan);
 
     camera = memnew(ProjectionCamera);
     camera->set_node_name("场景相机");
@@ -132,6 +157,8 @@ int main(int argc, char **argv)
         /* poll events */
         window->poll_events();
         update();
+
+        physical->update_physical_world();
 
         /* render to scene */
         double scene_render_start_time = glfwGetTime();
@@ -166,6 +193,7 @@ int main(int argc, char **argv)
     Renderer3D::destroy();
     memdel(naveditor);
     memdel(screen);
+    memdel(physical);
     ((RenderDeviceContextWin32 *) rdc)->destroy_render_device(rd);
     memdel(rdc);
     memdel(window);

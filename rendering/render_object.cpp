@@ -50,10 +50,12 @@ void RenderObject::update()
     mat4 scale(1.0f);
 
     // T
-	translate = glm::translate(translate, position);
+	// translate = glm::translate(translate, position);
+	translate = glm::translate(translate, rb->get_simulate_position());
 
     // R
     static float sensitivity = 8.0f;
+    rotation = rb->get_simulate_rotate();
     rotate = glm::rotate(rotate, glm::radians(rotation.x * sensitivity), vec3(1.0f, 0.0f, 0.0f));
     rotate = glm::rotate(rotate, glm::radians(rotation.y * sensitivity), vec3(0.0f, 1.0f, 0.0f));
     rotate = glm::rotate(rotate, glm::radians(rotation.z * sensitivity), vec3(0.0f, 0.0f, 1.0f));
@@ -65,9 +67,10 @@ void RenderObject::update()
     transform = translate * rotate * scale;
 }
 
-void RenderObject::initialize(RenderDevice *v_rd)
+void RenderObject::initialize(RenderDevice *v_rd, Physical3D *v_physical)
 {
     rd = v_rd;
+    physical = v_physical;
 
     size_t vertex_buffer_size = std::size(meshes) * sizeof(Mesh);
     size_t index_buffer_size = std::size(indices) * sizeof(uint32_t);
@@ -77,6 +80,8 @@ void RenderObject::initialize(RenderDevice *v_rd)
 
     rd->write_buffer(vertex_buffer, 0, vertex_buffer_size, std::data(meshes));
     rd->write_buffer(index_buffer, 0, index_buffer_size, std::data(indices));
+
+    rb = physical->create_rigid_body();
 }
 
 void RenderObject::cmd_bind(VkCommandBuffer cmd_buffer)

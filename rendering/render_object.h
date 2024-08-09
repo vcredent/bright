@@ -26,6 +26,7 @@
 #include "drivers/render_device.h"
 #include <bright/math.h>
 #include <bright/properties.h>
+#include "physical3d/physical_3d.h"
 
 class RenderObject : public NodeProperties {
 public:
@@ -39,18 +40,19 @@ public:
     };
 
     void update();
-    void initialize(RenderDevice *v_rd);
+    void initialize(RenderDevice *v_rd, Physical3D *v_physical);
 
     V_FORCEINLINE const char *get_name() { return name; }
     V_FORCEINLINE vec3 &get_object_position() { return position; }
     V_FORCEINLINE vec3 &get_object_rotation() { return rotation; }
     V_FORCEINLINE vec3 &get_object_scaling() { return scaling; }
     V_FORCEINLINE mat4 &get_model_matrix() { return transform; }
+    V_FORCEINLINE Physical3DRigidBody *build_rigid_body_attributes() { return rb; }
 
     V_FORCEINLINE void set_name(const char *v_name) { name = v_name; }
-    V_FORCEINLINE void set_object_position(vec3 &v_position) { position = v_position; }
-    V_FORCEINLINE void set_object_rotation(vec3 &v_rotation) { rotation = v_rotation; }
-    V_FORCEINLINE void set_object_scaling(vec3 &v_scaling) { scaling = v_scaling; }
+    V_FORCEINLINE void set_object_position(vec3 v_position) { position = v_position; }
+    V_FORCEINLINE void set_object_rotation(vec3 v_rotation) { rotation = v_rotation; }
+    V_FORCEINLINE void set_object_scaling(vec3 v_scaling) { scaling = v_scaling; }
 
     void cmd_bind(VkCommandBuffer cmd_buffer);
     void cmd_draw(VkCommandBuffer cmd_buffer, RenderDevice::Pipeline *pipeline);
@@ -58,6 +60,9 @@ public:
     static RenderObject *load_obj(const char *filename);
 
 private:
+    Physical3D *physical;
+    Physical3DRigidBody *rb;
+
     std::vector<Mesh> meshes;
     std::vector<uint32_t> indices;
     mat4 transform = mat4(1.0f);

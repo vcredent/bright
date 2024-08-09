@@ -34,6 +34,7 @@ set(PROGRAM_NAME bright)
 set(INCLUDE_DIRS
   "include"
   "thirdparty"
+  "thirdparty/ode/include"
 )
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -45,11 +46,13 @@ endif()
 set(LINK_DIRS
   ${glfw_link_dir}
   "thirdparty/vulkan"
+  "thirdparty/ode"
 )
 
 set(LINK_LIBS
   "navui"
   "glfw_vulkan_links"
+  "libode_doubled"
 )
 
 file(GLOB_RECURSE SOURCES
