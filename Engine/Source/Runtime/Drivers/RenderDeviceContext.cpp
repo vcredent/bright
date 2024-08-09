@@ -24,8 +24,8 @@
 #include <algorithm>
 
 const char *ignoreValidationError[] = {
-        "[ VUID-RuntimeSpirv-samples-08725 ]",
-        "[ VUID-VkWriteDescriptorSet-descriptorType-04150 ]",
+        // "[ VUID-RuntimeSpirv-samples-08725 ]",
+        // "[ VUID-VkWriteDescriptorSet-descriptorType-04150 ]",
 };
 
 #ifdef ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT

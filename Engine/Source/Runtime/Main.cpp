@@ -21,18 +21,18 @@
 /*                                                                          */
 /* ======================================================================== */
 #include "Win32/RenderDeviceContextWin32.h"
-#include "Renderer/RenderScreen.h"
+#include "Renderer/RenderDisplay.h"
 #include <NavUI/NavUI.h>
 
 int main()
 {
-    Window *window = new Window("Bright", 1680, 1080);
+    Window *window = new Window("BrightEngine", 1680, 1080);
     RenderDeviceContextWin32 *rdc = new RenderDeviceContextWin32(window);
     rdc->Initialize();
     RenderDevice *rd = rdc->CreateRenderDevice();
 
-    RenderScreen* screen = memnew(RenderScreen, rd);
-    screen->Initialize(window);
+    RenderDisplay* display = memnew(RenderDisplay, rd);
+    display->Initialize(window);
 
     NavUI::InitializeInfo initializeInfo = {};
     initializeInfo.window = (GLFWwindow *) window->GetNativeHandle();
@@ -42,28 +42,25 @@ int main()
     initializeInfo.QueueFamily = rdc->GetQueueFamily();
     initializeInfo.Queue = rdc->GetQueue();
     initializeInfo.DescriptorPool = rd->GetDescriptorPool();
-    initializeInfo.RenderPass = screen->GetRenderPass();
-    initializeInfo.MinImageCount = screen->GetImageBufferCount();
-    initializeInfo.ImageCount = screen->GetImageBufferCount();
+    initializeInfo.RenderPass = display->GetRenderPass();
+    initializeInfo.MinImageCount = display->GetImageBufferCount();
+    initializeInfo.ImageCount = display->GetImageBufferCount();
     initializeInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
     NavUI::Initialize(&initializeInfo);
 
     while (!window->IsClose()) 
     {
         window->PollEvents();
-        
-        VkCommandBuffer cmdBuffer;
-        screen->CmdBeginScreenRender(&cmdBuffer);
-        {
-            NavUI::BeginNewFrame(cmdBuffer);
-            NavUI::EndNewFrame(cmdBuffer);
-        }
-        screen->CmdEndScreenRender(cmdBuffer);
 
+        VkCommandBuffer cmdBuffer;
+        display->CmdBeginScreenRender(&cmdBuffer);
+        NavUI::BeginNewFrame(cmdBuffer);
+        NavUI::EndNewFrame(cmdBuffer);
+        display->CmdEndScreenRender(cmdBuffer);
     }
 
     NavUI::Destroy();
-    memdel(screen);
+    memdel(display);
     memdel(rd);
     memdel(rdc);
     memdel(window);

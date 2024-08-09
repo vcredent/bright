@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* RenderScreen.h                                                           */
+/* RenderDisplay.h                                                          */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                            BRIGHT ENGINE                                 */
@@ -26,13 +26,13 @@
 #include "Runtime/Drivers/RenderDevice.h"
 #include "Runtime/Window/Window.h"
 
-class RenderScreen {
+class RenderDisplay {
 public:
-    RenderScreen(RenderDevice *vRD);
-   ~RenderScreen();
+    RenderDisplay(RenderDevice *vRD);
+   ~RenderDisplay();
 
-    VkRenderPass GetRenderPass() { return window->renderPass; }
-    uint32_t GetImageBufferCount() { return window->imageBufferCount; }
+    VkRenderPass GetRenderPass() { return display->renderPass; }
+    uint32_t GetImageBufferCount() { return display->imageBufferCount; }
     Window *GetNativeWindow() { return currentNativeWindow; }
 
     void Initialize(Window *vCurrentNativeWindow);
@@ -48,7 +48,7 @@ private:
         VkFramebuffer framebuffer;
     };
 
-    struct _Window {
+    struct Display {
         VkSurfaceKHR surface = VK_NULL_HANDLE;
         VkFormat format;
         VkColorSpaceKHR colorSpace;
@@ -66,7 +66,7 @@ private:
 
     void _CreateSwapchain();
     void _CleanUpSwapchain();
-    void _UpdateSwapchain();
+    void _CheckUpdateSwapchain();
 
     RenderDevice *rd = VK_NULL_HANDLE;
     VkInstance instance = VK_NULL_HANDLE;
@@ -74,7 +74,7 @@ private:
     VkDevice device = VK_NULL_HANDLE;
     uint32_t graphQueueFamily = 0;
     VkCommandPool cmdPool = VK_NULL_HANDLE;
-    _Window *window = VK_NULL_HANDLE;
+    Display *display = VK_NULL_HANDLE;
     VkQueue graphQueue = VK_NULL_HANDLE;
     Window *currentNativeWindow= VK_NULL_HANDLE;
 
