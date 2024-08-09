@@ -73,7 +73,7 @@ void _DarkNavUITheme()
     colors[ImGuiCol_TabUnfocused]           = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
     colors[ImGuiCol_TabUnfocusedActive]     = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
     colors[ImGuiCol_DockingPreview]         = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
-    colors[ImGuiCol_DockingEmptyBg]         = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+    colors[ImGuiCol_DockingEmptyBg]         = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
     colors[ImGuiCol_PlotLines]              = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
     colors[ImGuiCol_PlotLinesHovered]       = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
     colors[ImGuiCol_PlotHistogram]          = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
@@ -198,7 +198,7 @@ namespace NavUI {
         ImGui_ImplVulkan_Shutdown();
       }
 
-    void BeginNewFrame(VkCommandBuffer cmd_buffer)
+    void BeginNewFrame(VkCommandBuffer cmdBuffer)
       {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -208,14 +208,14 @@ namespace NavUI {
         ImGui::DockSpaceOverViewport();
       }
 
-    void EndNewFrame(VkCommandBuffer cmd_buffer)
+    void EndNewFrame(VkCommandBuffer cmdBuffer)
       {
         ImGuiIO& io = ImGui::GetIO(); (void)io;
 
         // Rendering
         ImGui::Render();
         ImDrawData* main_draw_data = ImGui::GetDrawData();
-        ImGui_ImplVulkan_RenderDrawData(main_draw_data, cmd_buffer);
+        ImGui_ImplVulkan_RenderDrawData(main_draw_data, cmdBuffer);
 
         // Update and Render additional Platform Windows
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {

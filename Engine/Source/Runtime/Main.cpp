@@ -54,8 +54,14 @@ int main()
 
         VkCommandBuffer cmdBuffer;
         display->CmdBeginDisplayRender(&cmdBuffer);
-        NavUI::BeginNewFrame(cmdBuffer);
-        NavUI::EndNewFrame(cmdBuffer);
+        {
+            NavUI::BeginNewFrame(cmdBuffer);
+            {
+                static bool showDemoWindowFlag = true;
+                ImGui::ShowDemoWindow(&showDemoWindowFlag);
+            }
+            NavUI::EndNewFrame(cmdBuffer);
+        }
         display->CmdEndDisplayRender(cmdBuffer);
     }
 
