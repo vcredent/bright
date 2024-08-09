@@ -21,6 +21,8 @@
 /*                                                                          */
 /* ======================================================================== */
 #include "Win32/RenderDeviceContextWin32.h"
+#include "Renderer/RenderScreen.h"
+#include <NavUI/NavUI.h>
 
 int main()
 {
@@ -29,10 +31,39 @@ int main()
     rdc->Initialize();
     RenderDevice *rd = rdc->CreateRenderDevice();
 
-    while (!window->IsClose()) {
+    RenderScreen* screen = memnew(RenderScreen, rd);
+    screen->Initialize(window);
+
+    NavUI::InitializeInfo initializeInfo = {};
+    initializeInfo.window = (GLFWwindow *) window->GetNativeHandle();
+    initializeInfo.Instance = rdc->GetInstance();
+    initializeInfo.PhysicalDevice = rdc->GetPhysicalDevice();
+    initializeInfo.Device = rdc->GetDevice();
+    initializeInfo.QueueFamily = rdc->GetQueueFamily();
+    initializeInfo.Queue = rdc->GetQueue();
+    initializeInfo.DescriptorPool = rd->GetDescriptorPool();
+    initializeInfo.RenderPass = screen->GetRenderPass();
+    initializeInfo.MinImageCount = screen->GetImageBufferCount();
+    initializeInfo.ImageCount = screen->GetImageBufferCount();
+    initializeInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    NavUI::Initialize(&initializeInfo);
+
+    while (!window->IsClose()) 
+    {
         window->PollEvents();
+        
+        VkCommandBuffer cmdBuffer;
+        screen->CmdBeginScreenRender(&cmdBuffer);
+        {
+            NavUI::BeginNewFrame(cmdBuffer);
+            NavUI::EndNewFrame(cmdBuffer);
+        }
+        screen->CmdEndScreenRender(cmdBuffer);
+
     }
 
+    NavUI::Destroy();
+    memdel(screen);
     memdel(rd);
     memdel(rdc);
     memdel(window);

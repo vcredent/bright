@@ -138,11 +138,11 @@ RenderDeviceContext::RenderDeviceContext()
         }
     }
 
-    physical_device = physical_devices[gpu_number];
+    physicalDevice = physical_devices[gpu_number];
     free(physical_devices);
 
-    vkGetPhysicalDeviceProperties(physical_device, &physical_device_properties);
-    vkGetPhysicalDeviceFeatures(physical_device, &physical_device_features);
+    vkGetPhysicalDeviceProperties(physicalDevice, &physical_device_properties);
+    vkGetPhysicalDeviceFeatures(physicalDevice, &physical_device_features);
 
     max_msaa_sample_counts = find_max_msaa_sample_counts(physical_device_properties);
 }
@@ -170,7 +170,7 @@ VkFormat RenderDeviceContext::FindSupportedFormat(const std::vector<VkFormat> &c
 {
     for (VkFormat format : candidates) {
         VkFormatProperties props;
-        vkGetPhysicalDeviceFormatProperties(physical_device, format, &props);
+        vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
 
         if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
             return format;
@@ -207,16 +207,16 @@ void RenderDeviceContext::_InitializeWindowArguments(VkSurfaceKHR surface)
 {
     VkResult U_ASSERT_ONLY err;
 
-    err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &capabilities);
+    err = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &capabilities);
     assert(!err);
 
     /* pick surface format */
     uint32_t foramt_count = 0;
-    err = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &foramt_count, nullptr);
+    err = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &foramt_count, nullptr);
     assert(!err);
 
     VkSurfaceFormatKHR *surface_formats_khr = (VkSurfaceFormatKHR *) imalloc(sizeof(VkSurfaceFormatKHR) * foramt_count);
-    err = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &foramt_count, surface_formats_khr);
+    err = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &foramt_count, surface_formats_khr);
     assert(!err);
 
     VkSurfaceFormatKHR surface_format = pick_surface_format(surface_formats_khr, foramt_count);
@@ -224,14 +224,14 @@ void RenderDeviceContext::_InitializeWindowArguments(VkSurfaceKHR surface)
 
     /* add queue create info */
     uint32_t queue_family_count = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, nullptr);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queue_family_count, nullptr);
     VkQueueFamilyProperties *queue_family_properties = (VkQueueFamilyProperties *) imalloc(sizeof(VkQueueFamilyProperties) * queue_family_count);
-    vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, queue_family_properties);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queue_family_count, queue_family_properties);
 
     for (uint32_t i = 0; i < queue_family_count; i++) {
         VkQueueFamilyProperties properties = queue_family_properties[i];
         VkBool32 is_support_present = VK_FALSE;
-        vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, surface, &is_support_present);
+        vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &is_support_present);
         if ((properties.queueFlags & VK_QUEUE_GRAPHICS_BIT) && is_support_present) {
             graph_queue_family = i;
             break;
@@ -285,7 +285,7 @@ void RenderDeviceContext::_CreateDevice()
             /* pEnabledFeatures */ &features,
     };
 
-    err = vkCreateDevice(physical_device, &device_create_info, VK_NULL_HANDLE, &device);
+    err = vkCreateDevice(physicalDevice, &device_create_info, VK_NULL_HANDLE, &device);
     assert(!err);
 
     vkGetDeviceQueue(device, graph_queue_family, 0, &graph_queue);
@@ -312,7 +312,7 @@ void RenderDeviceContext::_CreateVmaAllocator()
 
     VmaAllocatorCreateInfo vma_allocator_create_info = {};
     vma_allocator_create_info.instance = instance;
-    vma_allocator_create_info.physicalDevice = physical_device;
+    vma_allocator_create_info.physicalDevice = physicalDevice;
     vma_allocator_create_info.device = device;
 
     err = vmaCreateAllocator(&vma_allocator_create_info, &allocator);

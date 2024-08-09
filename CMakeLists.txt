@@ -21,7 +21,7 @@
 #!                                                                          !#
 #! ======================================================================== !#
 cmake_minimum_required(VERSION 3.26)
-project(bright)
+project(BrightEngine)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options("/source-charset:utf-8")
@@ -29,7 +29,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 set(CMAKE_CXX_STANDARD 23)
-set(PROGRAM_NAME bright)
+set(PROGRAM_NAME BrightEngine)
 
 set(INCLUDE_DIRS
   "Engine/Source"

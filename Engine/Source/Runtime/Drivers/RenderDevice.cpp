@@ -653,13 +653,13 @@ void RenderDevice::DestroyPipeline(RenderDevice::Pipeline *pPipeline)
 
 void RenderDevice::CmdBufferBegin(VkCommandBuffer cmdBuffer, VkCommandBufferUsageFlags usage)
 {
-    VkCommandBufferBeginInfo cmd_buffer_begin_info = {
+    VkCommandBufferBeginInfo cmdBufferBeginInfo = {
             /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
             /* pNext */ VK_NULL_HANDLE,
             /* flags */ usage,
             /* pInheritanceInfo */ nullptr,
     };
-    vkBeginCommandBuffer(cmdBuffer, &cmd_buffer_begin_info);
+    vkBeginCommandBuffer(cmdBuffer, &cmdBufferBeginInfo);
 }
 
 void RenderDevice::CmdBufferEnd(VkCommandBuffer cmdBuffer)

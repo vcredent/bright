@@ -50,7 +50,7 @@ public:
 
     Error Initialize();
     VkInstance GetInstance() { return instance; }
-    VkPhysicalDevice GetPhysicalDevice() { return physical_device; }
+    VkPhysicalDevice GetPhysicalDevice() { return physicalDevice; }
     const char *GetDeviceName() { return physical_device_properties.deviceName; }
     VkDevice GetDevice() { return device; }
     VmaAllocator GetAllocator() { return allocator; }
@@ -82,7 +82,7 @@ private:
 #ifdef ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT
     VkDebugUtilsMessengerEXT messenger = VK_NULL_HANDLE;
 #endif
-    VkPhysicalDevice physical_device = VK_NULL_HANDLE;
+    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkPhysicalDeviceProperties physical_device_properties;
     VkPhysicalDeviceFeatures physical_device_features;
     VkDevice device = VK_NULL_HANDLE;
