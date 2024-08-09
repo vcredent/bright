@@ -32,7 +32,7 @@ include_directories(SYSTEM ${PROJECT_ROOT_DIR}/Include)
 include_directories(SYSTEM ${PROJECT_ROOT_DIR}/ThirdParty)
 
 add_library(${LIBRARY_NAME} STATIC
-  "Navui.cpp"
+  "NavUI.cpp"
   "imgui/imgui.cpp"
   "imgui/imgui_draw.cpp"
   "imgui/imgui_demo.cpp"

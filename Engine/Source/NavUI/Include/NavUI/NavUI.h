@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* navui.h                                                                  */
+/* NavUI.h                                                                  */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                            BRIGHT ENGINE                                 */
@@ -20,8 +20,8 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _PILOTUI_H_
-#define _PILOTUI_H_
+#ifndef _NAVUI_H_
+#define _NAVUI_H_
 
 #include <imgui.h>
 #include <vulkan/vulkan.h>
@@ -71,4 +71,4 @@ namespace NavUI {
     void _DragScalarN(const char *label, float *v, int v_number, float v_speed, float v_min, float v_max, const char *format);
 }
 
-#endif /* _PILOTUI_H_ */
+#endif /* _NAVUI_H_ */

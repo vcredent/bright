@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* navui.cpp                                                                */
+/* NavUI.cpp                                                                */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                            BRIGHT ENGINE                                 */
@@ -20,7 +20,7 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "navui/navui.h"
+#include "NavUI/NavUI.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
 #include <Bright/Typedefs.h>
