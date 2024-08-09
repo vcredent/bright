@@ -48,7 +48,6 @@ public:
     RenderDeviceContext();
     ~RenderDeviceContext();
 
-    Error Initialize();
     VkInstance GetInstance() { return instance; }
     VkPhysicalDevice GetPhysicalDevice() { return physicalDevice; }
     const char *GetDeviceName() { return physical_device_properties.deviceName; }
@@ -65,7 +64,7 @@ public:
     void FreeCommandBuffer(VkCommandBuffer cmdBuffer);
 
 protected:
-    void _InitializeWindowArguments(VkSurfaceKHR surface);
+    void _Initialize(VkSurfaceKHR surface);
 
 private:
 #ifdef ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT

@@ -28,11 +28,8 @@ int main()
 {
     Window *window = new Window("BrightEngine", 1680, 1080);
     RenderDeviceContextWin32 *rdc = new RenderDeviceContextWin32(window);
-    rdc->Initialize();
     RenderDevice *rd = rdc->CreateRenderDevice();
-
-    RenderDisplay* display = memnew(RenderDisplay, rd);
-    display->Initialize(window);
+    RenderDisplay* display = memnew(RenderDisplay, rd, window);
 
     NavUI::InitializeInfo initializeInfo = {};
     initializeInfo.window = (GLFWwindow *) window->GetNativeHandle();

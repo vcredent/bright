@@ -28,14 +28,12 @@
 
 class RenderDisplay {
 public:
-    RenderDisplay(RenderDevice *vRD);
+    RenderDisplay(RenderDevice *vRD, Window *vWindow);
    ~RenderDisplay();
 
     VkRenderPass GetRenderPass() { return display->renderPass; }
     uint32_t GetImageBufferCount() { return display->imageBufferCount; }
     Window *GetNativeWindow() { return currentNativeWindow; }
-
-    void Initialize(Window *vCurrentNativeWindow);
 
     void CmdBeginDisplayRender(VkCommandBuffer *pCmdBuffer);
     void CmdEndDisplayRender(VkCommandBuffer cmdBuffer);
@@ -64,6 +62,7 @@ private:
         uint32_t height;
     };
 
+    void _Initialize();
     void _CreateSwapchain();
     void _CleanUpSwapchain();
     void _CheckUpdateSwapchain();

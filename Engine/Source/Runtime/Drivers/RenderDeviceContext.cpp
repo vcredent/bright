@@ -158,14 +158,6 @@ RenderDeviceContext::~RenderDeviceContext()
     vkDestroyInstance(instance, VK_NULL_HANDLE);
 }
 
-Error RenderDeviceContext::Initialize()
-{
-    _CreateDevice();
-    _CreateCommandPool();
-    _CreateVmaAllocator();
-    return OK;
-}
-
 VkFormat RenderDeviceContext::FindSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 {
     for (VkFormat format : candidates) {
@@ -203,7 +195,7 @@ void RenderDeviceContext::FreeCommandBuffer(VkCommandBuffer cmdBuffer)
     vkFreeCommandBuffers(device, cmd_pool, 1, &cmdBuffer);
 }
 
-void RenderDeviceContext::_InitializeWindowArguments(VkSurfaceKHR surface)
+void RenderDeviceContext::_Initialize(VkSurfaceKHR surface)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -239,6 +231,11 @@ void RenderDeviceContext::_InitializeWindowArguments(VkSurfaceKHR surface)
     }
 
     free(queue_family_properties);
+
+    // create device...
+    _CreateDevice();
+    _CreateCommandPool();
+    _CreateVmaAllocator();
 }
 
 void RenderDeviceContext::_LoadVulkanFunctionProcAddr()

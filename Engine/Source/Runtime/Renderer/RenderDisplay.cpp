@@ -23,8 +23,8 @@
 #include "RenderDisplay.h"
 #include <algorithm>
 
-RenderDisplay::RenderDisplay(RenderDevice *vRD)
-    : rd(vRD)
+RenderDisplay::RenderDisplay(RenderDevice *vRD, Window *vWindow)
+    : rd(vRD), currentNativeWindow(vWindow)
 {
     RenderDeviceContext* rdc = rd->GetDeviceContext();
 
@@ -34,6 +34,8 @@ RenderDisplay::RenderDisplay(RenderDevice *vRD)
     graphQueueFamily = rdc->GetQueueFamily();
     cmdPool = rdc->GetCommandPool();
     graphQueue = rdc->GetQueue();
+
+    _Initialize();
 }
 
 RenderDisplay::~RenderDisplay()
@@ -47,13 +49,39 @@ RenderDisplay::~RenderDisplay()
     free(display);
 }
 
-void RenderDisplay::Initialize(Window *vCurrentNativeWindow)
+void RenderDisplay::CmdBeginDisplayRender(VkCommandBuffer *pCmdBuffer)
+{
+    _CheckUpdateSwapchain();
+    vkAcquireNextImageKHR(device, display->swapchain, UINT64_MAX, display->imageAvailableSemaphore, nullptr, &acquireNextIndex);
+
+    VkCommandBuffer cmdBuffer;
+    cmdBuffer = display->swapchainResources[acquireNextIndex].cmdBuffer;
+    *pCmdBuffer = cmdBuffer;
+    rd->CmdBufferBegin(cmdBuffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
+
+    VkClearValue clearColor = { 0.10f, 0.10f, 0.10f, 1.0f };
+
+    VkRect2D rect = {};
+    rect.extent = { display->width, display->height };
+    rd->CmdBeginRenderPass(cmdBuffer, display->renderPass, 1, &clearColor, display->swapchainResources[acquireNextIndex].framebuffer, &rect);
+}
+
+void RenderDisplay::CmdEndDisplayRender(VkCommandBuffer cmdBuffer)
+{
+    rd->CmdEndRenderPass(cmdBuffer);
+    rd->CmdBufferEnd(cmdBuffer);
+
+    VkPipelineStageFlags mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    rd->CmdBufferSubmit(cmdBuffer, 1, &display->imageAvailableSemaphore, 1, &display->renderFinishedSemaphore, &mask, graphQueue, VK_NULL_HANDLE);
+    rd->Present(graphQueue, display->swapchain, acquireNextIndex, display->renderFinishedSemaphore);
+}
+
+void RenderDisplay::_Initialize()
 {
     VkResult U_ASSERT_ONLY err;
 
     /* imalloc display struct and set surface */
     display = (Display *) imalloc(sizeof(Display));
-    currentNativeWindow = vCurrentNativeWindow;
     currentNativeWindow->CreateWindowSurfaceKHR(instance, VK_NULL_HANDLE, &display->surface);
 
     VkSurfaceCapabilitiesKHR capabilities;
@@ -93,33 +121,6 @@ void RenderDisplay::Initialize(Window *vCurrentNativeWindow)
     assert(!err);
 
     _CreateSwapchain();
-}
-
-void RenderDisplay::CmdBeginDisplayRender(VkCommandBuffer *pCmdBuffer)
-{
-    _CheckUpdateSwapchain();
-    vkAcquireNextImageKHR(device, display->swapchain, UINT64_MAX, display->imageAvailableSemaphore, nullptr, &acquireNextIndex);
-
-    VkCommandBuffer cmdBuffer;
-    cmdBuffer = display->swapchainResources[acquireNextIndex].cmdBuffer;
-    *pCmdBuffer = cmdBuffer;
-    rd->CmdBufferBegin(cmdBuffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
-
-    VkClearValue clearColor = { 0.10f, 0.10f, 0.10f, 1.0f };
-
-    VkRect2D rect = {};
-    rect.extent = { display->width, display->height };
-    rd->CmdBeginRenderPass(cmdBuffer, display->renderPass, 1, &clearColor, display->swapchainResources[acquireNextIndex].framebuffer, &rect);
-}
-
-void RenderDisplay::CmdEndDisplayRender(VkCommandBuffer cmdBuffer)
-{
-    rd->CmdEndRenderPass(cmdBuffer);
-    rd->CmdBufferEnd(cmdBuffer);
-
-    VkPipelineStageFlags mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    rd->CmdBufferSubmit(cmdBuffer, 1, &display->imageAvailableSemaphore, 1, &display->renderFinishedSemaphore, &mask, graphQueue, VK_NULL_HANDLE);
-    rd->Present(graphQueue, display->swapchain, acquireNextIndex, display->renderFinishedSemaphore);
 }
 
 void RenderDisplay::_CreateSwapchain()

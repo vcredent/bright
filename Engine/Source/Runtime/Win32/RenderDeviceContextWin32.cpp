@@ -26,7 +26,7 @@ RenderDeviceContextWin32::RenderDeviceContextWin32(Window *window)
 {
     VkSurfaceKHR surface;
     window->CreateWindowSurfaceKHR(GetInstance(), VK_NULL_HANDLE, &surface);
-    _InitializeWindowArguments(surface);
+    _Initialize(surface);
     vkDestroySurfaceKHR(GetInstance(), surface, VK_NULL_HANDLE);
 }
 
