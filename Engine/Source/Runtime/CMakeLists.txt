@@ -20,30 +20,31 @@
 #! limitations under the License.                                           !#
 #!                                                                          !#
 #! ======================================================================== !#
-cmake_minimum_required(VERSION 3.26)
-project(BrightEngine)
+set(LIBRARY_NAME Runtime)
+set(THIRD_PARTY_DIRECTORY "../../ThirdParty")
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  add_compile_options("/source-charset:utf-8")
-  add_compile_options("/execution-charset:utf-8")
-endif()
-
-include_directories(
-  "Engine/Include"
-  "Engine/ThirdParty"
+file(GLOB_RECURSE SOURCES
+  "*.cpp"
+  "${THIRD_PARTY_DIRECTORY}/vma/*.cpp"
+  "${THIRD_PARTY_DIRECTORY}/volk/*.cpp"
 )
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(GLFW_LINK_DIRECTORY "Engine/ThirdParty/GLFW/lib-mingw-w64")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  set(GLFW_LINK_DIRECTORY "Engine/ThirdParty/GLFW/lib-vc2022")
-endif()
-
-link_directories(
-  ${GLFW_LINK_DIRECTORY}
-  "Engine/ThirdParty/vulkan"
+set(LINK_LIBRARIES
+  "glfw3"
+  "vulkan-1"
 )
 
-add_subdirectory(Engine/Source/NavUI)
-add_subdirectory(Engine/Source/Runtime)
-add_subdirectory(Engine/Source/Sandbox)
+include_directories(SYSTEM "Include")
+
+link_directories(${LINK_DIRECTORIES})
+
+add_library(${LIBRARY_NAME} STATIC "${SOURCES}")
+
+target_include_directories(${LIBRARY_NAME} SYSTEM PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/Include
+)
+
+target_link_libraries(${LIBRARY_NAME}
+  PUBLIC
+  ${LINK_LIBRARIES}
+)

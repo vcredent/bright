@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* render_device_context_win32.cpp                                          */
+/* render_device_context_win32.h                                            */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                            BRIGHT ENGINE                                 */
@@ -20,27 +20,20 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include <RT/Win32/RenderDeviceContextWin32.h>
+#ifndef _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H
+#define _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H
 
-RenderDeviceContextWin32::RenderDeviceContextWin32(Window *window)
-{
-    VkSurfaceKHR surface;
-    window->CreateWindowSurfaceKHR(GetInstance(), VK_NULL_HANDLE, &surface);
-    _Initialize(surface);
-    vkDestroySurfaceKHR(GetInstance(), surface, VK_NULL_HANDLE);
-}
+#include "RT/Drivers/RenderDevice.h"
+#include "RT/Window/window.h"
 
-RenderDeviceContextWin32::~RenderDeviceContextWin32()
-{
-    /* do nothing in here... */
-}
+// Render driver context for vulkan
+class RenderDeviceContextWin32 : public RenderDeviceContext {
+public:
+    RenderDeviceContextWin32(Window *window);
+    ~RenderDeviceContextWin32();
 
-RenderDevice *RenderDeviceContextWin32::CreateRenderDevice()
-{
-    return memnew(RenderDevice, this);
-}
+    RenderDevice *CreateRenderDevice();
+    void DestroyRenderDevice(RenderDevice *pRenderDevice);
+};
 
-void RenderDeviceContextWin32::DestroyRenderDevice(RenderDevice * pRenderDevice)
-{
-    memdel(pRenderDevice);
-}
+#endif /* _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H */

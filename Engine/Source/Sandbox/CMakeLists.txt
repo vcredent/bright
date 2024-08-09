@@ -20,30 +20,17 @@
 #! limitations under the License.                                           !#
 #!                                                                          !#
 #! ======================================================================== !#
-cmake_minimum_required(VERSION 3.26)
-project(BrightEngine)
+set(PROGRAM_NAME Sandbox)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  add_compile_options("/source-charset:utf-8")
-  add_compile_options("/execution-charset:utf-8")
-endif()
-
-include_directories(
-  "Engine/Include"
-  "Engine/ThirdParty"
+set(LINK_LIBRARIES
+  "Runtime"
 )
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(GLFW_LINK_DIRECTORY "Engine/ThirdParty/GLFW/lib-mingw-w64")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  set(GLFW_LINK_DIRECTORY "Engine/ThirdParty/GLFW/lib-vc2022")
-endif()
-
-link_directories(
-  ${GLFW_LINK_DIRECTORY}
-  "Engine/ThirdParty/vulkan"
+add_executable(${PROGRAM_NAME}
+  "Sandbox.cpp"
 )
 
-add_subdirectory(Engine/Source/NavUI)
-add_subdirectory(Engine/Source/Runtime)
-add_subdirectory(Engine/Source/Sandbox)
+target_link_libraries(${PROGRAM_NAME}
+  PRIVATE
+  ${LINK_LIBRARIES}
+)

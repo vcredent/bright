@@ -42,7 +42,7 @@ add_library(${LIBRARY_NAME} STATIC
   "imgui/backends/imgui_impl_glfw.cpp"
 )
 
-target_link_libraries(${LIBRARY_NAME} PRIVATE
+target_link_libraries(${LIBRARY_NAME} PUBLIC
   "glfw3"
   "vulkan-1"
 )

@@ -20,7 +20,7 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "RenderDeviceContext.h"
+#include <RT/Drivers/RenderDeviceContext.h>
 #include <algorithm>
 
 const char *ignoreValidationError[] = {

@@ -1,8 +1,8 @@
 /* ======================================================================== */
-/* render_device_context_win32.h                                            */
+/* Main.cpp                                                                 */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                            BRIGHT ENGINE                                 */
+/*                           COPILOT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -15,25 +15,37 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#ifndef _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H
-#define _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H
+#include <RT/Win32/RenderDeviceContextWin32.h>
+#include <RT/Renderer/RenderingDisplay.h>
 
-#include "Runtime/Drivers/RenderDevice.h"
-#include "Runtime/Window/window.h"
+int main()
+{
+    Window *window = memnew(Window, "BrightEngine", 1680, 1080);
+    RenderDeviceContextWin32 *rdc = new RenderDeviceContextWin32(window);
+    RenderDevice *rd = rdc->CreateRenderDevice();
+    RenderingDisplay* display = memnew(RenderingDisplay, rd, window);
 
-// Render driver context for vulkan
-class RenderDeviceContextWin32 : public RenderDeviceContext {
-public:
-    RenderDeviceContextWin32(Window *window);
-    ~RenderDeviceContextWin32();
+    while (!window->IsClose())
+    {
+        window->PollEvents();
 
-    RenderDevice *CreateRenderDevice();
-    void DestroyRenderDevice(RenderDevice *pRenderDevice);
-};
+        VkCommandBuffer cmdBuffer;
+        display->CmdBeginDisplayRender(&cmdBuffer);
+        {
 
-#endif /* _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H */
+        }
+        display->CmdEndDisplayRender(cmdBuffer);
+    }
+
+    memdel(display);
+    memdel(rd);
+    memdel(rdc);
+    memdel(window);
+
+    return 0;
+}

@@ -20,7 +20,7 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "RenderDevice.h"
+#include <RT/Drivers/RenderDevice.h>
 
 RenderDevice::RenderDevice(RenderDeviceContext *vRDC)
     : rdc(vRDC)
