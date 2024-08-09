@@ -32,67 +32,37 @@ set(CMAKE_CXX_STANDARD 23)
 set(PROGRAM_NAME bright)
 
 set(INCLUDE_DIRS
-  "include"
-  "thirdparty"
-  "thirdparty/ode/include"
+  "Engine/Source"
 )
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(glfw_link_dir "thirdparty/GLFW/lib-mingw-w64")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  set(glfw_link_dir "thirdparty/GLFW/lib-vc2022")
-endif()
-
-set(LINK_DIRS
-  ${glfw_link_dir}
-  "thirdparty/vulkan"
-  "thirdparty/ode"
-)
-
-set(LINK_LIBS
-  "navui"
-  "glfw_vulkan_links"
-  "libode_doubled"
+set(SYSTEM_INCLUDE_DIRS
+  "Engine/Include"
+  "Engine/ThirdParty"
 )
 
 file(GLOB_RECURSE SOURCES
-  "main.cpp"
-  "drivers/*.cpp"
-  "editor/*.cpp"
-  "misc/*.cpp"
-  "platform/*.cpp"
-  "modules/*.cpp"
-  "rendering/*.cpp"
-  "misc/*.cpp"
-  "thirdparty/vma/*.cpp"
-  "thirdparty/tinyobjloader/*.cpp"
-  "thirdparty/stb/*.cpp"
+  "Engine/Source/*.cpp"
+  "Engine/ThirdParty/vma/*.cpp"
+  "Engine/ThirdParty/volk/*.cpp"
 )
 
-link_directories(${LINK_DIRS})
+set(LINK_DIRECTORIES
+  "Engine/ThirdParty/GLFW/lib-mingw-w64"
+  "Engine/ThirdParty/vulkan"
+)
 
-# definition global link libraries and includes
-add_library(glfw_vulkan_links INTERFACE)
-target_link_libraries(glfw_vulkan_links INTERFACE
+set(LINK_LIBRARIES
   "glfw3"
   "vulkan-1"
 )
-target_include_directories(glfw_vulkan_links INTERFACE "include" "thirdparty")
 
-add_subdirectory(navui)
+include_directories(${INCLUDE_DIRS})
+include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRS})
+link_directories(${LINK_DIRECTORIES})
 
-add_executable(${PROGRAM_NAME}
-  "${SOURCES}"
-)
-
-target_include_directories(${PROGRAM_NAME}
-  SYSTEM PRIVATE ${INCLUDE_DIRS}
-)
-
-target_include_directories(${PROGRAM_NAME}
-  PRIVATE /
-)
+add_executable(${PROGRAM_NAME} "${SOURCES}")
 
 target_link_libraries(${PROGRAM_NAME}
-  PRIVATE ${LINK_LIBS}
+  PRIVATE
+  ${LINK_LIBRARIES}
 )
