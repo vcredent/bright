@@ -42,7 +42,7 @@
 #define ARRAY_SIZE(a) ( sizeof(a) / sizeof(a[0]) )
 
 #if defined(__MINGW32__)
-#  define RESOURCE(path) "../Engine/Resources" path
+#  define RESOURCE(path) "../../../../Engine/Resources" path
 #elif defined(_MSC_VER)
 #  define RESOURCE(path) "../../../Engine/Resources" path
 #endif

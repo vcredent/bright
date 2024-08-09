@@ -24,6 +24,7 @@ set(PROGRAM_NAME Sandbox)
 
 set(LINK_LIBRARIES
   "Runtime"
+  "NavUI"
 )
 
 add_executable(${PROGRAM_NAME}

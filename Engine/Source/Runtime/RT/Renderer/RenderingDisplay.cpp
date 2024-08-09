@@ -20,7 +20,7 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include <RT/Renderer/RenderingDisplay.h>
+#include "RenderingDisplay.h"
 #include <algorithm>
 
 RenderingDisplay::RenderingDisplay(RenderDevice *vRD, Window *vWindow)

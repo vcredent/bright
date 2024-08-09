@@ -20,7 +20,7 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include <RT/Win32/RenderDeviceContextWin32.h>
+#include "RenderDeviceContextWin32.h"
 
 RenderDeviceContextWin32::RenderDeviceContextWin32(Window *window)
 {

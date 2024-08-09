@@ -24,7 +24,7 @@ set(LIBRARY_NAME Runtime)
 set(THIRD_PARTY_DIRECTORY "../../ThirdParty")
 
 file(GLOB_RECURSE SOURCES
-  "*.cpp"
+  "RT/*.cpp"
   "${THIRD_PARTY_DIRECTORY}/vma/*.cpp"
   "${THIRD_PARTY_DIRECTORY}/volk/*.cpp"
 )
@@ -34,14 +34,14 @@ set(LINK_LIBRARIES
   "vulkan-1"
 )
 
-include_directories(SYSTEM "Include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/RT")
 
 link_directories(${LINK_DIRECTORIES})
 
 add_library(${LIBRARY_NAME} STATIC "${SOURCES}")
 
 target_include_directories(${LIBRARY_NAME} SYSTEM PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/Include
+  ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_link_libraries(${LIBRARY_NAME}

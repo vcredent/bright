@@ -23,8 +23,8 @@
 #ifndef _RENDERING_SCREEN_H_
 #define _RENDERING_SCREEN_H_
 
-#include <RT/Drivers/RenderDevice.h>
-#include <RT/Window/Window.h>
+#include "RT/Drivers/RenderDevice.h"
+#include "RT/Window/Window.h"
 
 class RenderingDisplay {
 public:

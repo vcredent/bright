@@ -20,7 +20,7 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include <RT/Window/window.h>
+#include "Window.h"
 
 /* record window create instance count */
 static int GLOB_WindowInstanceCount = 0;

@@ -22,13 +22,28 @@
 /* ======================================================================== */
 #include <RT/Win32/RenderDeviceContextWin32.h>
 #include <RT/Renderer/RenderingDisplay.h>
+#include <NavUI/NavUI.h>
 
 int main()
 {
     Window *window = memnew(Window, "BrightEngine", 1680, 1080);
-    RenderDeviceContextWin32 *rdc = new RenderDeviceContextWin32(window);
+    RenderDeviceContextWin32 *rdc = memnew(RenderDeviceContextWin32, window);
     RenderDevice *rd = rdc->CreateRenderDevice();
     RenderingDisplay* display = memnew(RenderingDisplay, rd, window);
+
+    NavUI::InitializeInfo initializeInfo = {};
+    initializeInfo.window = (GLFWwindow *) window->GetNativeHandle();
+    initializeInfo.Instance = rdc->GetInstance();
+    initializeInfo.PhysicalDevice = rdc->GetPhysicalDevice();
+    initializeInfo.Device = rdc->GetDevice();
+    initializeInfo.QueueFamily = rdc->GetQueueFamily();
+    initializeInfo.Queue = rdc->GetQueue();
+    initializeInfo.DescriptorPool = rd->GetDescriptorPool();
+    initializeInfo.RenderPass = display->GetRenderPass();
+    initializeInfo.MinImageCount = display->GetImageBufferCount();
+    initializeInfo.ImageCount = display->GetImageBufferCount();
+    initializeInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    NavUI::Initialize(&initializeInfo);
 
     while (!window->IsClose())
     {
@@ -37,11 +52,17 @@ int main()
         VkCommandBuffer cmdBuffer;
         display->CmdBeginDisplayRender(&cmdBuffer);
         {
-
+            NavUI::BeginNewFrame(cmdBuffer);
+            {
+                static bool showDemoWindowFlag = true;
+                ImGui::ShowDemoWindow(&showDemoWindowFlag);
+            }
+            NavUI::EndNewFrame(cmdBuffer);
         }
         display->CmdEndDisplayRender(cmdBuffer);
     }
 
+    NavUI::Destroy();
     memdel(display);
     memdel(rd);
     memdel(rdc);
