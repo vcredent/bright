@@ -61,8 +61,8 @@ public:
     VkFormat FindSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
     VkSampleCountFlagBits GetMaxMSAASampleCounts() { return max_msaa_sample_counts; }
 
-    void AllocateCommandBuffer(VkCommandBufferLevel level, VkCommandBuffer *p_cmd_buffer);
-    void FreeCommandBuffer(VkCommandBuffer cmd_buffer);
+    void AllocateCommandBuffer(VkCommandBufferLevel level, VkCommandBuffer *pCmdBuffer);
+    void FreeCommandBuffer(VkCommandBuffer cmdBuffer);
 
 protected:
     void _InitializeWindowArguments(VkSurfaceKHR surface);

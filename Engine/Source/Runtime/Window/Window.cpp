@@ -23,11 +23,11 @@
 #include "window.h"
 
 /* record window create instance count */
-static int window_instance_count = 0;
+static int GLOB_WindowInstanceCount = 0;
 
 Window::Window(const char *title, int width, int height)
 {
-    if (window_instance_count <= 0) {
+    if (GLOB_WindowInstanceCount <= 0) {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     }
@@ -37,21 +37,21 @@ Window::Window(const char *title, int width, int height)
 
     glfwSetWindowUserPointer(handle, this);
 
-    ++window_instance_count;
+    ++GLOB_WindowInstanceCount;
 }
 
 Window::~Window()
 {
     glfwDestroyWindow(handle);
-    --window_instance_count;
-    if (window_instance_count <= 0) {
+    --GLOB_WindowInstanceCount;
+    if (GLOB_WindowInstanceCount <= 0) {
         glfwTerminate();
     }
 }
 
-void Window::GetSize(Rect2D *p_rect)
+void Window::GetSize(Rect2D *pRect)
 {
-    glfwGetWindowSize(handle, &p_rect->w, &p_rect->h);
+    glfwGetWindowSize(handle, &pRect->w, &pRect->h);
 }
 
 int Window::GetKey(int key)
@@ -64,20 +64,20 @@ int Window::GetMouseButton(int button)
     return glfwGetMouseButton(handle, button);
 }
 
-void Window::GetCursorPosition(float *p_xpos, float *p_ypos)
+void Window::GetCursorPosition(float* xpos, float* ypos)
 {
     double x, y;
     glfwGetCursorPos(handle, &x, &y);
-    *p_xpos = (float) x;
-    *p_ypos = (float) y;
+    *xpos = (float) x;
+    *ypos = (float) y;
 }
 
 
-void Window::SetVisible(bool is_visible)
+void Window::SetVisible(bool isVisible)
 {
-    visibleFlag = is_visible;
+    visibleFlag = isVisible;
 
-    if (is_visible) {
+    if (isVisible) {
         glfwShowWindow(handle);
     } else {
         glfwHideWindow(handle);
@@ -160,13 +160,13 @@ void Window::ToggleFullScreen()
     fullScreenFlag = !fullScreenFlag;
 
     if (fullScreenFlag) {
-        GLFWmonitor *primary_monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode *vidmode = glfwGetVideoMode(primary_monitor);
+        GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode *vidmode = glfwGetVideoMode(primaryMonitor);
 
         glfwGetWindowPos(handle, &fullScreenRect.x, &fullScreenRect.y);
         GetSize(&fullScreenRect);
 
-        glfwSetWindowMonitor(handle, primary_monitor, 0, 0, vidmode->width, vidmode->height, vidmode->refreshRate);
+        glfwSetWindowMonitor(handle, primaryMonitor, 0, 0, vidmode->width, vidmode->height, vidmode->refreshRate);
         return;
     }
 

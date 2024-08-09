@@ -28,7 +28,7 @@
 
 class RenderDevice {
 public:
-    RenderDevice(RenderDeviceContext *driver_context);
+    RenderDevice(RenderDeviceContext *vRDC);
     ~RenderDevice();
 
     RenderDeviceContext *GetDeviceContext() { return rdc; }
@@ -44,14 +44,14 @@ public:
     };
 
     Buffer *CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize size);
-    void DestroyBuffer(Buffer *p_buffer);
+    void DestroyBuffer(Buffer *buffer);
     void WriteBuffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
     void ReadBuffer(Buffer *buffer, VkDeviceSize offset, VkDeviceSize size, void *buf);
 
-    void CreateRenderPass(uint32_t attachment_count, VkAttachmentDescription *p_attachments, uint32_t subpass_count, VkSubpassDescription *p_subpass, uint32_t dependency_count, VkSubpassDependency *p_dependencies, VkRenderPass *p_render_pass);
-    void DestroyRenderPass(VkRenderPass render_pass);
-    void AllocateCommandBuffer(VkCommandBuffer *p_cmd_buffer);
-    void FreeCommandBuffer(VkCommandBuffer cmd_buffer);
+    void CreateRenderPass(uint32_t attachmentCount, VkAttachmentDescription *pAttachments, uint32_t subpassCount, VkSubpassDescription *pSubpass, uint32_t dependencyCount, VkSubpassDependency *pDependencies, VkRenderPass *pRenderPass);
+    void DestroyRenderPass(VkRenderPass renderPass);
+    void AllocateCommandBuffer(VkCommandBuffer *pCmdBuffer);
+    void FreeCommandBuffer(VkCommandBuffer cmdBuffer);
 
     struct Texture2D {
         VkImage image;
@@ -79,10 +79,10 @@ public:
         VkImageUsageFlags usage;
     };
 
-    Texture2D *CreateTexture(TextureCreateInfo *p_create_info);
+    Texture2D *CreateTexture(TextureCreateInfo *pCreateInfo);
     void DestroyTexture(Texture2D *p_texture);
     void WriteTexture(Texture2D *texture, size_t size, void *pixels);
-    void CreateFramebuffer(uint32_t width, uint32_t height, uint32_t image_view_count, VkImageView *p_image_view, VkRenderPass render_pass, VkFramebuffer *p_framebuffer);
+    void CreateFramebuffer(uint32_t width, uint32_t height, uint32_t image_view_count, VkImageView *p_image_view, VkRenderPass renderPass, VkFramebuffer *p_framebuffer);
     void DestroyFramebuffer(VkFramebuffer framebuffer);
 
     struct SamplerCreateInfo {
@@ -92,16 +92,16 @@ public:
         VkBorderColor border_color = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
     };
 
-    void CreateSampler(SamplerCreateInfo* p_create_info, VkSampler *p_sampler);
+    void CreateSampler(SamplerCreateInfo* pCreateInfo, VkSampler *p_sampler);
     void DestroySampler(VkSampler sampler);
     void BindTextureSampler(Texture2D *texture, VkSampler sampler);
 
-    void CreateDescriptorSetLayout(uint32_t bind_count, VkDescriptorSetLayoutBinding *p_bind, VkDescriptorSetLayout *p_descriptor_set_layout);
-    void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptor_set_layout);
-    void AllocateDescriptorSet(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor_set);
-    void FreeDescriptorSet(VkDescriptorSet descriptor_set);
-    void UpdateDescriptorSetBuffer(Buffer *p_buffer, uint32_t binding, VkDescriptorSet descriptor_set);
-    void UpdateDescriptorSetImage(Texture2D *p_texture, uint32_t binding, VkDescriptorSet descriptor_set);
+    void CreateDescriptorSetLayout(uint32_t bindingCount, VkDescriptorSetLayoutBinding *pBindings, VkDescriptorSetLayout *pDescriptorSetLayout);
+    void DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
+    void AllocateDescriptorSet(VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet *pDescriptorSet);
+    void FreeDescriptorSet(VkDescriptorSet descriptorSet);
+    void UpdateDescriptorSetBuffer(Buffer *buffer, uint32_t binding, VkDescriptorSet descriptorSet);
+    void UpdateDescriptorSetImage(Texture2D *texture, uint32_t binding, VkDescriptorSet descriptorSet);
 
     struct ShaderInfo {
         const char *vertex = NULL;
@@ -142,14 +142,14 @@ public:
         VkPipelineBindPoint bindPoint;
     };
 
-    Pipeline *CreateGraphicsPipeline(PipelineCreateInfo *p_create_info, ShaderInfo *p_shader_info);
-    Pipeline *CreateComputePipeline(ComputeShaderInfo *p_shader_info);
-    void DestroyPipeline(Pipeline *p_pipeline);
+    Pipeline *CreateGraphicsPipeline(PipelineCreateInfo *pCreateInfo, ShaderInfo *pShaderInfo);
+    Pipeline *CreateComputePipeline(ComputeShaderInfo *pShaderInfo);
+    void DestroyPipeline(Pipeline *pPipeline);
 
-    void CmdBufferBegin(VkCommandBuffer cmd_buffer, VkCommandBufferUsageFlags usage);
-    void CmdBufferEnd(VkCommandBuffer cmd_buffer);
-    void CmdBufferOneTimeBegin(VkCommandBuffer *p_cmd_buffer);
-    void CmdBufferOneTimeEnd(VkCommandBuffer cmd_buffer);
+    void CmdBufferBegin(VkCommandBuffer cmdBuffer, VkCommandBufferUsageFlags usage);
+    void CmdBufferEnd(VkCommandBuffer cmdBuffer);
+    void CmdBufferOneTimeBegin(VkCommandBuffer *pCmdBuffer);
+    void CmdBufferOneTimeEnd(VkCommandBuffer cmdBuffer);
 
     struct PipelineMemoryBarrier {
         struct {
@@ -161,26 +161,26 @@ public:
         } image;
     };
 
-    void CmdPipelineBarrier(VkCommandBuffer cmd_buffer, const PipelineMemoryBarrier *p_pipeline_memory_barrier);
+    void CmdPipelineBarrier(VkCommandBuffer cmdBuffer, const PipelineMemoryBarrier *pPipelineMemoryBarrier);
 
-    void CmdBeginRenderPass(VkCommandBuffer cmd_buffer, VkRenderPass render_pass, uint32_t clear_value_count, VkClearValue *p_clear_values, VkFramebuffer framebuffer, VkRect2D *p_rect);
-    void CmdEndRenderPass(VkCommandBuffer cmd_buffer);
-    void CmdBindVertexBuffer(VkCommandBuffer cmd_buffer, Buffer *p_buffer);
-    void CmdBindIndexBuffer(VkCommandBuffer cmd_buffer, VkIndexType type, Buffer *p_buffer);
-    void CmdDraw(VkCommandBuffer cmd_buffer, uint32_t vertex_count);
-    void CmdDrawIndexed(VkCommandBuffer cmd_buffer, uint32_t index_count);
-    void CmdBindPipeline(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline);
-    void CmdBufferSubmit(VkCommandBuffer cmd_buffer, uint32_t wait_semaphore_count, VkSemaphore *p_wait_semaphore, uint32_t signal_semaphore_count, VkSemaphore *p_signal_semaphore, VkPipelineStageFlags *p_mask, VkQueue queue, VkFence fence);
-    void CmdBindDescriptorSet(VkCommandBuffer cmd_buffer, Pipeline *p_pipeline, VkDescriptorSet descriptor);
-    void CmdSetViewport(VkCommandBuffer cmd_buffer , uint32_t w, uint32_t h);
-    void CmdPushConstant(VkCommandBuffer cmd_buffer, RenderDevice::Pipeline *pipeline, VkShaderStageFlags shader_stage_flags, uint32_t offset, uint32_t size, void *p_values);
-    void Present(VkQueue queue, VkSwapchainKHR swap_chain, uint32_t index, VkSemaphore wait_semaphore);
+    void CmdBeginRenderPass(VkCommandBuffer cmdBuffer, VkRenderPass renderPass, uint32_t clearValueCount, VkClearValue *pClearValues, VkFramebuffer framebuffer, VkRect2D *pRect2D);
+    void CmdEndRenderPass(VkCommandBuffer cmdBuffer);
+    void CmdBindVertexBuffer(VkCommandBuffer cmdBuffer, Buffer *buffer);
+    void CmdBindIndexBuffer(VkCommandBuffer cmdBuffer, VkIndexType type, Buffer *buffer);
+    void CmdDraw(VkCommandBuffer cmdBuffer, uint32_t vertexCount);
+    void CmdDrawIndexed(VkCommandBuffer cmdBuffer, uint32_t indexCount);
+    void CmdBindPipeline(VkCommandBuffer cmdBuffer, Pipeline *pPipeline);
+    void CmdBufferSubmit(VkCommandBuffer cmdBuffer, uint32_t waitSemaphoreCount, VkSemaphore *pWaitSemaphores, uint32_t signalSemaphoreCount, VkSemaphore *pSignalSemaphores, VkPipelineStageFlags *pMask, VkQueue queue, VkFence fence);
+    void CmdBindDescriptorSet(VkCommandBuffer cmdBuffer, Pipeline *pPipeline, VkDescriptorSet descriptor);
+    void CmdSetViewport(VkCommandBuffer cmdBuffer , uint32_t w, uint32_t h);
+    void CmdPushConstant(VkCommandBuffer cmdBuffer, RenderDevice::Pipeline *pipeline, VkShaderStageFlags shaderStageFlags, uint32_t offset, uint32_t size, void *pValues);
+    void Present(VkQueue queue, VkSwapchainKHR swapchain, uint32_t index, VkSemaphore waitSemaphore);
 
 private:
     void _InitializeDescriptorPool();
 
     RenderDeviceContext *rdc;
-    VkDevice vkDevice;
+    VkDevice device;
     VmaAllocator allocator;
     VkDescriptorPool descriptorPool;
     VkSampleCountFlagBits msaaSampleCounts;

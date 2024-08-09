@@ -77,13 +77,13 @@ public:
         pointers.erase(name);
       }
 
-    void GetSize(Rect2D *p_rect);
+    void GetSize(Rect2D *pRect);
     void *GetNativeHandle() { return handle; }
     int GetKey(int key);
     int GetMouseButton(int button);
-    void GetCursorPosition(float *p_xpos, float *p_ypos);
+    void GetCursorPosition(float *xpos, float *ypos);
 
-    void SetVisible(bool is_visible);
+    void SetVisible(bool isVisible);
     void SetCursorPosition(float x, float y);
 
     void SetWindowCloseCallback(PFN_WindowCloseCallback callback);

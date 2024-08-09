@@ -182,7 +182,7 @@ VkFormat RenderDeviceContext::FindSupportedFormat(const std::vector<VkFormat> &c
 }
 
 
-void RenderDeviceContext::AllocateCommandBuffer(VkCommandBufferLevel level, VkCommandBuffer *p_cmd_buffer)
+void RenderDeviceContext::AllocateCommandBuffer(VkCommandBufferLevel level, VkCommandBuffer *pCmdBuffer)
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -194,13 +194,13 @@ void RenderDeviceContext::AllocateCommandBuffer(VkCommandBufferLevel level, VkCo
             /* commandBufferCount */ 1
     };
 
-    err = vkAllocateCommandBuffers(device, &allocate_info, p_cmd_buffer);
+    err = vkAllocateCommandBuffers(device, &allocate_info, pCmdBuffer);
     assert(!err);
 }
 
-void RenderDeviceContext::FreeCommandBuffer(VkCommandBuffer cmd_buffer)
+void RenderDeviceContext::FreeCommandBuffer(VkCommandBuffer cmdBuffer)
 {
-    vkFreeCommandBuffers(device, cmd_pool, 1, &cmd_buffer);
+    vkFreeCommandBuffers(device, cmd_pool, 1, &cmdBuffer);
 }
 
 void RenderDeviceContext::_InitializeWindowArguments(VkSurfaceKHR surface)
