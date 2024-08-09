@@ -23,8 +23,6 @@
 #ifndef _TYPEDEFS_H_
 #define _TYPEDEFS_H_
 
-#define stackalloc() {/* 0 */}
-
 #if defined(__MINGW32__)
 #  define V_FORCEINLINE __attribute__((__always_inline__)) inline
 #elif defined(_MSC_VER)
