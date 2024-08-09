@@ -51,7 +51,7 @@ void RenderDisplay::Initialize(Window *vCurrentNativeWindow)
 {
     VkResult U_ASSERT_ONLY err;
 
-    /* imalloc display display struct and set surface */
+    /* imalloc display struct and set surface */
     display = (Display *) imalloc(sizeof(Display));
     currentNativeWindow = vCurrentNativeWindow;
     currentNativeWindow->CreateWindowSurfaceKHR(instance, VK_NULL_HANDLE, &display->surface);
