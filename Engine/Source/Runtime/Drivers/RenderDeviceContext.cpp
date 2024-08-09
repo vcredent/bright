@@ -95,7 +95,7 @@ RenderDeviceContext::RenderDeviceContext()
     err = vkCreateInstance(&instance_create_info, VK_NULL_HANDLE, &instance);
     assert(!err);
 
-    _load_proc_addr();
+    _LoadVulkanFunctionProcAddr();
 
     // ******************************************************** //
     //                initialize debug messenger                //
@@ -160,10 +160,9 @@ RenderDeviceContext::~RenderDeviceContext()
 
 Error RenderDeviceContext::Initialize()
 {
-    _create_device();
-    _create_cmd_pool();
-    _create_vma_allocator();
-
+    _CreateDevice();
+    _CreateCommandPool();
+    _CreateVmaAllocator();
     return OK;
 }
 
@@ -242,7 +241,7 @@ void RenderDeviceContext::_InitializeWindowArguments(VkSurfaceKHR surface)
     free(queue_family_properties);
 }
 
-void RenderDeviceContext::_load_proc_addr()
+void RenderDeviceContext::_LoadVulkanFunctionProcAddr()
 {
 #if defined(ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT)
     fnCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
@@ -250,7 +249,7 @@ void RenderDeviceContext::_load_proc_addr()
 #endif
 }
 
-void RenderDeviceContext::_create_device()
+void RenderDeviceContext::_CreateDevice()
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -292,7 +291,7 @@ void RenderDeviceContext::_create_device()
     vkGetDeviceQueue(device, graph_queue_family, 0, &graph_queue);
 }
 
-void RenderDeviceContext::_create_cmd_pool()
+void RenderDeviceContext::_CreateCommandPool()
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -307,7 +306,7 @@ void RenderDeviceContext::_create_cmd_pool()
     assert(!err);
 }
 
-void RenderDeviceContext::_create_vma_allocator()
+void RenderDeviceContext::_CreateVmaAllocator()
 {
     VkResult U_ASSERT_ONLY err;
 

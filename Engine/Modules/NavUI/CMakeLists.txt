@@ -26,8 +26,10 @@ include_directories(SYSTEM
   "imgui"
 )
 
-include_directories(SYSTEM ../../Include)
-include_directories(SYSTEM ../../ThirdParty)
+set(PROJECT_ROOT_DIR ../..)
+
+include_directories(SYSTEM ${PROJECT_ROOT_DIR}/Include)
+include_directories(SYSTEM ${PROJECT_ROOT_DIR}//ThirdParty)
 
 add_library(${LIBRARY_NAME} STATIC
   "Navui.cpp"
@@ -38,6 +40,11 @@ add_library(${LIBRARY_NAME} STATIC
   "imgui/imgui_widgets.cpp"
   "imgui/backends/imgui_impl_vulkan.cpp"
   "imgui/backends/imgui_impl_glfw.cpp"
+)
+
+target_link_libraries(${LIBRARY_NAME} PRIVATE
+  "glfw3"
+  "vulkan-1"
 )
 
 target_include_directories(${LIBRARY_NAME} SYSTEM PUBLIC

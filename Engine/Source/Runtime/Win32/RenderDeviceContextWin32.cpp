@@ -25,13 +25,9 @@
 RenderDeviceContextWin32::RenderDeviceContextWin32(Window *window)
 {
     VkSurfaceKHR surface;
-    VkInstance inst;
-
-    inst = GetInstance();
-
-    window->create_vulkan_surface(inst, VK_NULL_HANDLE, &surface);
+    window->CreateWindowSurfaceKHR(GetInstance(), VK_NULL_HANDLE, &surface);
     _InitializeWindowArguments(surface);
-    vkDestroySurfaceKHR(inst, surface, VK_NULL_HANDLE);
+    vkDestroySurfaceKHR(GetInstance(), surface, VK_NULL_HANDLE);
 }
 
 RenderDeviceContextWin32::~RenderDeviceContextWin32()

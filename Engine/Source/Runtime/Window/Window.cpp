@@ -49,22 +49,22 @@ Window::~Window()
     }
 }
 
-void Window::get_size(Rect2D *p_rect)
+void Window::GetSize(Rect2D *p_rect)
 {
     glfwGetWindowSize(handle, &p_rect->w, &p_rect->h);
 }
 
-int Window::getkey(int key)
+int Window::GetKey(int key)
 {
     return glfwGetKey(handle, key);
 }
 
-int Window::get_mouse_button(int button)
+int Window::GetMouseButton(int button)
 {
     return glfwGetMouseButton(handle, button);
 }
 
-void Window::get_cursor_position(float *p_xpos, float *p_ypos)
+void Window::GetCursorPosition(float *p_xpos, float *p_ypos)
 {
     double x, y;
     glfwGetCursorPos(handle, &x, &y);
@@ -73,9 +73,9 @@ void Window::get_cursor_position(float *p_xpos, float *p_ypos)
 }
 
 
-void Window::set_visible(bool is_visible)
+void Window::SetVisible(bool is_visible)
 {
-    visible_flag = is_visible;
+    visibleFlag = is_visible;
 
     if (is_visible) {
         glfwShowWindow(handle);
@@ -84,12 +84,12 @@ void Window::set_visible(bool is_visible)
     }
 }
 
-void Window::set_cursor_position(float x, float y)
+void Window::SetCursorPosition(float x, float y)
 {
     glfwSetCursorPos(handle, x, y);
 }
 
-void Window::set_window_close_callbacks(PFN_WindowCloseCallback callback)
+void Window::SetWindowCloseCallback(PFN_WindowCloseCallback callback)
 {
     fnWindowCloseCallback = callback;
     glfwSetWindowCloseCallback(handle, [](GLFWwindow *glfw_window) {
@@ -98,7 +98,7 @@ void Window::set_window_close_callbacks(PFN_WindowCloseCallback callback)
     });
 }
 
-void Window::set_window_resize_callbacks(PFN_WindowResizeCallback callback)
+void Window::SetWindowResizeCallback(PFN_WindowResizeCallback callback)
 {
     fnWindowResizeCallback = callback;
     glfwSetWindowSizeCallback(handle, [] (GLFWwindow *glfw_window, int w, int h) {
@@ -107,7 +107,7 @@ void Window::set_window_resize_callbacks(PFN_WindowResizeCallback callback)
     });
 }
 
-void Window::set_window_mouse_button_callbacks(PFN_WindowMouseButtonCallback callback)
+void Window::SetWindowMouseButtonCallback(PFN_WindowMouseButtonCallback callback)
 {
     fnWindowMouseButtonCallback = callback;
     glfwSetMouseButtonCallback(handle, [](GLFWwindow *glfw_window, int button, int action, int mods) {
@@ -116,7 +116,7 @@ void Window::set_window_mouse_button_callbacks(PFN_WindowMouseButtonCallback cal
     });
 }
 
-void Window::set_window_cursor_position_callbacks(PFN_WindowCursorPositionCallback callback)
+void Window::SetWindowCursorPositionCallback(PFN_WindowCursorPositionCallback callback)
 {
     fnWindowCursorPositionCallback = callback;
     glfwSetCursorPosCallback(handle, [](GLFWwindow *glfw_window, double x, double y) {
@@ -125,7 +125,7 @@ void Window::set_window_cursor_position_callbacks(PFN_WindowCursorPositionCallba
     });
 }
 
-void Window::set_window_key_callbacks(PFN_WindowKeyCallback callback)
+void Window::SetWindowKeyCallback(PFN_WindowKeyCallback callback)
 {
     fnWindowKeyCallback = callback;
     glfwSetKeyCallback(handle, [](GLFWwindow *glfw_window, int key, int scancode, int action, int mods) {
@@ -134,7 +134,7 @@ void Window::set_window_key_callbacks(PFN_WindowKeyCallback callback)
     });
 }
 
-void Window::set_window_scroll_callbacks(PFN_WindowScrollCallback callback)
+void Window::SetWindowScrollCallback(PFN_WindowScrollCallback callback)
 {
     fnWindowScrollCallback = callback;
     glfwSetScrollCallback(handle, [](GLFWwindow *glfw_window, double x, double y) {
@@ -144,41 +144,41 @@ void Window::set_window_scroll_callbacks(PFN_WindowScrollCallback callback)
 }
 
 
-bool Window::is_close()
+bool Window::IsClose()
 {
-    return !glfwWindowShouldClose(handle);
+    return glfwWindowShouldClose(handle);
 }
 
-void Window::poll_events()
+void Window::PollEvents()
 {
     glfwMakeContextCurrent(handle);
     glfwPollEvents();
 }
 
-void Window::toggle_full_screen()
+void Window::ToggleFullScreen()
 {
-    full_screen_flag = !full_screen_flag;
+    fullScreenFlag = !fullScreenFlag;
 
-    if (full_screen_flag) {
+    if (fullScreenFlag) {
         GLFWmonitor *primary_monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode *vidmode = glfwGetVideoMode(primary_monitor);
 
-        glfwGetWindowPos(handle, &full_screen_rect.x, &full_screen_rect.y);
-        get_size(&full_screen_rect);
+        glfwGetWindowPos(handle, &fullScreenRect.x, &fullScreenRect.y);
+        GetSize(&fullScreenRect);
 
         glfwSetWindowMonitor(handle, primary_monitor, 0, 0, vidmode->width, vidmode->height, vidmode->refreshRate);
         return;
     }
 
-    glfwSetWindowMonitor(handle, NULL, full_screen_rect.x, full_screen_rect.y, full_screen_rect.w, full_screen_rect.h, 0);
+    glfwSetWindowMonitor(handle, NULL, fullScreenRect.x, fullScreenRect.y, fullScreenRect.w, fullScreenRect.h, 0);
 }
 
-void Window::show_cursor()
+void Window::ShowCursor()
 {
     glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
-void Window::hide_cursor()
+void Window::HideCursor()
 {
     glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }

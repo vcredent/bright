@@ -73,10 +73,10 @@ private:
         PFN_vkDestroyDebugUtilsMessengerEXT fnDestroyDebugUtilsMessengerExt = VK_NULL_HANDLE;
 #endif
 
-    void _load_proc_addr();
-    void _create_device();
-    void _create_cmd_pool();
-    void _create_vma_allocator();
+    void _LoadVulkanFunctionProcAddr();
+    void _CreateDevice();
+    void _CreateCommandPool();
+    void _CreateVmaAllocator();
 
     VkInstance instance = VK_NULL_HANDLE;
 #ifdef ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT

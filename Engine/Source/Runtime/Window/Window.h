@@ -49,14 +49,14 @@ public:
     ~Window();
 
 #if defined(VK_VERSION_1_0)
-    void create_vulkan_surface(VkInstance instance, const VkAllocationCallbacks* allocator, VkSurfaceKHR *p_surface)
+    void CreateWindowSurfaceKHR(VkInstance instance, const VkAllocationCallbacks* allocator, VkSurfaceKHR *p_surface)
       {
           glfwCreateWindowSurface(instance, handle, allocator, p_surface);
       }
 #endif
 
     template<typename T>
-    T *pointer(const std::string& name)
+    T *Pointer(const std::string& name)
       {
         void *retval = nullptr;
 
@@ -67,46 +67,46 @@ public:
         return (T*) retval;
       }
 
-    void add_user_pointer(const std::string& name, void *pointer)
+    void AddUserPointer(const std::string& name, void *pointer)
       {
           pointers.insert({ name, pointer });
       }
 
-    void remove_user_pointer(const std::string& name)
+    void RemoveUserPointer(const std::string& name)
       {
         pointers.erase(name);
       }
 
-    void get_size(Rect2D *p_rect);
-    void *get_native_window() { return handle; }
-    int getkey(int key);
-    int get_mouse_button(int button);
-    void get_cursor_position(float *p_xpos, float *p_ypos);
+    void GetSize(Rect2D *p_rect);
+    void *GetNativeHandle() { return handle; }
+    int GetKey(int key);
+    int GetMouseButton(int button);
+    void GetCursorPosition(float *p_xpos, float *p_ypos);
 
-    void set_visible(bool is_visible);
-    void set_cursor_position(float x, float y);
+    void SetVisible(bool is_visible);
+    void SetCursorPosition(float x, float y);
 
-    void set_window_close_callbacks(PFN_WindowCloseCallback callback);
-    void set_window_resize_callbacks(PFN_WindowResizeCallback callback);
-    void set_window_mouse_button_callbacks(PFN_WindowMouseButtonCallback callback);
-    void set_window_cursor_position_callbacks(PFN_WindowCursorPositionCallback callback);
-    void set_window_key_callbacks(PFN_WindowKeyCallback callback);
-    void set_window_scroll_callbacks(PFN_WindowScrollCallback callback);
+    void SetWindowCloseCallback(PFN_WindowCloseCallback callback);
+    void SetWindowResizeCallback(PFN_WindowResizeCallback callback);
+    void SetWindowMouseButtonCallback(PFN_WindowMouseButtonCallback callback);
+    void SetWindowCursorPositionCallback(PFN_WindowCursorPositionCallback callback);
+    void SetWindowKeyCallback(PFN_WindowKeyCallback callback);
+    void SetWindowScrollCallback(PFN_WindowScrollCallback callback);
 
-    bool is_close();
-    bool is_visible() { return visible_flag; }
+    bool IsClose();
+    bool IsVisible() { return visibleFlag; }
 
-    void poll_events();
-    void toggle_full_screen();
+    void PollEvents();
+    void ToggleFullScreen();
 
-    void show_cursor();
-    void hide_cursor();
+    void ShowCursor();
+    void HideCursor();
 
 private:
     GLFWwindow *handle;
-    bool visible_flag = true;
-    bool full_screen_flag = false;
-    Rect2D full_screen_rect;
+    bool visibleFlag = true;
+    bool fullScreenFlag = false;
+    Rect2D fullScreenRect;
     std::unordered_map<std::string, void *> pointers;
 
     PFN_WindowCloseCallback fnWindowCloseCallback = NULL;
