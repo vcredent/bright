@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* RenderDisplay.cpp                                                        */
+/* RenderingDisplay.cpp                                                     */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                            BRIGHT ENGINE                                 */
@@ -20,10 +20,10 @@
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "RenderDisplay.h"
+#include "RenderingDisplay.h"
 #include <algorithm>
 
-RenderDisplay::RenderDisplay(RenderDevice *vRD, Window *vWindow)
+RenderingDisplay::RenderingDisplay(RenderDevice *vRD, Window *vWindow)
     : rd(vRD), currentNativeWindow(vWindow)
 {
     RenderDeviceContext* rdc = rd->GetDeviceContext();
@@ -38,7 +38,7 @@ RenderDisplay::RenderDisplay(RenderDevice *vRD, Window *vWindow)
     _Initialize();
 }
 
-RenderDisplay::~RenderDisplay()
+RenderingDisplay::~RenderingDisplay()
 {
     vkDestroySemaphore(device, display->imageAvailableSemaphore, VK_NULL_HANDLE);
     vkDestroySemaphore(device, display->renderFinishedSemaphore, VK_NULL_HANDLE);
@@ -49,7 +49,7 @@ RenderDisplay::~RenderDisplay()
     free(display);
 }
 
-void RenderDisplay::CmdBeginDisplayRender(VkCommandBuffer *pCmdBuffer)
+void RenderingDisplay::CmdBeginDisplayRender(VkCommandBuffer *pCmdBuffer)
 {
     _CheckUpdateSwapchain();
     vkAcquireNextImageKHR(device, display->swapchain, UINT64_MAX, display->imageAvailableSemaphore, nullptr, &acquireNextIndex);
@@ -66,7 +66,7 @@ void RenderDisplay::CmdBeginDisplayRender(VkCommandBuffer *pCmdBuffer)
     rd->CmdBeginRenderPass(cmdBuffer, display->renderPass, 1, &clearColor, display->swapchainResources[acquireNextIndex].framebuffer, &rect);
 }
 
-void RenderDisplay::CmdEndDisplayRender(VkCommandBuffer cmdBuffer)
+void RenderingDisplay::CmdEndDisplayRender(VkCommandBuffer cmdBuffer)
 {
     rd->CmdEndRenderPass(cmdBuffer);
     rd->CmdBufferEnd(cmdBuffer);
@@ -76,7 +76,7 @@ void RenderDisplay::CmdEndDisplayRender(VkCommandBuffer cmdBuffer)
     rd->Present(graphQueue, display->swapchain, acquireNextIndex, display->renderFinishedSemaphore);
 }
 
-void RenderDisplay::_Initialize()
+void RenderingDisplay::_Initialize()
 {
     VkResult U_ASSERT_ONLY err;
 
@@ -123,7 +123,7 @@ void RenderDisplay::_Initialize()
     _CreateSwapchain();
 }
 
-void RenderDisplay::_CreateSwapchain()
+void RenderingDisplay::_CreateSwapchain()
 {
     VkResult U_ASSERT_ONLY err;
     VkSwapchainKHR oldSwapchain;
@@ -276,7 +276,7 @@ void RenderDisplay::_CreateSwapchain()
     }
 }
 
-void RenderDisplay::_CleanUpSwapchain()
+void RenderingDisplay::_CleanUpSwapchain()
 {
     for (uint32_t i = 0; i < display->imageBufferCount; i++) {
         vkFreeCommandBuffers(device, cmdPool, 1, &display->swapchainResources[i].cmdBuffer);
@@ -287,7 +287,7 @@ void RenderDisplay::_CleanUpSwapchain()
     free(display->swapchainResources);
 }
 
-void RenderDisplay::_CheckUpdateSwapchain()
+void RenderingDisplay::_CheckUpdateSwapchain()
 {
     VkSurfaceCapabilitiesKHR capabilities;
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, display->surface, &capabilities);

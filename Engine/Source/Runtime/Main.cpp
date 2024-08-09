@@ -21,7 +21,7 @@
 /*                                                                          */
 /* ======================================================================== */
 #include "Win32/RenderDeviceContextWin32.h"
-#include "Renderer/RenderDisplay.h"
+#include "Renderer/RenderingDisplay.h"
 #include <NavUI/NavUI.h>
 
 int main()
@@ -29,7 +29,7 @@ int main()
     Window *window = new Window("BrightEngine", 1680, 1080);
     RenderDeviceContextWin32 *rdc = new RenderDeviceContextWin32(window);
     RenderDevice *rd = rdc->CreateRenderDevice();
-    RenderDisplay* display = memnew(RenderDisplay, rd, window);
+    RenderingDisplay* display = memnew(RenderingDisplay, rd, window);
 
     NavUI::InitializeInfo initializeInfo = {};
     initializeInfo.window = (GLFWwindow *) window->GetNativeHandle();

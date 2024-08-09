@@ -1,5 +1,5 @@
 /* ======================================================================== */
-/* RenderDisplay.h                                                          */
+/* RenderingDisplay.h                                                       */
 /* ======================================================================== */
 /*                        This file is part of:                             */
 /*                            BRIGHT ENGINE                                 */
@@ -26,10 +26,10 @@
 #include "Runtime/Drivers/RenderDevice.h"
 #include "Runtime/Window/Window.h"
 
-class RenderDisplay {
+class RenderingDisplay {
 public:
-    RenderDisplay(RenderDevice *vRD, Window *vWindow);
-   ~RenderDisplay();
+    RenderingDisplay(RenderDevice *vRD, Window *vWindow);
+   ~RenderingDisplay();
 
     VkRenderPass GetRenderPass() { return display->renderPass; }
     uint32_t GetImageBufferCount() { return display->imageBufferCount; }
