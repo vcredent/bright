@@ -46,8 +46,14 @@ file(GLOB_RECURSE SOURCES
   "Engine/ThirdParty/volk/*.cpp"
 )
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(GLFW_LINK_DIRECTORY "Engine/ThirdParty/GLFW/lib-mingw-w64")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  set(GLFW_LINK_DIRECTORY "Engine/ThirdParty/GLFW/lib-vc2022")
+endif()
+
 set(LINK_DIRECTORIES
-  "Engine/ThirdParty/GLFW/lib-mingw-w64"
+  ${GLFW_LINK_DIRECTORY}
   "Engine/ThirdParty/vulkan"
 )
 
