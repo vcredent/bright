@@ -29,7 +29,7 @@ include_directories(SYSTEM
 set(PROJECT_ROOT_DIR ../..)
 
 include_directories(SYSTEM ${PROJECT_ROOT_DIR}/Include)
-include_directories(SYSTEM ${PROJECT_ROOT_DIR}//ThirdParty)
+include_directories(SYSTEM ${PROJECT_ROOT_DIR}/ThirdParty)
 
 add_library(${LIBRARY_NAME} STATIC
   "Navui.cpp"

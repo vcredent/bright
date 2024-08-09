@@ -64,7 +64,7 @@ public:
         uint32_t height;
         VkFormat format;
         VkSampler sampler = VK_NULL_HANDLE;
-        VkImageAspectFlags aspect_mask;
+        VkImageAspectFlags aspectMask;
         size_t size = 0;
     };
 
@@ -73,9 +73,9 @@ public:
         uint32_t height;
         VkSampleCountFlagBits samples;
         VkFormat format;
-        VkImageAspectFlags aspect_mask;
-        VkImageType image_type;
-        VkImageViewType image_view_type;
+        VkImageAspectFlags aspectMask;
+        VkImageType imageType;
+        VkImageViewType imageViewType;
         VkImageUsageFlags usage;
     };
 

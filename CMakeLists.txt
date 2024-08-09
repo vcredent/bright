@@ -41,7 +41,7 @@ set(SYSTEM_INCLUDE_DIRS
 )
 
 file(GLOB_RECURSE SOURCES
-  "Engine/Source/*.cpp"
+  "Engine/Source/Runtime/*.cpp"
   "Engine/ThirdParty/vma/*.cpp"
   "Engine/ThirdParty/volk/*.cpp"
 )
@@ -63,7 +63,7 @@ set(LINK_LIBRARIES
   "NavUI"
 )
 
-add_subdirectory(Engine/Modules/NavUI)
+add_subdirectory(Engine/Source/NavUI)
 
 include_directories(${INCLUDE_DIRS})
 include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRS})

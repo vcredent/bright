@@ -102,13 +102,13 @@ void RenderingScreen::CmdBeginScreenRender(VkCommandBuffer *pCmdBuffer)
     cmd_buffer = window->swap_chain_resources[acquire_next_index].cmd_buffer;
     rd->CmdBufferBegin(cmd_buffer, VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT);
 
-    VkClearValue clear_color = {
-            0.10f, 0.10f, 0.10f, 1.0f
+    VkClearValue clearColor = {
+            0.0f, 0.10f, 0.10f, 1.0f
     };
 
     VkRect2D rect = {};
     rect.extent = { window->width, window->height };
-    rd->CmdBeginRenderPass(cmd_buffer, window->render_pass, 1, &clear_color, window->swap_chain_resources[acquire_next_index].framebuffer, &rect);
+    rd->CmdBeginRenderPass(cmd_buffer, window->render_pass, 1, &clearColor, window->swap_chain_resources[acquire_next_index].framebuffer, &rect);
 
     *pCmdBuffer = cmd_buffer;
 }

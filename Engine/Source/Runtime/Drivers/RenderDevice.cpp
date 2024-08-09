@@ -127,13 +127,13 @@ RenderDevice::Texture2D *RenderDevice::CreateTexture(TextureCreateInfo *p_create
     texture->format = p_create_info->format;
     texture->width = p_create_info->width;
     texture->height = p_create_info->height;
-    texture->aspect_mask = p_create_info->aspect_mask;
+    texture->aspectMask = p_create_info->aspectMask;
 
     VkImageCreateInfo image_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
             /* pNext */ VK_NULL_HANDLE,
             /* flags */ VK_NONE_FLAGS,
-            /* imageType */ p_create_info->image_type,
+            /* imageType */ p_create_info->imageType,
             /* format */ texture->format,
             /* extent */ { p_create_info->width, p_create_info->height, 1 },
             /* mipLevels */ 1,
@@ -157,7 +157,7 @@ RenderDevice::Texture2D *RenderDevice::CreateTexture(TextureCreateInfo *p_create
             /* pNext */ VK_NULL_HANDLE,
             /* flags */ VK_NONE_FLAGS,
             /* image */ texture->image,
-            /* viewType */ p_create_info->image_view_type,
+            /* viewType */ p_create_info->imageViewType,
             /* format */ texture->format,
             /* components */
                 {
@@ -168,7 +168,7 @@ RenderDevice::Texture2D *RenderDevice::CreateTexture(TextureCreateInfo *p_create
                 },
             /* subresourceRange */
                 {
-                    .aspectMask = p_create_info->aspect_mask,
+                    .aspectMask = p_create_info->aspectMask,
                     .baseMipLevel = 0,
                     .levelCount = 1,
                     .baseArrayLayer = 0,
@@ -717,7 +717,7 @@ void RenderDevice::CmdPipelineBarrier(VkCommandBuffer cmd_buffer, const RenderDe
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.image = p_pipeline_memory_barrier->image.texture->image;
-    barrier.subresourceRange.aspectMask = p_pipeline_memory_barrier->image.texture->aspect_mask;
+    barrier.subresourceRange.aspectMask = p_pipeline_memory_barrier->image.texture->aspectMask;
     barrier.subresourceRange.baseMipLevel = 0;
     barrier.subresourceRange.levelCount = 1;
     barrier.subresourceRange.baseArrayLayer = 0;
