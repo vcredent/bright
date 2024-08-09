@@ -59,7 +59,7 @@ RenderDeviceContext::RenderDeviceContext()
     // ************************************************* //
     VkApplicationInfo application_info = {
             /* sType */ VK_STRUCTURE_TYPE_APPLICATION_INFO,
-            /* pNext */ nextptr,
+            /* pNext */ VK_NULL_HANDLE,
             /* pApplicationName */ "PortableX",
             /* applicationVersion */ VK_MAKE_VERSION(1, 0, 0),
             /* pEngineName */ "PortableEngine",
@@ -83,8 +83,8 @@ RenderDeviceContext::RenderDeviceContext()
 
     VkInstanceCreateInfo instance_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* pNext */ VK_NULL_HANDLE,
+            /* flags */ VK_NONE_FLAGS,
             /* pApplicationInfo */ &application_info,
             /* enabledLayerCount */ ARRAY_SIZE(layers),
             /* ppEnabledLayerNames */ layers,
@@ -92,7 +92,7 @@ RenderDeviceContext::RenderDeviceContext()
             /* ppEnabledExtensionNames */ extensions
     };
 
-    err = vkCreateInstance(&instance_create_info, allocation_callbacks, &instance);
+    err = vkCreateInstance(&instance_create_info, VK_NULL_HANDLE, &instance);
     assert(!err);
 
     _load_proc_addr();
@@ -111,7 +111,7 @@ RenderDeviceContext::RenderDeviceContext()
                                         VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     messenger_create_info.pfnUserCallback = debugCallback;
 
-    err = fnCreateDebugUtilsMessengerEXT(instance, &messenger_create_info, allocation_callbacks, &messenger);
+    err = fnCreateDebugUtilsMessengerEXT(instance, &messenger_create_info, VK_NULL_HANDLE, &messenger);
     assert(!err);
 #endif
 
@@ -150,12 +150,12 @@ RenderDeviceContext::RenderDeviceContext()
 RenderDeviceContext::~RenderDeviceContext()
 {
     vmaDestroyAllocator(allocator);
-    vkDestroyCommandPool(device, cmd_pool, allocation_callbacks);
-    vkDestroyDevice(device, allocation_callbacks);
+    vkDestroyCommandPool(device, cmd_pool, VK_NULL_HANDLE);
+    vkDestroyDevice(device, VK_NULL_HANDLE);
 #ifdef ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT
-    fnDestroyDebugUtilsMessengerExt(instance, messenger, allocation_callbacks);
+    fnDestroyDebugUtilsMessengerExt(instance, messenger, VK_NULL_HANDLE);
 #endif
-    vkDestroyInstance(instance, allocation_callbacks);
+    vkDestroyInstance(instance, VK_NULL_HANDLE);
 }
 
 Error RenderDeviceContext::Initialize()
@@ -189,7 +189,7 @@ void RenderDeviceContext::AllocateCommandBuffer(VkCommandBufferLevel level, VkCo
 
     VkCommandBufferAllocateInfo allocate_info = {
             /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-            /* pNext */ nextptr,
+            /* pNext */ VK_NULL_HANDLE,
             /* commandPool */ cmd_pool,
             /* level */ level,
             /* commandBufferCount */ 1
@@ -257,8 +257,8 @@ void RenderDeviceContext::_create_device()
     float priorities = 1.0f;
     VkDeviceQueueCreateInfo queue_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* pNext */ VK_NULL_HANDLE,
+            /* flags */ VK_NONE_FLAGS,
             /* queueFamilyIndex */ graph_queue_family,
             /* queueCount */ 1,
             /* pQueuePriorities */ &priorities
@@ -275,8 +275,8 @@ void RenderDeviceContext::_create_device()
 
     VkDeviceCreateInfo device_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* pNext */ VK_NULL_HANDLE,
+            /* flags */ VK_NONE_FLAGS,
             /* queueCreateInfoCount */ 1,
             /* pQueueCreateInfos */ &queue_create_info,
             /* enabledLayerCount */ 0,
@@ -286,7 +286,7 @@ void RenderDeviceContext::_create_device()
             /* pEnabledFeatures */ &features,
     };
 
-    err = vkCreateDevice(physical_device, &device_create_info, allocation_callbacks, &device);
+    err = vkCreateDevice(physical_device, &device_create_info, VK_NULL_HANDLE, &device);
     assert(!err);
 
     vkGetDeviceQueue(device, graph_queue_family, 0, &graph_queue);
@@ -298,12 +298,12 @@ void RenderDeviceContext::_create_cmd_pool()
 
     VkCommandPoolCreateInfo cmd_pool_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-            /* pNext */ nextptr,
+            /* pNext */ VK_NULL_HANDLE,
             /* flags */ VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
             /* queueFamilyIndex */ graph_queue_family
     };
 
-    err = vkCreateCommandPool(device, &cmd_pool_create_info, allocation_callbacks, &cmd_pool);
+    err = vkCreateCommandPool(device, &cmd_pool_create_info, VK_NULL_HANDLE, &cmd_pool);
     assert(!err);
 }
 

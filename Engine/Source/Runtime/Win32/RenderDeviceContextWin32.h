@@ -23,8 +23,8 @@
 #ifndef _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H
 #define _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H
 
-#include "Drivers/RenderDevice.h"
-#include "Window/window.h"
+#include "Runtime/Drivers/RenderDevice.h"
+#include "Runtime/Window/window.h"
 
 // Render driver context for vulkan
 class RenderDeviceContextWin32 : public RenderDeviceContext {
@@ -33,7 +33,7 @@ public:
     ~RenderDeviceContextWin32();
 
     RenderDevice *CreateRenderDevice();
-    void DestroyRenderDevice(RenderDevice *p_render_device);
+    void DestroyRenderDevice(RenderDevice *pRenderDevice);
 };
 
 #endif /* _RENDERING_CONTEXT_DRIVER_VULKAN_WIN32_H */

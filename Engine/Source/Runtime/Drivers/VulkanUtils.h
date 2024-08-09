@@ -91,14 +91,14 @@ static VkShaderModule load_shader_module(VkDevice device, const char *name, cons
 
     VkShaderModuleCreateInfo shader_module_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-            /* pNext */ nextptr,
+            /* pNext */ VK_NULL_HANDLE,
             /* flags */ 0,
             /* codeSize */ size,
             /* pCode */ reinterpret_cast<uint32_t *>(buf),
     };
 
     VkShaderModule shader_module;
-    err = vkCreateShaderModule(device, &shader_module_create_info, allocation_callbacks, &shader_module);
+    err = vkCreateShaderModule(device, &shader_module_create_info, VK_NULL_HANDLE, &shader_module);
     assert(!err);
 
     io_free_buf(buf);

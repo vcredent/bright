@@ -38,7 +38,7 @@ RenderDevice::RenderDevice(RenderDeviceContext *driver_context)
 
 RenderDevice::~RenderDevice()
 {
-    vkDestroyDescriptorPool(vk_device, descriptor_pool, allocation_callbacks);
+    vkDestroyDescriptorPool(vk_device, descriptor_pool, VK_NULL_HANDLE);
 }
 
 RenderDevice::Buffer *RenderDevice::CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize size)
@@ -99,13 +99,13 @@ void RenderDevice::CreateRenderPass(uint32_t attachment_count, VkAttachmentDescr
     render_pass_create_info.dependencyCount = dependency_count;
     render_pass_create_info.pDependencies = p_dependencies;
 
-    err = vkCreateRenderPass(vk_device, &render_pass_create_info, allocation_callbacks, p_render_pass);
+    err = vkCreateRenderPass(vk_device, &render_pass_create_info, VK_NULL_HANDLE, p_render_pass);
     assert(!err);
 }
 
 void RenderDevice::DestroyRenderPass(VkRenderPass render_pass)
 {
-    vkDestroyRenderPass(vk_device, render_pass, allocation_callbacks);
+    vkDestroyRenderPass(vk_device, render_pass, VK_NULL_HANDLE);
 }
 
 void RenderDevice::AllocateCommandBuffer(VkCommandBuffer *p_cmd_buffer)
@@ -131,8 +131,8 @@ RenderDevice::Texture2D *RenderDevice::CreateTexture(TextureCreateInfo *p_create
 
     VkImageCreateInfo image_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* pNext */ VK_NULL_HANDLE,
+            /* flags */ VK_NONE_FLAGS,
             /* imageType */ p_create_info->image_type,
             /* format */ texture->format,
             /* extent */ { p_create_info->width, p_create_info->height, 1 },
@@ -154,8 +154,8 @@ RenderDevice::Texture2D *RenderDevice::CreateTexture(TextureCreateInfo *p_create
 
     VkImageViewCreateInfo image_view_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* pNext */ VK_NULL_HANDLE,
+            /* flags */ VK_NONE_FLAGS,
             /* image */ texture->image,
             /* viewType */ p_create_info->image_view_type,
             /* format */ texture->format,
@@ -176,7 +176,7 @@ RenderDevice::Texture2D *RenderDevice::CreateTexture(TextureCreateInfo *p_create
                 },
     };
 
-    err = vkCreateImageView(vk_device, &image_view_create_info, allocation_callbacks, &texture->image_view);
+    err = vkCreateImageView(vk_device, &image_view_create_info, VK_NULL_HANDLE, &texture->image_view);
     assert(!err);
 
     return texture;
@@ -185,7 +185,7 @@ RenderDevice::Texture2D *RenderDevice::CreateTexture(TextureCreateInfo *p_create
 void RenderDevice::DestroyTexture(Texture2D *p_texture)
 {
     vmaDestroyImage(allocator, p_texture->image, p_texture->allocation);
-    vkDestroyImageView(vk_device, p_texture->image_view, allocation_callbacks);
+    vkDestroyImageView(vk_device, p_texture->image_view, VK_NULL_HANDLE);
     if (p_texture->descriptor_set)
         FreeDescriptorSet(p_texture->descriptor_set);
 }
@@ -245,8 +245,8 @@ RenderDevice::CreateFramebuffer(uint32_t width, uint32_t height, uint32_t image_
 
     VkFramebufferCreateInfo framebuffer_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* pNext */ VK_NULL_HANDLE,
+            /* flags */ VK_NONE_FLAGS,
             /* renderPass */ render_pass,
             /* attachmentCount */ image_view_count,
             /* pAttachments */ p_image_view,
@@ -255,13 +255,13 @@ RenderDevice::CreateFramebuffer(uint32_t width, uint32_t height, uint32_t image_
             /* layers */ 1,
     };
 
-    err = vkCreateFramebuffer(vk_device, &framebuffer_create_info, allocation_callbacks, p_framebuffer);
+    err = vkCreateFramebuffer(vk_device, &framebuffer_create_info, VK_NULL_HANDLE, p_framebuffer);
     assert(!err);
 }
 
 void RenderDevice::DestroyFramebuffer(VkFramebuffer framebuffer)
 {
-    vkDestroyFramebuffer(vk_device, framebuffer, allocation_callbacks);
+    vkDestroyFramebuffer(vk_device, framebuffer, VK_NULL_HANDLE);
 }
 
 void RenderDevice::CreateSampler(SamplerCreateInfo* p_create_info, VkSampler* p_sampler)
@@ -284,12 +284,12 @@ void RenderDevice::CreateSampler(SamplerCreateInfo* p_create_info, VkSampler* p_
     sampler_create_info.minLod = 0.0f;
     sampler_create_info.maxLod = 0.0f;
 
-    vkCreateSampler(vk_device, &sampler_create_info, allocation_callbacks, p_sampler);
+    vkCreateSampler(vk_device, &sampler_create_info, VK_NULL_HANDLE, p_sampler);
 }
 
 void RenderDevice::DestroySampler(VkSampler sampler)
 {
-    vkDestroySampler(vk_device, sampler, allocation_callbacks);
+    vkDestroySampler(vk_device, sampler, VK_NULL_HANDLE);
 }
 
 void RenderDevice::BindTextureSampler(RenderDevice::Texture2D *texture, VkSampler sampler)
@@ -303,26 +303,26 @@ void RenderDevice::CreateDescriptorSetLayout(uint32_t bind_count, VkDescriptorSe
 
     VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* pNext */ VK_NULL_HANDLE,
+            /* flags */ VK_NONE_FLAGS,
             /* bindingCount */ bind_count,
             /* pBindings */ p_bind,
     };
 
-    err = vkCreateDescriptorSetLayout(vk_device, &descriptor_set_layout_create_info, allocation_callbacks, p_descriptor_set_layout);
+    err = vkCreateDescriptorSetLayout(vk_device, &descriptor_set_layout_create_info, VK_NULL_HANDLE, p_descriptor_set_layout);
     assert(!err);
 }
 
 void RenderDevice::DestroyDescriptorSetLayout(VkDescriptorSetLayout descriptor_set_layout)
 {
-    vkDestroyDescriptorSetLayout(vk_device, descriptor_set_layout, allocation_callbacks);
+    vkDestroyDescriptorSetLayout(vk_device, descriptor_set_layout, VK_NULL_HANDLE);
 }
 
 void RenderDevice::AllocateDescriptorSet(VkDescriptorSetLayout descriptor_set_layout, VkDescriptorSet *p_descriptor_set)
 {
     VkDescriptorSetAllocateInfo descriptor_allocate_info = {
             /* sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-            /* pNext */ nextptr,
+            /* pNext */ VK_NULL_HANDLE,
             /* descriptorPool */ descriptor_pool,
             /* descriptorSetCount */ 1,
             /* pSetLayouts */ &descriptor_set_layout,
@@ -346,7 +346,7 @@ void RenderDevice::UpdateDescriptorSetBuffer(Buffer *p_buffer, uint32_t binding,
 
     VkWriteDescriptorSet write_info = {
             /* sType */ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            /* pNext */ nextptr,
+            /* pNext */ VK_NULL_HANDLE,
             /* dstSet */ descriptor_set,
             /* dstBinding */ binding,
             /* dstArrayElement */ 0,
@@ -370,7 +370,7 @@ void RenderDevice::UpdateDescriptorSetImage(RenderDevice::Texture2D *p_texture, 
 
     VkWriteDescriptorSet write_info = {
             /* sType */ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            /* pNext */ nextptr,
+            /* pNext */ VK_NULL_HANDLE,
             /* dstSet */ descriptor_set,
             /* dstBinding */ binding,
             /* dstArrayElement */ 0,
@@ -390,8 +390,8 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
 
     VkPipelineLayoutCreateInfo pipeline_layout_creat_info = {
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* pNext */ VK_NULL_HANDLE,
+            /* flags */ VK_NONE_FLAGS,
             /* setLayoutCount */ p_shader_info->descriptor_set_layout_count,
             /* pSetLayouts */ p_shader_info->p_descriptor_set_layouts,
             /* pushConstantRangeCount */ p_shader_info->push_const_count,
@@ -399,7 +399,7 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
     };
 
     VkPipelineLayout vk_pipeline_layout;
-    err = vkCreatePipelineLayout(vk_device, &pipeline_layout_creat_info, allocation_callbacks, &vk_pipeline_layout);
+    err = vkCreatePipelineLayout(vk_device, &pipeline_layout_creat_info, VK_NULL_HANDLE, &vk_pipeline_layout);
     assert(!err);
 
     VkShaderModule vertex_shader_module, fragment_shader_module;
@@ -425,8 +425,8 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
 
     VkPipelineVertexInputStateCreateInfo input_state_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* pNext */ VK_NULL_HANDLE,
+            /* flags */ VK_NONE_FLAGS,
             /* vertexBindingDescriptionCount */ p_shader_info->bind_count,
             /* pVertexBindingDescriptions */ p_shader_info->binds,
             /* vertexAttributeDescriptionCount */ p_shader_info->attribute_count,
@@ -435,8 +435,8 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
 
     VkPipelineInputAssemblyStateCreateInfo input_assembly = {
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* pNext */ VK_NULL_HANDLE,
+            /* flags */ VK_NONE_FLAGS,
             /* topology */ p_create_info->topology,
             /* primitiveRestartEnable */ VK_FALSE,
     };
@@ -457,8 +457,8 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
 
     VkPipelineViewportStateCreateInfo viewport_state_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* pNext */ VK_NULL_HANDLE,
+            /* flags */ VK_NONE_FLAGS,
             /* viewportCount */ 1,
             /* pViewports */ &viewport,
             /* scissorCount */ 1,
@@ -535,16 +535,16 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
 
     VkPipelineDynamicStateCreateInfo dynamic_state_crate_info = {
             /* sType= */ VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
-            /* pNext= */ nextptr,
-            /* flags= */ no_flag_bits,
+            /* pNext= */ VK_NULL_HANDLE,
+            /* flags= */ VK_NONE_FLAGS,
             /* dynamicStateCount= */ (uint32_t) std::size(dynamics),
             /* pDynamicStates= */ std::data(dynamics),
     };
 
     VkGraphicsPipelineCreateInfo pipeline_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-            /* pNext */ nextptr,
-            /* flags */ no_flag_bits,
+            /* pNext */ VK_NULL_HANDLE,
+            /* flags */ VK_NONE_FLAGS,
             /* stageCount */ ARRAY_SIZE(shader_stages_info),
             /* pStages */ shader_stages_info,
             /* pVertexInputState */ &input_state_create_info,
@@ -564,7 +564,7 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
     };
 
     VkPipeline vk_pipeline;
-    err = vkCreateGraphicsPipelines(vk_device, nullptr, 1, &pipeline_create_info, allocation_callbacks, &vk_pipeline);
+    err = vkCreateGraphicsPipelines(vk_device, nullptr, 1, &pipeline_create_info, VK_NULL_HANDLE, &vk_pipeline);
     assert(!err);
 
     Pipeline *p_pipeline = (Pipeline*) imalloc(sizeof(Pipeline));
@@ -572,8 +572,8 @@ RenderDevice::Pipeline *RenderDevice::CreateGraphicsPipeline(RenderDevice::Pipel
     p_pipeline->layout = vk_pipeline_layout;
     p_pipeline->bind_point = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
-    vkDestroyShaderModule(vk_device, vertex_shader_module, allocation_callbacks);
-    vkDestroyShaderModule(vk_device, fragment_shader_module, allocation_callbacks);
+    vkDestroyShaderModule(vk_device, vertex_shader_module, VK_NULL_HANDLE);
+    vkDestroyShaderModule(vk_device, fragment_shader_module, VK_NULL_HANDLE);
 
     return p_pipeline;
 }
@@ -598,14 +598,14 @@ void RenderDevice::_InitializeDescriptorPool()
 
     VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
             /* sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            /* pNext */ nextptr,
+            /* pNext */ VK_NULL_HANDLE,
             /* flags */ VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
             /* maxSets */ 1024,
             /* poolSizeCount */ ARRAY_SIZE(pool_size),
             /* pPoolSizes */ pool_size,
     };
 
-    err = vkCreateDescriptorPool(vk_device, &descriptor_pool_create_info, allocation_callbacks, &descriptor_pool);
+    err = vkCreateDescriptorPool(vk_device, &descriptor_pool_create_info, VK_NULL_HANDLE, &descriptor_pool);
     assert(!err);
 }
 
@@ -616,14 +616,14 @@ RenderDevice::Pipeline *RenderDevice::CreateComputePipeline(RenderDevice::Comput
 
     VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
             /* sType= */ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-            /* pNext= */ nextptr,
-            /* flags= */ no_flag_bits,
+            /* pNext= */ VK_NULL_HANDLE,
+            /* flags= */ VK_NONE_FLAGS,
             /* setLayoutCount= */ p_shader_info->descriptor_set_layout_count,
             /* pSetLayouts= */ p_shader_info->p_descriptor_set_layouts,
             /* pushConstantRangeCount= */ p_shader_info->push_const_count,
             /* pPushConstantRanges= */ p_shader_info->p_push_const_range,
     };
-    vkCreatePipelineLayout(vk_device, &pipeline_layout_create_info, allocation_callbacks, &pipeline->layout);
+    vkCreatePipelineLayout(vk_device, &pipeline_layout_create_info, VK_NULL_HANDLE, &pipeline->layout);
 
     VkShaderModule compute_shader_module;
     compute_shader_module = load_shader_module(vk_device, p_shader_info->compute, "vert");
@@ -640,22 +640,22 @@ RenderDevice::Pipeline *RenderDevice::CreateComputePipeline(RenderDevice::Comput
     pipeline_create_info.layout = pipeline->layout;
 
     vkCreateComputePipelines(vk_device, VK_NULL_HANDLE, 1, &pipeline_create_info, VK_NULL_HANDLE, &pipeline->pipeline);
-    vkDestroyShaderModule(vk_device, compute_shader_module, allocation_callbacks);
+    vkDestroyShaderModule(vk_device, compute_shader_module, VK_NULL_HANDLE);
 
     return pipeline;
 }
 
 void RenderDevice::DestroyPipeline(RenderDevice::Pipeline *p_pipeline)
 {
-    vkDestroyPipelineLayout(vk_device, p_pipeline->layout, allocation_callbacks);
-    vkDestroyPipeline(vk_device, p_pipeline->pipeline, allocation_callbacks);
+    vkDestroyPipelineLayout(vk_device, p_pipeline->layout, VK_NULL_HANDLE);
+    vkDestroyPipeline(vk_device, p_pipeline->pipeline, VK_NULL_HANDLE);
 }
 
 void RenderDevice::CmdBufferBegin(VkCommandBuffer cmd_buffer, VkCommandBufferUsageFlags usage)
 {
     VkCommandBufferBeginInfo cmd_buffer_begin_info = {
             /* sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-            /* pNext */ nextptr,
+            /* pNext */ VK_NULL_HANDLE,
             /* flags */ usage,
             /* pInheritanceInfo */ nullptr,
     };
@@ -695,7 +695,7 @@ void RenderDevice::CmdBeginRenderPass(VkCommandBuffer cmd_buffer, VkRenderPass r
 {
     VkRenderPassBeginInfo render_pass_begin_info = {
             /* sType */ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-            /* pNext */ nextptr,
+            /* pNext */ VK_NULL_HANDLE,
             /* renderPass */ render_pass,
             /* framebuffer */ framebuffer,
             /* renderArea */ *p_rect,
@@ -778,7 +778,7 @@ void RenderDevice::CmdBufferSubmit(VkCommandBuffer cmd_buffer, uint32_t wait_sem
 
     VkSubmitInfo submit_info = {
             /* sType */ VK_STRUCTURE_TYPE_SUBMIT_INFO,
-            /* pNext */ nextptr,
+            /* pNext */ VK_NULL_HANDLE,
             /* waitSemaphoreCount */ wait_semaphore_count,
             /* pWaitSemaphores */ p_wait_semaphore,
             /* pWaitDstStageMask */ p_mask,
@@ -823,7 +823,7 @@ void RenderDevice::Present(VkQueue queue, VkSwapchainKHR swap_chain, uint32_t in
 {
     VkPresentInfoKHR present_info = {
             /* sType */ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-            /* pNext */ nextptr,
+            /* pNext */ VK_NULL_HANDLE,
             /* waitSemaphoreCount */ 1,
             /* pWaitSemaphores */ &wait_semaphore,
             /* swapchainCount */ 1,

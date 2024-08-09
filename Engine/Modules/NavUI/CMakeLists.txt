@@ -20,58 +20,30 @@
 #! limitations under the License.                                           !#
 #!                                                                          !#
 #! ======================================================================== !#
-cmake_minimum_required(VERSION 3.26)
-project(bright)
+set(LIBRARY_NAME NavUI)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  add_compile_options("/source-charset:utf-8")
-  add_compile_options("/execution-charset:utf-8")
-endif()
-
-set(CMAKE_CXX_STANDARD 23)
-set(PROGRAM_NAME bright)
-
-set(INCLUDE_DIRS
-  "Engine/Source"
+include_directories(SYSTEM
+  "imgui"
 )
 
-set(SYSTEM_INCLUDE_DIRS
-  "Engine/Include"
-  "Engine/ThirdParty"
+include_directories(SYSTEM ../../Include)
+include_directories(SYSTEM ../../ThirdParty)
+
+add_library(${LIBRARY_NAME} STATIC
+  "Navui.cpp"
+  "imgui/imgui.cpp"
+  "imgui/imgui_draw.cpp"
+  "imgui/imgui_demo.cpp"
+  "imgui/imgui_tables.cpp"
+  "imgui/imgui_widgets.cpp"
+  "imgui/backends/imgui_impl_vulkan.cpp"
+  "imgui/backends/imgui_impl_glfw.cpp"
 )
 
-file(GLOB_RECURSE SOURCES
-  "Engine/Source/*.cpp"
-  "Engine/ThirdParty/vma/*.cpp"
-  "Engine/ThirdParty/volk/*.cpp"
+target_include_directories(${LIBRARY_NAME} SYSTEM PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/Include
+  ${CMAKE_CURRENT_SOURCE_DIR}/imgui
+  ${CMAKE_CURRENT_SOURCE_DIR}/imgui
 )
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(GLFW_LINK_DIRECTORY "Engine/ThirdParty/GLFW/lib-mingw-w64")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  set(GLFW_LINK_DIRECTORY "Engine/ThirdParty/GLFW/lib-vc2022")
-endif()
-
-set(LINK_DIRECTORIES
-  ${GLFW_LINK_DIRECTORY}
-  "Engine/ThirdParty/vulkan"
-)
-
-set(LINK_LIBRARIES
-  "glfw3"
-  "vulkan-1"
-  "NavUI"
-)
-
-add_subdirectory(Engine/Modules/NavUI)
-
-include_directories(${INCLUDE_DIRS})
-include_directories(SYSTEM ${SYSTEM_INCLUDE_DIRS})
-link_directories(${LINK_DIRECTORIES})
-
-add_executable(${PROGRAM_NAME} "${SOURCES}")
-
-target_link_libraries(${PROGRAM_NAME}
-  PRIVATE
-  ${LINK_LIBRARIES}
-)
+target_compile_options(${LIBRARY_NAME} PRIVATE -Wall)

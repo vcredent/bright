@@ -36,9 +36,7 @@
 #include <time.h>
 #include <vector>
 
-#define no_flag_bits         0
-#define nextptr              nullptr
-#define allocation_callbacks nullptr
+#define VK_NONE_FLAGS 0
 
 #define ENGINE_ENABLE_VULKAN_DEBUG_UTILS_EXT
 

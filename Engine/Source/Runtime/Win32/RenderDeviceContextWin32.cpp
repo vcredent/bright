@@ -1,8 +1,8 @@
 /* ======================================================================== */
-/* Main.cpp                                                                 */
+/* render_device_context_win32.cpp                                          */
 /* ======================================================================== */
 /*                        This file is part of:                             */
-/*                           COPILOT ENGINE                                 */
+/*                            BRIGHT ENGINE                                 */
 /* ======================================================================== */
 /*                                                                          */
 /* Copyright (C) 2022 Vcredent All rights reserved.                         */
@@ -15,20 +15,36 @@
 /*                                                                          */
 /* Unless required by applicable law or agreed to in writing, software      */
 /* distributed under the License is distributed on an "AS IS" BASIS,        */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e1ither express or implied */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied  */
 /* See the License for the specific language governing permissions and      */
 /* limitations under the License.                                           */
 /*                                                                          */
 /* ======================================================================== */
-#include "Win32/RenderDeviceContextWin32.h"
+#include "RenderDeviceContextWin32.h"
 
-int main()
+RenderDeviceContextWin32::RenderDeviceContextWin32(Window *window)
 {
-    Window *window = new Window("Bright", 1680, 1080);
+    VkSurfaceKHR surface;
+    VkInstance inst;
 
-    RenderDeviceContextWin32 *rdc = new RenderDeviceContextWin32(window);
-    rdc->Initialize();
-    RenderDevice *rd = rdc->CreateRenderDevice();
+    inst = GetInstance();
 
-    return 0;
+    window->create_vulkan_surface(inst, VK_NULL_HANDLE, &surface);
+    _InitializeWindowArguments(surface);
+    vkDestroySurfaceKHR(inst, surface, VK_NULL_HANDLE);
+}
+
+RenderDeviceContextWin32::~RenderDeviceContextWin32()
+{
+    /* do nothing in here... */
+}
+
+RenderDevice *RenderDeviceContextWin32::CreateRenderDevice()
+{
+    return memnew(RenderDevice, this);
+}
+
+void RenderDeviceContextWin32::DestroyRenderDevice(RenderDevice * pRenderDevice)
+{
+    memdel(pRenderDevice);
 }
