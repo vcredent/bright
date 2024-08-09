@@ -95,7 +95,7 @@ void RenderDisplay::Initialize(Window *vCurrentNativeWindow)
     _CreateSwapchain();
 }
 
-void RenderDisplay::CmdBeginScreenRender(VkCommandBuffer *pCmdBuffer)
+void RenderDisplay::CmdBeginDisplayRender(VkCommandBuffer *pCmdBuffer)
 {
     _CheckUpdateSwapchain();
     vkAcquireNextImageKHR(device, display->swapchain, UINT64_MAX, display->imageAvailableSemaphore, nullptr, &acquireNextIndex);
@@ -112,13 +112,13 @@ void RenderDisplay::CmdBeginScreenRender(VkCommandBuffer *pCmdBuffer)
     rd->CmdBeginRenderPass(cmdBuffer, display->renderPass, 1, &clearColor, display->swapchainResources[acquireNextIndex].framebuffer, &rect);
 }
 
-void RenderDisplay::CmdEndScreenRender(VkCommandBuffer cmd_buffer)
+void RenderDisplay::CmdEndDisplayRender(VkCommandBuffer cmdBuffer)
 {
-    rd->CmdEndRenderPass(cmd_buffer);
-    rd->CmdBufferEnd(cmd_buffer);
+    rd->CmdEndRenderPass(cmdBuffer);
+    rd->CmdBufferEnd(cmdBuffer);
 
     VkPipelineStageFlags mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    rd->CmdBufferSubmit(cmd_buffer, 1, &display->imageAvailableSemaphore, 1, &display->renderFinishedSemaphore, &mask, graphQueue, VK_NULL_HANDLE);
+    rd->CmdBufferSubmit(cmdBuffer, 1, &display->imageAvailableSemaphore, 1, &display->renderFinishedSemaphore, &mask, graphQueue, VK_NULL_HANDLE);
     rd->Present(graphQueue, display->swapchain, acquireNextIndex, display->renderFinishedSemaphore);
 }
 

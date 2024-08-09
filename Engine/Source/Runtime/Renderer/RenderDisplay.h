@@ -37,8 +37,8 @@ public:
 
     void Initialize(Window *vCurrentNativeWindow);
 
-    void CmdBeginScreenRender(VkCommandBuffer *pCmdBuffer);
-    void CmdEndScreenRender(VkCommandBuffer cmdBuffer);
+    void CmdBeginDisplayRender(VkCommandBuffer *pCmdBuffer);
+    void CmdEndDisplayRender(VkCommandBuffer cmdBuffer);
 
 private:
     struct SwapchainResource {

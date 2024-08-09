@@ -53,10 +53,10 @@ int main()
         window->PollEvents();
 
         VkCommandBuffer cmdBuffer;
-        display->CmdBeginScreenRender(&cmdBuffer);
+        display->CmdBeginDisplayRender(&cmdBuffer);
         NavUI::BeginNewFrame(cmdBuffer);
         NavUI::EndNewFrame(cmdBuffer);
-        display->CmdEndScreenRender(cmdBuffer);
+        display->CmdEndDisplayRender(cmdBuffer);
     }
 
     NavUI::Destroy();
