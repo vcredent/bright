@@ -137,7 +137,7 @@ void RenderDisplay::_CreateSwapchain()
     if (!oldSwapchain)
     {
         // attachment
-        VkAttachmentDescription color_attachment = {
+        VkAttachmentDescription attachment = {
                 /* flags */ VK_NONE_FLAGS,
                 /* format */ display->format,
                 /* samples */ VK_SAMPLE_COUNT_1_BIT,
@@ -149,14 +149,14 @@ void RenderDisplay::_CreateSwapchain()
                 /* finalLayout */ VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
         };
 
-        VkAttachmentReference color_attachment_reference = {};
-        color_attachment_reference.attachment = 0;
-        color_attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        VkAttachmentReference reference = {};
+        reference.attachment = 0;
+        reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
         VkSubpassDescription subpass = {};
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &color_attachment_reference;
+        subpass.pColorAttachments = &reference;
 
         VkSubpassDependency subpass_dependency = {};
         subpass_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -170,7 +170,7 @@ void RenderDisplay::_CreateSwapchain()
         VkRenderPassCreateInfo render_pass_create_info = {};
         render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         render_pass_create_info.attachmentCount = 1;
-        render_pass_create_info.pAttachments = &color_attachment;
+        render_pass_create_info.pAttachments = &attachment;
         render_pass_create_info.subpassCount = 1;
         render_pass_create_info.pSubpasses = &subpass;
         render_pass_create_info.dependencyCount = 1;
